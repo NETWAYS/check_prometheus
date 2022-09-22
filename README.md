@@ -14,11 +14,15 @@ TODO
 
 ```
 check_prometheus alert --name NodeMemoryFull
-WARNING - Alert NodeMemoryFull firing
+CRITICAL - Alert NodeMemoryFull firing
+exit status 2
+
+check_prometheus alert --name NodeCPULoad
+WARNING - Alert NodeCPULoad pending
 exit status 1
 
 check_prometheus alert --name NodeDiskFull
-OK - Alert NodeMemoryFull inactive
+OK - Alert NodeDiskFull inactive
 ```
 
 ## License
