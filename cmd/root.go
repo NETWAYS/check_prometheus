@@ -41,8 +41,8 @@ func init() {
 		"Port of the prometheus instance")
 	pfs.BoolVarP(&cliConfig.TLS, "tls", "S", false,
 		"Use secure connection")
-	// pfs.BoolVar(&cliConfig.Insecure, "insecure", false,
-	//	"Allow use of self signed certificates when using SSL")
+	pfs.BoolVar(&cliConfig.Insecure, "insecure", false,
+		"Allow use of self signed certificates when using SSL")
 	pfs.IntVarP(&Timeout, "timeout", "t", Timeout,
 		"Timeout for the check")
 

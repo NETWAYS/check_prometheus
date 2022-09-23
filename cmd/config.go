@@ -12,6 +12,7 @@ type Config struct {
 	Hostname string
 	Port     int
 	TLS      bool
+	Insecure bool
 }
 
 var cliConfig Config
@@ -27,6 +28,7 @@ func (c *Config) Client() *client.Client {
 	}
 
 	cl := client.NewClient(u.String())
+	cl.Insecure = c.Insecure
 
 	return cl
 }
