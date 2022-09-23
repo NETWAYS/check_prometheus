@@ -39,7 +39,6 @@ func (c *Client) Connect() error {
 		return err
 	}
 
-	// TODO Test connection?
 	c.Client = cfg
 	c.Api = v1.NewAPI(c.Client)
 
