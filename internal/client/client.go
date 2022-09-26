@@ -24,7 +24,6 @@ func NewClient(url string) *Client {
 
 // nolint: gosec
 func (c *Client) Connect() error {
-
 	var rt = &http.Transport{
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: c.Insecure},
 	}
@@ -35,8 +34,7 @@ func (c *Client) Connect() error {
 	})
 
 	if err != nil {
-		fmt.Errorf("Error creating client: %v\n", err)
-		return err
+		return fmt.Errorf("Error creating client: %w\n", err)
 	}
 
 	c.Client = cfg
