@@ -4,6 +4,13 @@ An Icinga check plugin to check Prometheus.
 
 ## Usage
 
+### Health
+
+```
+check_prometheus health -H my-prometheus-server
+OK
+```
+
 ### Query
 
 ```
