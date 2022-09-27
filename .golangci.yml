@@ -13,6 +13,14 @@ linters:
     - exportloopref
   disable:
     - scopelint
+    - bodyclose
+    - contextcheck
+    - nilerr
+    - noctx
+    - rowserrcheck
+    - sqlclosecheck
+    - structcheck
+    - unparam
   presets:
     - bugs
     - unused
