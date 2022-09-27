@@ -4,6 +4,38 @@ An Icinga check plugin to check Prometheus.
 
 ## Usage
 
+### Health
+
+Checks the health or readiness status of the Prometheus server.
+
+* `Health`: Checks the health of an endpoint, which always returns 200 and should be used to check Prometheus health.
+* `Ready`: Checks the readiness of an endpoint, which returns 200 when Prometheus is ready to serve traffic (i.e. respond to queries).
+
+````
+Usage:
+  check_prometheus health
+
+Flags:
+  -r, --ready   Checks the readiness of an endpoint
+  -i, --info    Displays various build information properties about the Prometheus server
+  -h, --help    help for health
+
+Global Flags:
+  -H, --hostname string   Address of the prometheus instance (default "localhost")
+      --insecure          Allow use of self signed certificates when using SSL
+  -p, --port int          Port of the prometheus instance (default 9090)
+  -t, --timeout int       Timeout for the check (default 30)
+  -S, --tls               Use secure connection
+````
+
+````
+$ check_prometheus health --hostname 'localhost' --port 9090 --insecure
+OK - Prometheus Server is Healthy.
+
+$check_prometheus health --ready       
+OK - Prometheus Server is Ready.
+````
+
 ### Query
 
 ```

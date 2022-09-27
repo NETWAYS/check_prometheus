@@ -2,22 +2,22 @@ package cmd
 
 import (
 	"context"
-	"fmt"
 	"github.com/NETWAYS/go-check"
+	"github.com/NETWAYS/go-check/perfdata"
 	"github.com/spf13/cobra"
-	"io/ioutil"
-	"strconv"
-	"strings"
 )
 
 var healthCmd = &cobra.Command{
 	Use:   "health",
-	Short: "Checks the health status of the Prometheus instance",
-	Long:  `Checks the health status of the Prometheus instance. With `,
+	Short: "Checks the health or readiness status of the Prometheus server",
+	Long: `Checks the health or readiness status of the Prometheus server.
+	Health: Checks the health of an endpoint, which always returns 200 and should be used to check Prometheus health.
+    Ready: Checks the readiness of an endpoint, which returns 200 when Prometheus is ready to serve traffic (i.e. respond to queries).`,
 	Run: func(cmd *cobra.Command, args []string) {
 		var (
-			rc     int
-			output string
+			rc         int
+			output     string
+			statuscode int
 		)
 
 		c := cliConfig.Client()
@@ -26,27 +26,6 @@ var healthCmd = &cobra.Command{
 			check.ExitError(err)
 		}
 
-		// Health status
-		health, err := c.Health()
-		if err != nil {
-			check.ExitError(err)
-		}
-
-		healthBody, err := ioutil.ReadAll(health.Body)
-		if err != nil {
-			check.ExitError(fmt.Errorf("could not read response body: %w", err))
-		}
-
-		out := strings.TrimSpace(string(healthBody))
-
-		if health.StatusCode != 200 {
-			rc = check.Unknown
-		} else {
-			rc = check.OK
-		}
-
-		output += strconv.Itoa(health.StatusCode) + ": " + out
-
 		// Ready status
 		if cliConfig.PReady {
 			ready, err := c.Ready()
@@ -54,23 +33,29 @@ var healthCmd = &cobra.Command{
 				check.ExitError(err)
 			}
 
-			readybody, err := ioutil.ReadAll(ready.Body)
+			statuscode = ready.StatusCode
+
+			rc, output, err = c.GetStatus(ready)
+			if err != nil {
+				check.ExitError(err)
+			}
+		} else {
+			// Health status
+			health, err := c.Health()
 			if err != nil {
 				check.ExitError(err)
 			}
 
-			out := strings.TrimSpace(string(readybody))
+			statuscode = health.StatusCode
 
-			if ready.StatusCode != 200 {
-				rc = check.Unknown
-			} else {
-				rc = check.OK
+			rc, output, err = c.GetStatus(health)
+			if err != nil {
+				check.ExitError(err)
 			}
-
-			output += " - " + strconv.Itoa(ready.StatusCode) + ": " + out
 		}
 
 		if cliConfig.Info {
+			// Displays various build information properties about the Prometheus server
 			info, err := c.Api.Buildinfo(context.Background())
 			if err != nil {
 				check.ExitError(err)
@@ -84,7 +69,16 @@ var healthCmd = &cobra.Command{
 				"Revision: " + info.Revision
 		}
 
-		check.ExitRaw(rc, output)
+		// Statuscode 200 && "Prometheus Server is Healthy." -> 0 OK
+		// Statuscode 200 && "Prometheus Server is Ready." -> 0 OK
+
+		p := perfdata.PerfdataList{
+			{Label: "status", Value: rc},
+			{Label: "output", Value: output},
+			{Label: "statuscode", Value: statuscode},
+		}
+
+		check.ExitRaw(rc, output, "|", p.String())
 	},
 }
 
@@ -92,8 +86,11 @@ func init() {
 	rootCmd.AddCommand(healthCmd)
 
 	fs := healthCmd.Flags()
-	fs.BoolVarP(&cliConfig.PReady, "ready", "r", false, "")
-	fs.BoolVarP(&cliConfig.Info, "info", "i", false, "")
+	fs.BoolVarP(&cliConfig.PReady, "ready", "r", false,
+		"Checks the readiness of an endpoint")
+	fs.BoolVarP(&cliConfig.Info, "info", "i", false,
+		"Displays various build information properties about the Prometheus server")
 
+	fs.SortFlags = false
 	healthCmd.DisableFlagsInUseLine = true
 }
