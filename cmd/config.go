@@ -8,6 +8,12 @@ import (
 	"time"
 )
 
+type AlertConfig struct {
+	AlertName []string
+	Group     []string
+	ShowAll   bool
+}
+
 type Config struct {
 	Hostname string
 	Port     int
@@ -17,7 +23,10 @@ type Config struct {
 	Info     bool
 }
 
-var cliConfig Config
+var (
+	cliConfig      Config
+	cliAlertConfig AlertConfig
+)
 
 func (c *Config) Client() *client.Client {
 	u := url.URL{
