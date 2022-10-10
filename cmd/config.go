@@ -13,6 +13,8 @@ type Config struct {
 	Port     int
 	TLS      bool
 	Insecure bool
+	PReady   bool
+	Info     bool
 }
 
 var cliConfig Config
