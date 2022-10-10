@@ -45,16 +45,23 @@ TODO
 ### Alert
 
 ```
-check_prometheus alert --name NodeMemoryFull
-CRITICAL - Alert NodeMemoryFull firing
-exit status 2
-
-check_prometheus alert --name NodeCPULoad
-WARNING - Alert NodeCPULoad pending
-exit status 1
-
-check_prometheus alert --name NodeDiskFull
-OK - Alert NodeDiskFull inactive
+$ check_prometheus alert
+CRITICAL - Found 6 alerts - firing 3 - pending 0 - inactive 3
+ \_[OK] [PrometheusTargetMissing] is inactive 
+ \_[CRITICAL] [PrometheusAlertmanagerJobMissing] - Job: [alertmanager] on Instance: [] is firing 
+ \_[OK] [HostOutOfMemory] - Job: [alertmanager] on Instance: [] is inactive 
+ \_[OK] [HostHighCpuLoad] - Job: [alertmanager] on Instance: [] is inactive 
+ \_[CRITICAL] [HighResultLatency] - Job: [prometheus] on Instance: [localhost:9090] is firing 
+ \_[CRITICAL] [HighResultLatency] - Job: [node-exporter] on Instance: [node-exporter:9100] is firing 
+ 
+$ check_prometheus alert --name "HostHighCpuLoad" --name "HighResultLatency" 
+CRITICAL - Found 3 alerts - firing 2 - pending 0 - inactive 1
+ \_[OK] [HostHighCpuLoad] is inactive 
+ \_[CRITICAL] [HighResultLatency] - Job: [prometheus] on Instance: [localhost:9090] is firing 
+ \_[CRITICAL] [HighResultLatency] - Job: [node-exporter] on Instance: [node-exporter:9100] is firing 
+ 
+$ check_prometheus alert --name "HostHighCpuLoad" --name "PrometheusTargetMissing"
+OK - All alerts are inactive
 ```
 
 ## License
