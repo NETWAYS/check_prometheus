@@ -3,7 +3,7 @@ version: '2'
 services:
 
     prometheus:
-        image: docker.io/prom/prometheus
+        image: prom/prometheus
         privileged: true
         volumes:
             - ./prometheus.yml:/etc/prometheus/prometheus.yml
@@ -15,12 +15,12 @@ services:
             - '9090:9090'
 
     node-exporter:
-        image: docker.io/prom/node-exporter
+        image: prom/node-exporter
         ports:
             - '9100:9100'
 
     alertmanager:
-        image: docker.io/prom/alertmanager
+        image: prom/alertmanager
         privileged: true
         volumes:
              - ./alertmanager/alertmanager.yml:/alertmanager.yml
