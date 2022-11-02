@@ -38,9 +38,33 @@ OK - Prometheus Server is Ready.
 
 ### Query
 
+#### Checking a single metric with ONE direct vector result
 ```
-TODO
+$ check_prometheus query -n 'go_goroutines{job="prometheus"}' -c 40 -w 27
+WARNING - go_goroutines{instance="localhost:9090", job="prometheus"}
+ \_ 37 @ 2022-10-12 14:03:53.256 +0200 CEST
 ```
+
+#### Checking a single metric with multiple vector results
+````
+$ check_prometheus query -n 'go_goroutines' -c 40 -w 27 
+WARNING - Found 2 Metrics - 0 Critical - 1 Warning - 1 Ok
+[WARNING] go_goroutines{instance="localhost:9090", job="prometheus"}
+ \_ 37 @ 2022-10-12 14:05:34.744 +0200 CEST
+[OK] go_goroutines{instance="node-exporter:9100", job="node-exporter"}
+ \_ 37 @ 2022-10-12 14:05:34.744 +0200 CEST
+ \_ 7 @ 2022-10-12 14:05:34.744 +0200 CEST
+````
+#### Checking a timeseries matrix result
+````
+$ check_prometheus query -n 'go_goroutines{job="prometheus"}[10s]' -c5 -w 10                                   
+CRITICAL - [CRITICAL] go_goroutines{instance="localhost:9090", job="prometheus"}
+ \_ 37 @ 2022-10-12 14:15:27.45 +0200 CEST
+ \_ 37 @ 2022-10-12 14:15:32.451 +0200 CEST
+
+$ check_prometheus query -n 'go_goroutines{job="prometheus"}[10s]' -c 50 -w 40
+OK - Found 1 Metrics - all Metrics Ok
+````
 
 ### Alert
 
