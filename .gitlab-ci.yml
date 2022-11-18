@@ -16,5 +16,6 @@ go_fmt:
 
 go_test:
   stage: test
+  coverage: '/coverage: (\d+\.\d+)/'
   script:
     - go test -v -cover ./...
