@@ -1,0 +1,21 @@
+image: golang:latest
+
+stages:
+  - lint
+  - test
+
+go_vet:
+  stage: lint
+  script:
+    - go vet $(go list ./... | grep -v /vendor/)
+
+go_fmt:
+  stage: lint
+  script:
+    - go fmt $(go list ./... | grep -v /vendor/)
+
+go_test:
+  stage: test
+  coverage: '/coverage: (\d+\.\d+)/'
+  script:
+    - go test -v -cover ./...

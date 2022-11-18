@@ -1,10 +1,8 @@
 package client
 
 import (
-	"errors"
 	"fmt"
 	"net/http"
-	"syscall"
 )
 
 func newHttpRequest(requestURL string) (response *http.Response, err error) {
@@ -15,11 +13,7 @@ func newHttpRequest(requestURL string) (response *http.Response, err error) {
 
 	response, err = http.DefaultClient.Do(req)
 	if err != nil {
-		if errors.Is(err, syscall.ECONNREFUSED) {
-			err = fmt.Errorf("connection refused: %s", requestURL)
-		}
-
-		return nil, fmt.Errorf("error making http request: %w", err)
+		return nil, err
 	}
 
 	return response, nil
