@@ -11,13 +11,13 @@ import (
 type AlertConfig struct {
 	AlertName []string
 	Group     []string
-	ShowAll   bool
+	Problems  bool
 }
 
 type Config struct {
 	Hostname string
 	Port     int
-	TLS      bool
+	Secure   bool
 	Insecure bool
 	PReady   bool
 	Info     bool
@@ -34,7 +34,7 @@ func (c *Config) Client() *client.Client {
 		Host:   c.Hostname + ":" + strconv.Itoa(c.Port),
 	}
 
-	if c.TLS {
+	if c.Secure {
 		u.Scheme = "https"
 	}
 

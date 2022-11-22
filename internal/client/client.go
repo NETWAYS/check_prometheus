@@ -1,13 +1,14 @@
 package client
 
 import (
-	"crypto/tls"
+	"context"
 	"fmt"
 	"github.com/NETWAYS/go-check"
 	"github.com/prometheus/client_golang/api"
 	v1 "github.com/prometheus/client_golang/api/prometheus/v1"
-	"io/ioutil"
+	"github.com/prometheus/common/config"
 	"net/http"
+	"net/url"
 	"strings"
 )
 
@@ -18,11 +19,6 @@ type Client struct {
 	Insecure bool
 }
 
-const (
-	HealthGood = "Prometheus Server is Healthy."
-	ReadyGood  = "Prometheus Server is Ready."
-)
-
 func NewClient(url string) *Client {
 	return &Client{
 		Url:      url,
@@ -32,9 +28,7 @@ func NewClient(url string) *Client {
 
 // nolint: gosec
 func (c *Client) Connect() error {
-	var rt = &http.Transport{
-		TLSClientConfig: &tls.Config{InsecureSkipVerify: c.Insecure},
-	}
+	var rt = config.NewBasicAuthRoundTripper("username", "password", "", api.DefaultRoundTripper)
 
 	cfg, err := api.NewClient(api.Config{
 		Address:      c.Url,
@@ -51,21 +45,43 @@ func (c *Client) Connect() error {
 	return nil
 }
 
-func (c *Client) GetStatus(response *http.Response) (rc int, output string, err error) {
-	body, err := ioutil.ReadAll(response.Body)
+func (c *Client) GetStatus(ctx context.Context, endpoint string) (int, string, error) {
+	// Parses the response from the Prometheus /healthy and /ready endpoint
+
+	// Building the final URL with the endpoint parameter
+	u, _ := url.JoinPath(c.Url, "/-/", endpoint)
+	req, err := http.NewRequest(http.MethodGet, u, nil)
+
 	if err != nil {
-		return check.Unknown, "", err
+		e := fmt.Sprintf("Could not create request: %s", err)
+		return check.Unknown, e, err
 	}
 
-	output = strings.TrimSpace(string(body))
+	// Making the request with the preconfigured Client
+	// So that we can reuse the preconfigured Roundtripper
+	resp, body, err := c.Client.Do(ctx, req)
 
-	if response.StatusCode == 200 && (output == HealthGood || output == ReadyGood) {
-		rc = check.OK
-	} else if response.StatusCode != 200 {
-		rc = check.Critical
-	} else {
-		rc = check.Unknown
+	if err != nil {
+		e := fmt.Sprintf("Could get status: %s", err)
+		return check.Unknown, e, err
 	}
 
-	return rc, output, err
+	// Getting the response body
+	respBody := strings.TrimSpace(string(body))
+
+	// What we expect from the Prometheus Server
+	statusOk := "Prometheus Server is Healthy."
+	if endpoint == "ready" {
+		statusOk = "Prometheus Server is Ready."
+	}
+
+	if resp.StatusCode == 200 && respBody == statusOk {
+		return check.OK, respBody, err
+	}
+
+	if resp.StatusCode != 200 {
+		return check.Critical, respBody, err
+	}
+
+	return check.Unknown, respBody, err
 }

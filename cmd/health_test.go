@@ -38,7 +38,7 @@ func TestHealthCmd(t *testing.T) {
 				w.Write([]byte(`Prometheus Server is Healthy.`))
 			})),
 			args:     []string{"run", "../main.go", "health"},
-			expected: "OK - Prometheus Server is Healthy. | statuscode=200\n",
+			expected: "OK - Prometheus Server is Healthy.\n",
 		},
 		{
 			name: "ready-ok",
@@ -47,7 +47,43 @@ func TestHealthCmd(t *testing.T) {
 				w.Write([]byte(`Prometheus Server is Ready.`))
 			})),
 			args:     []string{"run", "../main.go", "health", "--ready"},
-			expected: "OK - Prometheus Server is Ready. | statuscode=200\n",
+			expected: "OK - Prometheus Server is Ready.\n",
+		},
+		{
+			name: "health-basic-auth-ok",
+			server: httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				user, pass, ok := r.BasicAuth()
+				if ok {
+					// Just for testing, this is now how to handle BasicAuth properly
+					if user == "username" && pass == "password" {
+						w.WriteHeader(http.StatusOK)
+						w.Write([]byte(`Prometheus Server is Healthy.`))
+						return
+					}
+				}
+				w.WriteHeader(http.StatusUnauthorized)
+				w.Write([]byte(`The Authorization header wasn't set`))
+			})),
+			args:     []string{"run", "../main.go", "health"},
+			expected: "OK - Prometheus Server is Healthy.\n",
+		},
+		{
+			name: "health-basic-auth-unauthorized",
+			server: httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				user, pass, ok := r.BasicAuth()
+				if ok {
+					// Just for testing, this is now how to handle BasicAuth properly
+					if user == "wrong" && pass == "kong" {
+						w.WriteHeader(http.StatusOK)
+						w.Write([]byte(`Prometheus Server is Healthy.`))
+						return
+					}
+				}
+				w.WriteHeader(http.StatusUnauthorized)
+				w.Write([]byte(`Access Denied!`))
+			})),
+			args:     []string{"run", "../main.go", "health"},
+			expected: "CRITICAL - Access Denied!\nexit status 2\n",
 		},
 	}
 
