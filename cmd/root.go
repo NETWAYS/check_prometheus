@@ -60,15 +60,25 @@ func init() {
 
 	pfs := rootCmd.PersistentFlags()
 	pfs.StringVarP(&cliConfig.Hostname, "hostname", "H", "localhost",
-		"Address of the prometheus instance")
+		"Hostname of the Prometheus server")
 	pfs.IntVarP(&cliConfig.Port, "port", "p", 9090,
-		"Port of the prometheus instance")
+		"Port of the Prometheus server")
 	pfs.BoolVarP(&cliConfig.Secure, "secure", "s", false,
-		"Use secure connection")
+		"Use a HTTPS connection")
 	pfs.BoolVarP(&cliConfig.Insecure, "insecure", "i", false,
-		"Allow use of self signed certificates when using SSL")
+		"Skip the verification of the server's TLS certificate")
+	pfs.StringVarP(&cliConfig.Bearer, "bearer", "b", "",
+		"Specify the Bearer Token for server authentication")
+	pfs.StringVarP(&cliConfig.BasicAuth, "user", "u", "",
+		"Specify the user name and password for server authentication <user:password>")
+	pfs.StringVarP(&cliConfig.CAFile, "ca-file", "", "",
+		"Specify the CA File for TLS authentication")
+	pfs.StringVarP(&cliConfig.CertFile, "cert-file", "", "",
+		"Specify the Certificate File for TLS authentication")
+	pfs.StringVarP(&cliConfig.KeyFile, "key-file", "", "",
+		"Specify the Key File for TLS authentication")
 	pfs.IntVarP(&Timeout, "timeout", "t", Timeout,
-		"Timeout for the check")
+		"Timeout in seconds for the CheckPlugin")
 
 	rootCmd.Flags().SortFlags = false
 	pfs.SortFlags = false

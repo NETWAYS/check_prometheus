@@ -50,6 +50,38 @@ func TestHealthCmd(t *testing.T) {
 			expected: "OK - Prometheus Server is Ready.\n",
 		},
 		{
+			name: "health-bearer-ok",
+			server: httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				token := r.Header.Get("Authorization")
+				if token == "Bearer secret" {
+					// Just for testing, this is now how to handle tokens properly
+					w.WriteHeader(http.StatusOK)
+					w.Write([]byte(`Prometheus Server is Healthy.`))
+					return
+				}
+				w.WriteHeader(http.StatusUnauthorized)
+				w.Write([]byte(`The Authorization header wasn't set`))
+			})),
+			args:     []string{"run", "../main.go", "--bearer", "secret", "health"},
+			expected: "OK - Prometheus Server is Healthy.\n",
+		},
+		{
+			name: "health-bearer-unauthorized",
+			server: httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				token := r.Header.Get("Authorization")
+				if token == "Bearer right-token" {
+					// Just for testing, this is now how to handle BasicAuth properly
+					w.WriteHeader(http.StatusOK)
+					w.Write([]byte(`Prometheus Server is Healthy.`))
+					return
+				}
+				w.WriteHeader(http.StatusUnauthorized)
+				w.Write([]byte(`Access Denied!`))
+			})),
+			args:     []string{"run", "../main.go", "--bearer", "wrong-token", "health"},
+			expected: "CRITICAL - Access Denied!\nexit status 2\n",
+		},
+		{
 			name: "health-basic-auth-ok",
 			server: httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 				user, pass, ok := r.BasicAuth()
@@ -64,7 +96,7 @@ func TestHealthCmd(t *testing.T) {
 				w.WriteHeader(http.StatusUnauthorized)
 				w.Write([]byte(`The Authorization header wasn't set`))
 			})),
-			args:     []string{"run", "../main.go", "health"},
+			args:     []string{"run", "../main.go", "--user", "username:password", "health"},
 			expected: "OK - Prometheus Server is Healthy.\n",
 		},
 		{
@@ -84,6 +116,15 @@ func TestHealthCmd(t *testing.T) {
 			})),
 			args:     []string{"run", "../main.go", "health"},
 			expected: "CRITICAL - Access Denied!\nexit status 2\n",
+		},
+		{
+			name: "health-basic-auth-wrong-use",
+			server: httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				w.WriteHeader(http.StatusUnauthorized)
+				w.Write([]byte(`Access Denied!`))
+			})),
+			args:     []string{"run", "../main.go", "--user", "passwordmissing", "health"},
+			expected: "UNKNOWN - Specify the user name and password for server authentication <user:password> (*errors.errorString)\nexit status 3\n",
 		},
 	}
 
