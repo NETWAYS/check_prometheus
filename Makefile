@@ -1,4 +1,4 @@
-.PHONY: test
+.PHONY: test coverage lint vet
 
 build:
 	go build
@@ -8,3 +8,6 @@ vet:
 	go vet $(go list ./... | grep -v /vendor/)
 test:
 	go test -v -cover ./...
+coverage:
+	go test -v -cover -coverprofile=coverage.out ./... &&\
+	go tool cover -html=coverage.out -o coverage.html

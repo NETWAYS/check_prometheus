@@ -7,9 +7,10 @@ import (
 
 // nolint: gochecknoglobals
 var (
-	version = "0.1.0"
-	commit  = ""
-	date    = ""
+	// These get filled at build time with the proper vaules
+	version = "development"
+	commit  = "HEAD"
+	date    = "latest"
 )
 
 func main() {
@@ -27,6 +28,8 @@ func buildVersion() string {
 	if date != "" {
 		result = fmt.Sprintf("%s\ndate: %s", result, date)
 	}
+
+	result += "\n" + cmd.License
 
 	return result
 }

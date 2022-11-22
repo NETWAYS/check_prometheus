@@ -184,13 +184,6 @@ The alert status is:
 func init() {
 	rootCmd.AddCommand(alertCmd)
 	fs := alertCmd.Flags()
-	fs.StringSliceVarP(&cliAlertConfig.AlertName, "name", "n", nil,
-		"The name of one or more specific alerts to check."+
-			"\nThis parameter can be repeated e.G.: '--name alert1 --name alert2'"+
-			"\nIf no name is given, all alerts will be evaluated")
-	//fs.StringSliceVarP(&cliAlertConfig.Group, "group", "g", nil,
-	//	"The name of one or more specific groups to check."+
-	//		"\nThis parameter can be repeated e.G.: '--name group1 --name group2'")
-	fs.BoolVarP(&cliAlertConfig.ShowAll, "show-all", "a", false,
-		"Displays all alerts regardless of the status")
+	fs.BoolVarP(&cliAlertConfig.Problems, "problems", "P", false,
+		"Displays only alerts which status is not OK.")
 }

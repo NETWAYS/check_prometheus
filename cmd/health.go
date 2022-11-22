@@ -2,13 +2,9 @@ package cmd
 
 import (
 	"context"
-	"errors"
-	"fmt"
 	"github.com/NETWAYS/go-check"
 	"github.com/NETWAYS/go-check/perfdata"
 	"github.com/spf13/cobra"
-	"os"
-	"syscall"
 )
 
 var healthCmd = &cobra.Command{
@@ -20,45 +16,33 @@ Ready: Checks the readiness of an endpoint, which returns OK if the Prometheus s
 	Example: `$ check_prometheus health --hostname 'localhost' --port 9090 --insecure`,
 	Run: func(cmd *cobra.Command, args []string) {
 		var (
-			rc         int
-			output     string
-			statuscode int
+			rc     int
+			output string
 		)
 
+		// Creating an client and connecting to the API
 		c := cliConfig.Client()
 		err := c.Connect()
 		if err != nil {
 			check.ExitError(err)
 		}
 
-		// Ready status
+		// Getting the preconfigured context
+		ctx, cancel := cliConfig.timeoutContext()
+		defer cancel()
+
 		if cliConfig.PReady {
-			ready, err := c.Ready()
-			if err != nil {
-				if errors.Is(err, syscall.ECONNREFUSED) {
-					//err = fmt.Errorf("connection refused: %s", c.Url)
-					os.Exit(3)
-				}
+			// Getting the ready status
+			rc, output, err = c.GetStatus(ctx, "ready")
 
-				check.ExitError(fmt.Errorf("DWDdww"))
-			}
-
-			statuscode = ready.StatusCode
-
-			rc, output, err = c.GetStatus(ready)
 			if err != nil {
 				check.ExitError(err)
 			}
+
 		} else {
-			// Health status
-			health, err := c.Health()
-			if err != nil {
-				check.ExitError(err)
-			}
+			// Getting the health status
+			rc, output, err = c.GetStatus(ctx, "healthy")
 
-			statuscode = health.StatusCode
-
-			rc, output, err = c.GetStatus(health)
 			if err != nil {
 				check.ExitError(err)
 			}
@@ -89,14 +73,7 @@ Ready: Checks the readiness of an endpoint, which returns OK if the Prometheus s
 			check.ExitRaw(rc, output, "|", p.String())
 		}
 
-		// Statuscode 200 && "Prometheus Server is Healthy." -> 0 OK
-		// Statuscode 200 && "Prometheus Server is Ready." -> 0 OK
-
-		p := perfdata.PerfdataList{
-			{Label: "statuscode", Value: statuscode},
-		}
-
-		check.ExitRaw(rc, output, "|", p.String())
+		check.ExitRaw(rc, output)
 	},
 }
 
