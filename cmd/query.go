@@ -7,7 +7,6 @@ import (
 	v1 "github.com/prometheus/client_golang/api/prometheus/v1"
 	"github.com/prometheus/common/model"
 	"github.com/spf13/cobra"
-	"os"
 	"time"
 )
 
@@ -70,8 +69,7 @@ var queryCmd = &cobra.Command{
 
 		result, warnings, err := c.Api.Query(ctx, cliQueryConfig.RawQuery, time.Now())
 		if err != nil {
-			fmt.Printf("Error querying Prometheus: %v\n", err)
-			os.Exit(1)
+			check.ExitError(err)
 		}
 
 		//valType := query.ValType{}
