@@ -89,6 +89,5 @@ func (c *Config) Client() *client.Client {
 }
 
 func (c *Config) timeoutContext() (context.Context, func()) {
-	// TODO Add timeout config
-	return context.WithTimeout(context.Background(), 5*time.Second)
+	return context.WithTimeout(context.Background(), 10*time.Second)
 }

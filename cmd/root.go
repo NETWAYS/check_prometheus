@@ -32,7 +32,7 @@ var Timeout = 30
 var rootCmd = &cobra.Command{
 	Use:   "check_prometheus",
 	Short: "An Icinga check plugin to check Prometheus",
-	PersistentPostRun: func(cmd *cobra.Command, args []string) {
+	PersistentPreRun: func(cmd *cobra.Command, args []string) {
 		go check.HandleTimeout(Timeout)
 	},
 	Run: Usage,
