@@ -17,15 +17,15 @@ var alertCmd = &cobra.Command{
 firing = 2
 pending = 1
 inactive = 0`,
-	Example: `  $ check_prometheus alert --name "PrometheusAlertmanagerJobMissing" 
-  CRITICAL - 1 Alerts: 1 Firing - 0 Pending - 0 Inactive 
-   \_[CRITICAL] [PrometheusAlertmanagerJobMissing] - Job: [alertmanager] is firing - value: 1.00 
+	Example: `  $ check_prometheus alert --name "PrometheusAlertmanagerJobMissing"
+  CRITICAL - 1 Alerts: 1 Firing - 0 Pending - 0 Inactive
+   \_[CRITICAL] [PrometheusAlertmanagerJobMissing] - Job: [alertmanager] is firing - value: 1.00
    | firing=1 pending=0 inactive=0
 
-  $ check_prometheus a alert --name "PrometheusAlertmanagerJobMissing" --name "PrometheusTargetMissing" 
-  CRITICAL - 2 Alerts: 1 Firing - 0 Pending - 1 Inactive 
-   \_[OK] [PrometheusTargetMissing] is inactive 
-   \_[CRITICAL] [PrometheusAlertmanagerJobMissing] - Job: [alertmanager] is firing - value: 1.00 
+  $ check_prometheus a alert --name "PrometheusAlertmanagerJobMissing" --name "PrometheusTargetMissing"
+  CRITICAL - 2 Alerts: 1 Firing - 0 Pending - 1 Inactive
+   \_[OK] [PrometheusTargetMissing] is inactive
+   \_[CRITICAL] [PrometheusAlertmanagerJobMissing] - Job: [alertmanager] is firing - value: 1.00
    | total=2 firing=1 pending=0 inactive=1`,
 	Run: func(cmd *cobra.Command, args []string) {
 		var (
@@ -90,7 +90,7 @@ inactive = 0`,
 						output += fmt.Sprintf("[%s] %s", check.StatusText(rule.GetStatus()), rule.GetOutput())
 
 						if len(cliAlertConfig.AlertName) > 1 || cliAlertConfig.Group == nil {
-							output += " \n"
+							output += "\n"
 						}
 					} else {
 						for _, alert := range rule.AlertingRule.Alerts {
@@ -115,7 +115,7 @@ inactive = 0`,
 							output += fmt.Sprintf("[%s] %s", check.StatusText(rule.GetStatus()), rule.GetOutput())
 
 							if len(cliAlertConfig.AlertName) > 1 || cliAlertConfig.Group == nil {
-								output += " \n"
+								output += "\n"
 							}
 						}
 					}
@@ -143,7 +143,7 @@ inactive = 0`,
 								output += fmt.Sprintf("[%s] %s", check.StatusText(rule.GetStatus()), rule.GetOutput())
 
 								if len(cliAlertConfig.AlertName) > 1 || cliAlertConfig.Group == nil {
-									output += " \n"
+									output += "\n"
 								}
 							} else {
 								for _, alert := range rule.AlertingRule.Alerts {
@@ -168,7 +168,7 @@ inactive = 0`,
 									output += fmt.Sprintf("[%s] %s", check.StatusText(rule.GetStatus()), rule.GetOutput())
 
 									if len(cliAlertConfig.AlertName) > 1 || cliAlertConfig.Group == nil {
-										output += " \n"
+										output += "\n"
 									}
 								}
 							}
@@ -193,7 +193,7 @@ inactive = 0`,
 			}
 		}
 
-		summary += fmt.Sprintf("%d Alerts: %d Firing - %d Pending - %d Inactive ",
+		summary += fmt.Sprintf("%d Alerts: %d Firing - %d Pending - %d Inactive",
 			counterAlert,
 			counterFiring,
 			counterPending,

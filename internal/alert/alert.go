@@ -61,7 +61,7 @@ func (a *Alertingrule) GetOutput() (output string) {
 		//}
 
 		if instance != "" {
-			output += fmt.Sprintf(" on Instance: [%s] ", instance)
+			output += fmt.Sprintf(" on Instance: [%s]", instance)
 		}
 
 		if a.AlertingRule.State != "inactive" {
