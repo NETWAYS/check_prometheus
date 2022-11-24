@@ -13,26 +13,34 @@ Checks the health or readiness status of the Prometheus server.
 
 ````
 Usage:
-  check_prometheus health
+  check_prometheus [flags]
+  check_prometheus [command]
+
+Available Commands:
+  alert       Checks the status of an Prometheus alert
+  health      Checks the health or readiness status of the Prometheus server
+  query       Checks the status of an Prometheus query
 
 Flags:
-  -r, --ready   Checks the readiness of an endpoint
-  -i, --info    Displays various build information properties about the Prometheus server
-  -h, --help    help for health
-
-Global Flags:
-  -H, --hostname string   Address of the prometheus instance (default "localhost")
-      --insecure          Allow use of self signed certificates when using SSL
-  -p, --port int          Port of the prometheus instance (default 9090)
-  -t, --timeout int       Timeout for the check (default 30)
-  -S, --tls               Use secure connection
+  -H, --hostname string    Hostname of the Prometheus server (default "localhost")
+  -p, --port int           Port of the Prometheus server (default 9090)
+  -s, --secure             Use a HTTPS connection
+  -i, --insecure           Skip the verification of the server's TLS certificate
+  -b, --bearer string      Specify the Bearer Token for server authentication
+  -u, --user string        Specify the user name and password for server authentication <user:password>
+      --ca-file string     Specify the CA File for TLS authentication
+      --cert-file string   Specify the Certificate File for TLS authentication
+      --key-file string    Specify the Key File for TLS authentication
+  -t, --timeout int        Timeout in seconds for the CheckPlugin (default 30)
+  -h, --help               help for check_prometheus
+  -v, --version            version for check_prometheus
 ````
 
 ````
 $ check_prometheus health --hostname 'localhost' --port 9090 --insecure
 OK - Prometheus Server is Healthy.
 
-$check_prometheus health --ready       
+$check_prometheus health --ready
 OK - Prometheus Server is Ready.
 ````
 
@@ -57,7 +65,7 @@ WARNING - Found 2 Metrics - 0 Critical - 1 Warning - 1 Ok
 ````
 #### Checking a timeseries matrix result
 ````
-$ check_prometheus query -n 'go_goroutines{job="prometheus"}[10s]' -c5 -w 10                                   
+$ check_prometheus query -n 'go_goroutines{job="prometheus"}[10s]' -c5 -w 10
 CRITICAL - [CRITICAL] go_goroutines{instance="localhost:9090", job="prometheus"}
  \_ 37 @ 2022-10-12 14:15:27.45 +0200 CEST
  \_ 37 @ 2022-10-12 14:15:32.451 +0200 CEST

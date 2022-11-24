@@ -6,33 +6,30 @@ import (
 	"github.com/NETWAYS/go-check"
 	"github.com/prometheus/client_golang/api"
 	v1 "github.com/prometheus/client_golang/api/prometheus/v1"
-	"github.com/prometheus/common/config"
 	"net/http"
 	"net/url"
 	"strings"
 )
 
 type Client struct {
-	Url      string
-	Client   api.Client
-	Api      v1.API
-	Insecure bool
+	Url          string
+	Client       api.Client
+	Api          v1.API
+	RoundTripper http.RoundTripper
 }
 
-func NewClient(url string) *Client {
+func NewClient(url string, rt http.RoundTripper) *Client {
 	return &Client{
-		Url:      url,
-		Insecure: false,
+		Url:          url,
+		RoundTripper: rt,
 	}
 }
 
 // nolint: gosec
 func (c *Client) Connect() error {
-	var rt = config.NewBasicAuthRoundTripper("username", "password", "", api.DefaultRoundTripper)
-
 	cfg, err := api.NewClient(api.Config{
 		Address:      c.Url,
-		RoundTripper: rt,
+		RoundTripper: c.RoundTripper,
 	})
 
 	if err != nil {
