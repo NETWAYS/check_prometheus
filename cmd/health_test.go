@@ -5,6 +5,7 @@ import (
 	"net/http/httptest"
 	"net/url"
 	"os/exec"
+	"strings"
 	"testing"
 )
 
@@ -13,11 +14,10 @@ func TestHealth_ConnectionRefused(t *testing.T) {
 	cmd := exec.Command("go", "run", "../main.go", "health", "--port", "9999")
 	out, _ := cmd.CombinedOutput()
 
-	expected := "UNKNOWN - Get \"http://localhost:9999/-/healthy\": dial tcp 127.0.0.1:9999: connect: connection refused (*url.Error)\nexit status 3\n"
-
 	actual := string(out)
+	expected := "UNKNOWN - Get \"http://localhost:9999/-/healthy\": dial"
 
-	if actual != expected {
+	if !strings.Contains(actual, expected) {
 		t.Error("\nActual: ", actual, "\nExpected: ", expected)
 	}
 }

@@ -4,22 +4,15 @@ An Icinga check plugin to check Prometheus.
 
 ## Usage
 
-### Health
-
-Checks the health or readiness status of the Prometheus server.
-
-* `Health`: Checks the health of an endpoint, which always returns 200 and should be used to check Prometheus health.
-* `Ready`: Checks the readiness of an endpoint, which returns 200 when Prometheus is ready to serve traffic (i.e. respond to queries).
-
 ````
 Usage:
   check_prometheus [flags]
   check_prometheus [command]
 
 Available Commands:
-  alert       Checks the status of an Prometheus alert
+  alert       Checks the status of a Prometheus alert
   health      Checks the health or readiness status of the Prometheus server
-  query       Checks the status of an Prometheus query
+  query       Checks the status of a Prometheus query
 
 Flags:
   -H, --hostname string    Hostname of the Prometheus server (default "localhost")
@@ -36,64 +29,138 @@ Flags:
   -v, --version            version for check_prometheus
 ````
 
-````
-$ check_prometheus health --hostname 'localhost' --port 9090 --insecure
-OK - Prometheus Server is Healthy.
+### Health
 
-$check_prometheus health --ready
-OK - Prometheus Server is Ready.
+Checks the health or readiness status of the Prometheus server.
+
+* `Health`: Checks the health of an endpoint, which returns OK if the Prometheus server is healthy.
+* `Ready`: Checks the readiness of an endpoint, which returns OK if the Prometheus server is ready to serve traffic (i.e. respond to queries).
+
+````
+Usage:
+  check_prometheus health [flags]
+
+Examples:
+  $ check_prometheus health --hostname 'localhost' --port 9090 --insecure           
+  OK - Prometheus Server is Healthy. | statuscode=200
+
+Flags:
+  -r, --ready   Checks the readiness of an endpoint
+  -I, --info    Displays various build information properties about the Prometheus server
+  -h, --help    help for health
+````
+
+````
+$ check_prometheus health --hostname 'localhost' --port 9090 --insecure                                                      
+OK - Prometheus Server is Healthy. | statuscode=200
+
+$ check_prometheus health --ready        
+OK - Prometheus Server is Ready. | statuscode=200
 ````
 
 ### Query
 
+Checks the status of a Prometheus query and evaluates the result of the alert.
+
+>Note: Time range values e.G. 'go_memstats_alloc_bytes_total[10s]', only the latest value will be evaluated, other values will be ignored!
+````
+Usage:
+  check_prometheus query [flags]
+
+Examples:
+  $ check_prometheus query -q 'go_gc_duration_seconds_count' -c 5000 -w 2000   
+  CRITICAL - 2 Metrics: 1 Critical - 0 Warning - 1 Ok
+   \_[OK] go_gc_duration_seconds_count{instance="localhost:9090", job="prometheus"} - value: 1599
+   \_[CRITICAL] go_gc_duration_seconds_count{instance="node-exporter:9100", job="node-exporter"} - value: 79610
+   | value_go_gc_duration_seconds_count_localhost:9090_prometheus=1599 value_go_gc_duration_seconds_count_node-exporter:9100_node-exporter=79610
+
+Flags:
+  -q, --query string      An Prometheus query which will be performed and the value result will be evaluated
+  -w, --warning string    The warning threshold for a value (default "10")
+  -c, --critical string   The critical threshold for a value (default "20")
+  -h, --help              help for query
+````
+
 #### Checking a single metric with ONE direct vector result
 ```
-$ check_prometheus query -n 'go_goroutines{job="prometheus"}' -c 40 -w 27
-WARNING - go_goroutines{instance="localhost:9090", job="prometheus"}
- \_ 37 @ 2022-10-12 14:03:53.256 +0200 CEST
+$ check_prometheus query -q 'go_goroutines{job="prometheus"}' -c 40 -w 27     
+WARNING - 1 Metrics: 0 Critical - 1 Warning - 0 Ok
+ \_[WARNING] go_goroutines{instance="localhost:9090", job="prometheus"} - value: 37
+ | value_go_goroutines_localhost:9090_prometheus=37
 ```
 
 #### Checking a single metric with multiple vector results
 ````
-$ check_prometheus query -n 'go_goroutines' -c 40 -w 27 
-WARNING - Found 2 Metrics - 0 Critical - 1 Warning - 1 Ok
-[WARNING] go_goroutines{instance="localhost:9090", job="prometheus"}
- \_ 37 @ 2022-10-12 14:05:34.744 +0200 CEST
-[OK] go_goroutines{instance="node-exporter:9100", job="node-exporter"}
- \_ 37 @ 2022-10-12 14:05:34.744 +0200 CEST
- \_ 7 @ 2022-10-12 14:05:34.744 +0200 CEST
+$ check_prometheus query -q 'go_goroutines' -c 40 -w 27                                                      
+WARNING - 2 Metrics: 0 Critical - 1 Warning - 1 Ok
+ \_[WARNING] go_goroutines{instance="localhost:9090", job="prometheus"} - value: 37
+ \_[OK] go_goroutines{instance="node-exporter:9100", job="node-exporter"} - value: 7
+ | value_go_goroutines_localhost:9090_prometheus=37 value_go_goroutines_node-exporter:9100_node-exporter=7
 ````
-#### Checking a timeseries matrix result
+#### Checking a time series matrix result
+> Only the latest value will be evaluated, other values will be ignored!
 ````
-$ check_prometheus query -n 'go_goroutines{job="prometheus"}[10s]' -c5 -w 10
-CRITICAL - [CRITICAL] go_goroutines{instance="localhost:9090", job="prometheus"}
- \_ 37 @ 2022-10-12 14:15:27.45 +0200 CEST
- \_ 37 @ 2022-10-12 14:15:32.451 +0200 CEST
+$ check_prometheus query -q 'go_goroutines{job="prometheus"}[10s]' -c5 -w 10                                     
+CRITICAL - 1 Metrics: 1 Critical - 0 Warning - 0 Ok
+ \_[CRITICAL] go_goroutines{instance="localhost:9090", job="prometheus"} - value: 37
+ | value_go_goroutines_localhost:9090_prometheus=37
 
-$ check_prometheus query -n 'go_goroutines{job="prometheus"}[10s]' -c 50 -w 40
-OK - Found 1 Metrics - all Metrics Ok
+$ check_prometheus query -q 'go_goroutines[10s]' -c 50 -w 40                                                         
+OK - 2 Metrics OK | value_go_goroutines_localhost:9090_prometheus=37 value_go_goroutines_node-exporter:9100_node-exporter=7
 ````
 
 ### Alert
 
+Checks the status of a Prometheus alert and evaluates the status of the alert.
+
+````
+Usage:
+  check_prometheus alert [flags]
+
+Examples:
+  $ check_prometheus alert --name "PrometheusAlertmanagerJobMissing" 
+  CRITICAL - 1 Alerts: 1 Firing - 0 Pending - 0 Inactive 
+   \_[CRITICAL] [PrometheusAlertmanagerJobMissing] - Job: [alertmanager] is firing - value: 1.00 
+   | firing=1 pending=0 inactive=0
+
+  $ check_prometheus a alert --name "PrometheusAlertmanagerJobMissing" --name "PrometheusTargetMissing" 
+  CRITICAL - 2 Alerts: 1 Firing - 0 Pending - 1 Inactive 
+   \_[OK] [PrometheusTargetMissing] is inactive 
+   \_[CRITICAL] [PrometheusAlertmanagerJobMissing] - Job: [alertmanager] is firing - value: 1.00 
+   | total=2 firing=1 pending=0 inactive=1
+
+Flags:
+  -h, --help           help for alert
+  -n, --name strings   The name of one or more specific alerts to check.
+                       This parameter can be repeated e.G.: '--name alert1 --name alert2'
+                       If no name is given, all alerts will be evaluated
+````
+
+#### Checking all defined alerts
 ```
-$ check_prometheus alert
-CRITICAL - Found 6 alerts - firing 3 - pending 0 - inactive 3
+$ check_prometheus alert        
+CRITICAL - 6 Alerts: 3 Firing - 0 Pending - 3 Inactive 
  \_[OK] [PrometheusTargetMissing] is inactive 
- \_[CRITICAL] [PrometheusAlertmanagerJobMissing] - Job: [alertmanager] on Instance: [] is firing 
- \_[OK] [HostOutOfMemory] - Job: [alertmanager] on Instance: [] is inactive 
- \_[OK] [HostHighCpuLoad] - Job: [alertmanager] on Instance: [] is inactive 
- \_[CRITICAL] [HighResultLatency] - Job: [prometheus] on Instance: [localhost:9090] is firing 
- \_[CRITICAL] [HighResultLatency] - Job: [node-exporter] on Instance: [node-exporter:9100] is firing 
- 
-$ check_prometheus alert --name "HostHighCpuLoad" --name "HighResultLatency" 
-CRITICAL - Found 3 alerts - firing 2 - pending 0 - inactive 1
+ \_[CRITICAL] [PrometheusAlertmanagerJobMissing] - Job: [alertmanager] is firing - value: 1.00 
+ \_[OK] [HostOutOfMemory] - Job: [alertmanager] 
+ \_[OK] [HostHighCpuLoad] - Job: [alertmanager] 
+ \_[CRITICAL] [HighResultLatency] - Job: [prometheus] on Instance: [localhost:9090]  is firing - value: 11.00 
+ \_[CRITICAL] [HighResultLatency] - Job: [node-exporter] on Instance: [node-exporter:9100]  is firing - value: 10.00 
+ | total=6 firing=3 pending=0 inactive=3
+```
+#### Checking multiple alerts
+```
+$ check_prometheus alert --name "HostHighCpuLoad" --name "HighResultLatency"     
+CRITICAL - 3 Alerts: 2 Firing - 0 Pending - 1 Inactive 
  \_[OK] [HostHighCpuLoad] is inactive 
- \_[CRITICAL] [HighResultLatency] - Job: [prometheus] on Instance: [localhost:9090] is firing 
- \_[CRITICAL] [HighResultLatency] - Job: [node-exporter] on Instance: [node-exporter:9100] is firing 
- 
-$ check_prometheus alert --name "HostHighCpuLoad" --name "PrometheusTargetMissing"
-OK - All alerts are inactive
+ \_[CRITICAL] [HighResultLatency] - Job: [prometheus] on Instance: [localhost:9090]  is firing - value: 11.00 
+ \_[CRITICAL] [HighResultLatency] - Job: [node-exporter] on Instance: [node-exporter:9100]  is firing - value: 10.00 
+ | total=3 firing=2 pending=0 inactive=1
+```
+
+```
+$ check_prometheus alert --name "HostHighCpuLoad" --name "PrometheusTargetMissing"                                                         
+OK - Alerts inactive | total=2 firing=0 pending=0 inactive=2
 ```
 
 ## License

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/NETWAYS/check_prometheus/internal/alert"
 	"github.com/NETWAYS/go-check"
+	"github.com/NETWAYS/go-check/perfdata"
 	"github.com/NETWAYS/go-check/result"
 	v1 "github.com/prometheus/client_golang/api/prometheus/v1"
 	"github.com/spf13/cobra"
@@ -11,15 +12,21 @@ import (
 
 var alertCmd = &cobra.Command{
 	Use:   "alert",
-	Short: "Checks the status of an Prometheus alert",
-	Long: `Checks the status of an Prometheus alert
+	Short: "Checks the status of a Prometheus alert",
+	Long: `Checks the status of a Prometheus alert and evaluates the status of the alert:
+firing = 2
+pending = 1
+inactive = 0`,
+	Example: `  $ check_prometheus alert --name "PrometheusAlertmanagerJobMissing" 
+  CRITICAL - 1 Alerts: 1 Firing - 0 Pending - 0 Inactive 
+   \_[CRITICAL] [PrometheusAlertmanagerJobMissing] - Job: [alertmanager] is firing - value: 1.00 
+   | firing=1 pending=0 inactive=0
 
-	1. --name
-
-The alert status is:
-	inactive = OK
-	pending = WARNING
-	firing = CRITICAL`,
+  $ check_prometheus a alert --name "PrometheusAlertmanagerJobMissing" --name "PrometheusTargetMissing" 
+  CRITICAL - 2 Alerts: 1 Firing - 0 Pending - 1 Inactive 
+   \_[OK] [PrometheusTargetMissing] is inactive 
+   \_[CRITICAL] [PrometheusAlertmanagerJobMissing] - Job: [alertmanager] is firing - value: 1.00 
+   | total=2 firing=1 pending=0 inactive=1`,
 	Run: func(cmd *cobra.Command, args []string) {
 		var (
 			states          []int
@@ -29,6 +36,8 @@ The alert status is:
 			counterFiring   int
 			counterPending  int
 			counterInactive int
+			perfList        perfdata.PerfdataList
+			//value           int
 		)
 
 		rule := alert.Alertingrule{}
@@ -49,16 +58,18 @@ The alert status is:
 			check.ExitError(err)
 		}
 
-		summary += fmt.Sprintf("Found ")
-
 		// TODO SUPER SUPER hacky, needs to be refactored ASAP!
 		// Search for specified groups
 		for _, grp := range alerts.Groups {
 			for _, rl := range grp.Rules {
-				rule.Alertingrule = rl.(v1.AlertingRule)
+
+				if _, ok := rl.(v1.AlertingRule); ok {
+					rule.AlertingRule = rl.(v1.AlertingRule)
+				}
+
 				// Search for specified alert names
 				if cliAlertConfig.AlertName == nil {
-					if len(rule.Alertingrule.Alerts) == 0 {
+					if len(rule.AlertingRule.Alerts) == 0 {
 						counterAlert++
 
 						switch rule.GetStatus() {
@@ -82,7 +93,7 @@ The alert status is:
 							output += " \n"
 						}
 					} else {
-						for _, alert := range rule.Alertingrule.Alerts {
+						for _, alert := range rule.AlertingRule.Alerts {
 							counterAlert++
 
 							switch rule.GetStatus() {
@@ -110,8 +121,8 @@ The alert status is:
 					}
 				} else {
 					for _, name := range cliAlertConfig.AlertName {
-						if name == rule.Alertingrule.Name {
-							if len(rule.Alertingrule.Alerts) == 0 {
+						if name == rule.AlertingRule.Name {
+							if len(rule.AlertingRule.Alerts) == 0 {
 								counterAlert++
 
 								switch rule.GetStatus() {
@@ -135,7 +146,7 @@ The alert status is:
 									output += " \n"
 								}
 							} else {
-								for _, alert := range rule.Alertingrule.Alerts {
+								for _, alert := range rule.AlertingRule.Alerts {
 									counterAlert++
 
 									switch rule.GetStatus() {
@@ -167,16 +178,31 @@ The alert status is:
 			}
 		}
 
-		summary += fmt.Sprintf("%d alerts - firing %d - pending %d - inactive %d",
+		if len(cliAlertConfig.AlertName) > 1 || counterAlert > 1 {
+			perfList = perfdata.PerfdataList{
+				{Label: "total", Value: counterAlert},
+				{Label: "firing", Value: counterFiring},
+				{Label: "pending", Value: counterPending},
+				{Label: "inactive", Value: counterInactive},
+			}
+		} else if len(cliAlertConfig.AlertName) == 1 && counterAlert == 1 {
+			perfList = perfdata.PerfdataList{
+				{Label: "firing", Value: counterFiring},
+				{Label: "pending", Value: counterPending},
+				{Label: "inactive", Value: counterInactive},
+			}
+		}
+
+		summary += fmt.Sprintf("%d Alerts: %d Firing - %d Pending - %d Inactive ",
 			counterAlert,
 			counterFiring,
 			counterPending,
 			counterInactive)
 
 		if result.WorstState(states...) == 0 {
-			check.ExitRaw(result.WorstState(states...), "All alerts are inactive")
+			check.ExitRaw(result.WorstState(states...), "Alerts inactive", "|", perfList.String())
 		} else {
-			check.ExitRaw(result.WorstState(states...), summary+"\n"+output)
+			check.ExitRaw(result.WorstState(states...), summary+"\n"+output, "|", perfList.String())
 		}
 	},
 }
@@ -184,6 +210,12 @@ The alert status is:
 func init() {
 	rootCmd.AddCommand(alertCmd)
 	fs := alertCmd.Flags()
+	fs.StringSliceVarP(&cliAlertConfig.AlertName, "name", "n", nil,
+		"The name of one or more specific alerts to check."+
+			"\nThis parameter can be repeated e.G.: '--name alert1 --name alert2'"+
+			"\nIf no name is given, all alerts will be evaluated")
 	fs.BoolVarP(&cliAlertConfig.Problems, "problems", "P", false,
-		"Displays only alerts which status is not OK.")
+		"Displays only alerts which status is not OK")
+	// TODO: has to be implemented
+	_ = fs.MarkHidden("problems")
 }
