@@ -1,6 +1,6 @@
 module github.com/NETWAYS/check_prometheus
 
-go 1.18
+go 1.19
 
 require (
 	github.com/NETWAYS/go-check v0.3.0

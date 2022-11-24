@@ -10,10 +10,11 @@ import (
 var healthCmd = &cobra.Command{
 	Use:   "health",
 	Short: "Checks the health or readiness status of the Prometheus server",
-	Long: `Checks the health or readiness status of the Prometheus server.
+	Long: `Checks the health or readiness status of the Prometheus server
 Health: Checks the health of an endpoint, which returns OK if the Prometheus server is healthy.
 Ready: Checks the readiness of an endpoint, which returns OK if the Prometheus server is ready to serve traffic (i.e. respond to queries).`,
-	Example: `$ check_prometheus health --hostname 'localhost' --port 9090 --insecure`,
+	Example: `  $ check_prometheus health --hostname 'localhost' --port 9090 --insecure           
+  OK - Prometheus Server is Healthy. | statuscode=200`,
 	Run: func(cmd *cobra.Command, args []string) {
 		var (
 			rc     int
@@ -87,5 +88,4 @@ func init() {
 		"Displays various build information properties about the Prometheus server")
 
 	fs.SortFlags = false
-	healthCmd.DisableFlagsInUseLine = true
 }
