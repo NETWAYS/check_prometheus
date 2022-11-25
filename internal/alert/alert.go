@@ -7,13 +7,32 @@ import (
 	"strconv"
 )
 
-type Alertingrule struct {
+// Internal representation of Prometheus Rules
+type Rule struct {
 	AlertingRule  v1.AlertingRule
 	Alert         *v1.Alert
 	RecordingRule v1.RecordingRule
 }
 
-func (a *Alertingrule) GetStatus() (status int) {
+func FlattenRules(groups []v1.RuleGroup) []Rule {
+	// Flattens a list of RuleGroup containing a list of Rules into
+	// a list of internal Alertingrules
+	var r Rule
+	var rules []Rule
+
+	for _, grp := range groups {
+		for _, rl := range grp.Rules {
+
+			if _, ok := rl.(v1.AlertingRule); ok {
+				r.AlertingRule = rl.(v1.AlertingRule)
+				rules = append(rules, r)
+			}
+		}
+	}
+	return rules
+}
+
+func (a *Rule) GetStatus() (status int) {
 	switch a.AlertingRule.State {
 	case string(v1.AlertStateFiring):
 		status = check.Critical
@@ -28,7 +47,7 @@ func (a *Alertingrule) GetStatus() (status int) {
 	return status
 }
 
-func (a *Alertingrule) GetOutput() (output string) {
+func (a *Rule) GetOutput() (output string) {
 	var (
 		job      string
 		instance string
@@ -55,10 +74,6 @@ func (a *Alertingrule) GetOutput() (output string) {
 		}
 
 		output += fmt.Sprintf("[%s] - Job: [%s]", a.AlertingRule.Name, job)
-
-		//if a.AlertingRule.State != "inactive" {
-		//	output += fmt.Sprintf(" on Instance: [%s] ", instance)
-		//}
 
 		if instance != "" {
 			output += fmt.Sprintf(" on Instance: [%s]", instance)

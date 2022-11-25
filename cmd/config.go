@@ -14,9 +14,9 @@ import (
 )
 
 type AlertConfig struct {
-	AlertName []string
-	Group     []string
-	Problems  bool
+	AlertName    []string
+	Group        []string
+	ProblemsOnly bool
 }
 
 type Config struct {

@@ -134,6 +134,7 @@ Flags:
   -n, --name strings   The name of one or more specific alerts to check.
                        This parameter can be repeated e.G.: '--name alert1 --name alert2'
                        If no name is given, all alerts will be evaluated
+ -P, --problems       Display only alerts which status is not inactive/OK
 ````
 
 #### Checking all defined alerts
