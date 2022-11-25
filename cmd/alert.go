@@ -32,7 +32,6 @@ inactive = 0`,
 			states          []int
 			output          string
 			summary         string
-			counterAlert    int
 			counterFiring   int
 			counterPending  int
 			counterInactive int
@@ -70,8 +69,6 @@ inactive = 0`,
 				// Search for specified alert names
 				if cliAlertConfig.AlertName == nil {
 					if len(rule.AlertingRule.Alerts) == 0 {
-						counterAlert++
-
 						switch rule.GetStatus() {
 						case 0:
 							counterInactive++
@@ -94,8 +91,6 @@ inactive = 0`,
 						}
 					} else {
 						for _, alert := range rule.AlertingRule.Alerts {
-							counterAlert++
-
 							switch rule.GetStatus() {
 							case 0:
 								counterInactive++
@@ -123,8 +118,6 @@ inactive = 0`,
 					for _, name := range cliAlertConfig.AlertName {
 						if name == rule.AlertingRule.Name {
 							if len(rule.AlertingRule.Alerts) == 0 {
-								counterAlert++
-
 								switch rule.GetStatus() {
 								case 0:
 									counterInactive++
@@ -147,8 +140,6 @@ inactive = 0`,
 								}
 							} else {
 								for _, alert := range rule.AlertingRule.Alerts {
-									counterAlert++
-
 									switch rule.GetStatus() {
 									case 0:
 										counterInactive++
@@ -178,6 +169,7 @@ inactive = 0`,
 			}
 		}
 
+		counterAlert := counterFiring + counterPending + counterInactive
 		if len(cliAlertConfig.AlertName) > 1 || counterAlert > 1 {
 			perfList = perfdata.PerfdataList{
 				{Label: "total", Value: counterAlert},
