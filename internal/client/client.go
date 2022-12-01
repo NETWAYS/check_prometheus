@@ -42,8 +42,9 @@ func (c *Client) Connect() error {
 	return nil
 }
 
-func (c *Client) GetStatus(ctx context.Context, endpoint string) (int, string, error) {
+func (c *Client) GetStatus(ctx context.Context, endpoint string) (statuscode int, returncode int, body string, err error) {
 	// Parses the response from the Prometheus /healthy and /ready endpoint
+	// Return: Exit Status Code, HTTP Status Code, HTTP Body, Error
 
 	// Building the final URL with the endpoint parameter
 	u, _ := url.JoinPath(c.Url, "/-/", endpoint)
@@ -51,20 +52,20 @@ func (c *Client) GetStatus(ctx context.Context, endpoint string) (int, string, e
 
 	if err != nil {
 		e := fmt.Sprintf("Could not create request: %s", err)
-		return check.Unknown, e, err
+		return check.Unknown, 0, e, err
 	}
 
 	// Making the request with the preconfigured Client
 	// So that we can reuse the preconfigured Roundtripper
-	resp, body, err := c.Client.Do(ctx, req)
+	resp, b, err := c.Client.Do(ctx, req)
 
 	if err != nil {
-		e := fmt.Sprintf("Could get status: %s", err)
-		return check.Unknown, e, err
+		e := fmt.Sprintf("Could not get status: %s", err)
+		return check.Unknown, 0, e, err
 	}
 
 	// Getting the response body
-	respBody := strings.TrimSpace(string(body))
+	respBody := strings.TrimSpace(string(b))
 
 	// What we expect from the Prometheus Server
 	statusOk := "Prometheus Server is Healthy."
@@ -73,12 +74,12 @@ func (c *Client) GetStatus(ctx context.Context, endpoint string) (int, string, e
 	}
 
 	if resp.StatusCode == 200 && respBody == statusOk {
-		return check.OK, respBody, err
+		return check.OK, resp.StatusCode, respBody, err
 	}
 
 	if resp.StatusCode != 200 {
-		return check.Critical, respBody, err
+		return check.Critical, resp.StatusCode, respBody, err
 	}
 
-	return check.Unknown, respBody, err
+	return check.Unknown, resp.StatusCode, respBody, err
 }

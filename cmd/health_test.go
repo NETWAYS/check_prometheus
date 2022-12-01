@@ -15,7 +15,7 @@ func TestHealth_ConnectionRefused(t *testing.T) {
 	out, _ := cmd.CombinedOutput()
 
 	actual := string(out)
-	expected := "UNKNOWN - Get \"http://localhost:9999/-/healthy\": dial"
+	expected := "UNKNOWN - Could not get status: Get \"http://localhost:9999/-/healthy\": dial"
 
 	if !strings.Contains(actual, expected) {
 		t.Error("\nActual: ", actual, "\nExpected: ", expected)
@@ -38,7 +38,7 @@ func TestHealthCmd(t *testing.T) {
 				w.Write([]byte(`Prometheus Server is Healthy.`))
 			})),
 			args:     []string{"run", "../main.go", "health"},
-			expected: "OK - Prometheus Server is Healthy.\n",
+			expected: "OK - Prometheus Server is Healthy. | statuscode=200\n",
 		},
 		{
 			name: "ready-ok",
@@ -47,7 +47,7 @@ func TestHealthCmd(t *testing.T) {
 				w.Write([]byte(`Prometheus Server is Ready.`))
 			})),
 			args:     []string{"run", "../main.go", "health", "--ready"},
-			expected: "OK - Prometheus Server is Ready.\n",
+			expected: "OK - Prometheus Server is Ready. | statuscode=200\n",
 		},
 		{
 			name: "health-bearer-ok",
@@ -63,7 +63,7 @@ func TestHealthCmd(t *testing.T) {
 				w.Write([]byte(`The Authorization header wasn't set`))
 			})),
 			args:     []string{"run", "../main.go", "--bearer", "secret", "health"},
-			expected: "OK - Prometheus Server is Healthy.\n",
+			expected: "OK - Prometheus Server is Healthy. | statuscode=200\n",
 		},
 		{
 			name: "health-bearer-unauthorized",
@@ -79,7 +79,7 @@ func TestHealthCmd(t *testing.T) {
 				w.Write([]byte(`Access Denied!`))
 			})),
 			args:     []string{"run", "../main.go", "--bearer", "wrong-token", "health"},
-			expected: "CRITICAL - Access Denied!\nexit status 2\n",
+			expected: "CRITICAL - Access Denied! | statuscode=401\nexit status 2\n",
 		},
 		{
 			name: "health-basic-auth-ok",
@@ -97,7 +97,7 @@ func TestHealthCmd(t *testing.T) {
 				w.Write([]byte(`The Authorization header wasn't set`))
 			})),
 			args:     []string{"run", "../main.go", "--user", "username:password", "health"},
-			expected: "OK - Prometheus Server is Healthy.\n",
+			expected: "OK - Prometheus Server is Healthy. | statuscode=200\n",
 		},
 		{
 			name: "health-basic-auth-unauthorized",
@@ -115,7 +115,7 @@ func TestHealthCmd(t *testing.T) {
 				w.Write([]byte(`Access Denied!`))
 			})),
 			args:     []string{"run", "../main.go", "health"},
-			expected: "CRITICAL - Access Denied!\nexit status 2\n",
+			expected: "CRITICAL - Access Denied! | statuscode=401\nexit status 2\n",
 		},
 		{
 			name: "health-basic-auth-wrong-use",

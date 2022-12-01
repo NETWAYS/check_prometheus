@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"context"
+	"fmt"
 	"github.com/NETWAYS/go-check"
 	"github.com/NETWAYS/go-check/perfdata"
 	"github.com/spf13/cobra"
@@ -13,12 +14,17 @@ var healthCmd = &cobra.Command{
 	Long: `Checks the health or readiness status of the Prometheus server
 Health: Checks the health of an endpoint, which returns OK if the Prometheus server is healthy.
 Ready: Checks the readiness of an endpoint, which returns OK if the Prometheus server is ready to serve traffic (i.e. respond to queries).`,
-	Example: `  $ check_prometheus health --hostname 'localhost' --port 9090 --insecure
-  OK - Prometheus Server is Healthy. | statuscode=200`,
+	Example: `
+	$ check_prometheus health --hostname 'localhost' --port 9090 --insecure
+	OK - Prometheus Server is Healthy. | statuscode=200
+
+	$ check_prometheus --bearer secrettoken health --ready
+	OK - Prometheus Server is Ready. | statuscode=200`,
 	Run: func(cmd *cobra.Command, args []string) {
 		var (
-			rc     int
 			output string
+			rc     int
+			sc     int
 		)
 
 		// Creating an client and connecting to the API
@@ -34,18 +40,18 @@ Ready: Checks the readiness of an endpoint, which returns OK if the Prometheus s
 
 		if cliConfig.PReady {
 			// Getting the ready status
-			rc, output, err = c.GetStatus(ctx, "ready")
+			rc, sc, output, err = c.GetStatus(ctx, "ready")
 
 			if err != nil {
-				check.ExitError(err)
+				check.ExitError(fmt.Errorf(output))
 			}
 
 		} else {
 			// Getting the health status
-			rc, output, err = c.GetStatus(ctx, "healthy")
+			rc, sc, output, err = c.GetStatus(ctx, "healthy")
 
 			if err != nil {
-				check.ExitError(err)
+				check.ExitError(fmt.Errorf(output))
 			}
 		}
 
@@ -74,7 +80,10 @@ Ready: Checks the readiness of an endpoint, which returns OK if the Prometheus s
 			check.ExitRaw(rc, output, "|", p.String())
 		}
 
-		check.ExitRaw(rc, output)
+		p := perfdata.PerfdataList{
+			{Label: "statuscode", Value: sc},
+		}
+		check.ExitRaw(rc, output, "|", p.String())
 	},
 }
 
