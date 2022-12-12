@@ -59,8 +59,7 @@ var (
 	cliAlertConfig AlertConfig
 )
 
-// TODO: Rename to NewClient
-func (c *Config) Client() *client.Client {
+func (c *Config) NewClient() *client.Client {
 	u := url.URL{
 		Scheme: "http",
 		Host:   c.Hostname + ":" + strconv.Itoa(c.Port),

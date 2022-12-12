@@ -62,7 +62,7 @@ inactive = 0`,
 			perfList        perfdata.PerfdataList
 		)
 
-		c := cliConfig.Client()
+		c := cliConfig.NewClient()
 		err := c.Connect()
 		if err != nil {
 			check.ExitError(err)

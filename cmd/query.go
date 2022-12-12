@@ -78,7 +78,7 @@ Note: Time range values e.G. 'go_memstats_alloc_bytes_total[0s]' only the latest
 			check.ExitError(err)
 		}
 
-		c := cliConfig.Client()
+		c := cliConfig.NewClient()
 		err = c.Connect()
 		if err != nil {
 			check.ExitError(err)
