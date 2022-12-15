@@ -171,5 +171,5 @@ func init() {
 			"\nThis parameter can be repeated e.G.: '--name alert1 --name alert2'"+
 			"\nIf no name is given, all alerts will be evaluated")
 	fs.BoolVarP(&cliAlertConfig.ProblemsOnly, "problems", "P", false,
-		"Display only alerts which status is not inactive/OK")
+		"Display only alerts which status is not inactive/OK. Note that in combination with the --name flag this might result in no Alerts being displayed")
 }
