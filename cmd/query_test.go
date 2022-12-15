@@ -82,6 +82,15 @@ func TestQueryCmd(t *testing.T) {
 			expected: "UNKNOWN - Scalar value results are not supported (*errors.errorString)\nexit status 3\n",
 		},
 		{
+			name: "query-string",
+			server: httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				w.WriteHeader(http.StatusOK)
+				w.Write([]byte(`{"status":"success","data":{"resultType":"string","result":[1670339013.992,"up"]}}`))
+			})),
+			args:     []string{"run", "../main.go", "query", "--query", "up"},
+			expected: "UNKNOWN - String value results are not supported (*errors.errorString)\nexit status 3\n",
+		},
+		{
 			name: "query-matrix-exists",
 			server: httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 				w.WriteHeader(http.StatusOK)
