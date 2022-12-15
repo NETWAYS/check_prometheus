@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"context"
 	"fmt"
 	"github.com/NETWAYS/go-check"
 	"github.com/NETWAYS/go-check/perfdata"
@@ -45,19 +44,16 @@ Ready: Checks the readiness of an endpoint, which returns OK if the Prometheus s
 			if err != nil {
 				check.ExitError(fmt.Errorf(output))
 			}
-
-		} else {
-			// Getting the health status
-			rc, sc, output, err = c.GetStatus(ctx, "healthy")
-
-			if err != nil {
-				check.ExitError(fmt.Errorf(output))
+			p := perfdata.PerfdataList{
+				{Label: "statuscode", Value: sc},
 			}
+
+			check.ExitRaw(rc, output, "|", p.String())
 		}
 
 		if cliConfig.Info {
 			// Displays various build information properties about the Prometheus server
-			info, err := c.Api.Buildinfo(context.Background())
+			info, err := c.Api.Buildinfo(ctx)
 			if err != nil {
 				check.ExitError(err)
 			}
@@ -70,7 +66,7 @@ Ready: Checks the readiness of an endpoint, which returns OK if the Prometheus s
 				"Revision: " + info.Revision
 
 			p := perfdata.PerfdataList{
-				{Label: "status", Value: rc},
+				{Label: "statuscode", Value: 200},
 				{Label: "version", Value: info.Version},
 				{Label: "builddate", Value: info.BuildDate},
 				{Label: "builduser", Value: info.BuildUser},
@@ -80,9 +76,17 @@ Ready: Checks the readiness of an endpoint, which returns OK if the Prometheus s
 			check.ExitRaw(rc, output, "|", p.String())
 		}
 
+		// Getting the health status is the default
+		rc, sc, output, err = c.GetStatus(ctx, "healthy")
+
+		if err != nil {
+			check.ExitError(fmt.Errorf(output))
+		}
+
 		p := perfdata.PerfdataList{
 			{Label: "statuscode", Value: sc},
 		}
+
 		check.ExitRaw(rc, output, "|", p.String())
 	},
 }

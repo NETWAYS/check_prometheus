@@ -42,7 +42,7 @@ func (c *Client) Connect() error {
 	return nil
 }
 
-func (c *Client) GetStatus(ctx context.Context, endpoint string) (statuscode int, returncode int, body string, err error) {
+func (c *Client) GetStatus(ctx context.Context, endpoint string) (returncode int, statuscode int, body string, err error) {
 	// Parses the response from the Prometheus /healthy and /ready endpoint
 	// Return: Exit Status Code, HTTP Status Code, HTTP Body, Error
 
