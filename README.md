@@ -18,7 +18,7 @@ Flags:
   -H, --hostname string    Hostname of the Prometheus server (default "localhost")
   -p, --port int           Port of the Prometheus server (default 9090)
   -s, --secure             Use a HTTPS connection
-  -i, --insecure           Skip the verification of the server's TLS certificate
+  -i, --insecure           Skip the verification of the server TLS certificate
   -b, --bearer string      Specify the Bearer Token for server authentication
   -u, --user string        Specify the user name and password for server authentication <user:password>
       --ca-file string     Specify the CA File for TLS authentication
