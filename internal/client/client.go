@@ -45,7 +45,6 @@ func (c *Client) Connect() error {
 func (c *Client) GetStatus(ctx context.Context, endpoint string) (returncode int, statuscode int, body string, err error) {
 	// Parses the response from the Prometheus /healthy and /ready endpoint
 	// Return: Exit Status Code, HTTP Status Code, HTTP Body, Error
-
 	// Building the final URL with the endpoint parameter
 	u, _ := url.JoinPath(c.Url, "/-/", endpoint)
 	req, err := http.NewRequest(http.MethodGet, u, nil)

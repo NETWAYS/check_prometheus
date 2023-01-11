@@ -18,17 +18,18 @@ func FlattenRules(groups []v1.RuleGroup) []Rule {
 	// Flattens a list of RuleGroup containing a list of Rules into
 	// a list of internal Alertingrules
 	var r Rule
+
 	var rules []Rule
 
 	for _, grp := range groups {
 		for _, rl := range grp.Rules {
-
 			if _, ok := rl.(v1.AlertingRule); ok {
 				r.AlertingRule = rl.(v1.AlertingRule)
 				rules = append(rules, r)
 			}
 		}
 	}
+
 	return rules
 }
 
