@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/NETWAYS/go-check"
 	v1 "github.com/prometheus/client_golang/api/prometheus/v1"
+	"github.com/prometheus/common/model"
 	"strconv"
 )
 
@@ -49,43 +50,38 @@ func (a *Rule) GetStatus() (status int) {
 }
 
 func (a *Rule) GetOutput() (output string) {
-	var (
-		job      string
-		instance string
-	)
-
 	if a.Alert == nil {
 		return fmt.Sprintf("[%s] is %s",
 			a.AlertingRule.Name,
 			a.AlertingRule.State)
-	} else {
-		labels := a.Alert.Labels
-		for key, val := range labels {
-			switch key {
-			case "instance":
-				instance = string(val)
-			case "job":
-				job = string(val)
-			}
-		}
-
-		val, err := strconv.ParseFloat(a.Alert.Value, 32)
-		if err != nil {
-			check.ExitError(err)
-		}
-
-		output += fmt.Sprintf("[%s] - Job: [%s]", a.AlertingRule.Name, job)
-
-		if instance != "" {
-			output += fmt.Sprintf(" on Instance: [%s]", instance)
-		}
-
-		if a.AlertingRule.State != "inactive" {
-			output += fmt.Sprintf(" is %s - value: %.2f",
-				a.AlertingRule.State,
-				val)
-		}
-
-		return output
 	}
+
+	var (
+		value float64
+		v     model.LabelValue
+		ok    bool
+	)
+
+	// Base Output
+	output += fmt.Sprintf("[%s]", a.AlertingRule.Name)
+
+	// Add job if available
+	v, ok = a.Alert.Labels["job"]
+	if ok {
+		output += fmt.Sprintf(" - Job: [%s]", string(v))
+	}
+
+	// Add instance if available
+	v, ok = a.Alert.Labels["instance"]
+	if ok {
+		output += fmt.Sprintf(" on Instance: [%s]", string(v))
+	}
+
+	// Add current value to output
+	value, _ = strconv.ParseFloat(a.Alert.Value, 32)
+	output += fmt.Sprintf(" is %s - value: %.2f",
+		a.AlertingRule.State,
+		value)
+
+	return output
 }
