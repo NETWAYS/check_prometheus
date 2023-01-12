@@ -104,6 +104,8 @@ Note: Time range values e.G. 'go_memstats_alloc_bytes_total[0s]' only the latest
 		// Scalar - a simple numeric floating point value
 		case model.ValScalar:
 			check.ExitError(fmt.Errorf("Scalar value results are not supported"))
+		case model.ValNone:
+			check.ExitError(fmt.Errorf("None value results are not supported"))
 		case model.ValString:
 			// String - a simple string value; currently unused
 			check.ExitError(fmt.Errorf("String value results are not supported"))
@@ -193,7 +195,9 @@ func init() {
 		"An Prometheus query which will be performed and the value result will be evaluated")
 	fs.BoolVar(&cliQueryConfig.ShowAll, "show-all", false,
 		"Displays all metrics regardless of the status")
+
 	_ = fs.MarkHidden("show-all")
+
 	fs.StringVarP(&cliQueryConfig.Warning, "warning", "w", "10",
 		"The warning threshold for a value")
 	fs.StringVarP(&cliQueryConfig.Critical, "critical", "c", "20",

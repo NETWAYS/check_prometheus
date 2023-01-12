@@ -20,6 +20,7 @@ func generateOutput(rl alert.Rule, cfg AlertConfig) (output string) {
 	if len(cfg.AlertName) > 1 || cfg.Group == nil {
 		output += "\n"
 	}
+
 	return output
 }
 
@@ -30,6 +31,7 @@ func contains(s string, list []string) bool {
 			return true
 		}
 	}
+
 	return false
 }
 
