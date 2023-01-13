@@ -96,9 +96,7 @@ Note: Time range values e.G. 'go_memstats_alloc_bytes_total[0s]' only the latest
 			check.ExitError(err)
 		}
 
-		//valType := query.ValType{}
 		switch result.Type() {
-		// model.ValNone
 		default:
 			check.ExitError(fmt.Errorf("None value results are not supported"))
 		// Scalar - a simple numeric floating point value
