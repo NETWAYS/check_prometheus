@@ -144,4 +144,10 @@ func TestGetOutput(t *testing.T) {
 	if r.GetOutput() != expected {
 		t.Error("\nActual: ", r.GetOutput(), "\nExpected: ", expected)
 	}
+
+	r.Alert = nil
+	expected = "[HighRequestLatency] is inactive"
+	if r.GetOutput() != expected {
+		t.Error("\nActual: ", r.GetOutput(), "\nExpected: ", expected)
+	}
 }
