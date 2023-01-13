@@ -111,6 +111,9 @@ Note: Time range values e.G. 'go_memstats_alloc_bytes_total[0s]' only the latest
 			// Instant vector - a set of time series containing a single sample for each time series, all sharing the same timestamp
 			vectorVal := result.(model.Vector)
 
+			// Set initial capacity to reduce memory allocations
+			vStates := make([]int, 0, len(vectorVal))
+
 			for _, sample := range vectorVal {
 				metricsCounter++
 
@@ -125,7 +128,7 @@ Note: Time range values e.G. 'go_memstats_alloc_bytes_total[0s]' only the latest
 					okCounter++
 				}
 
-				states = append(states, rc)
+				vStates = append(states, rc)
 				// Format the metric and RC output for console output
 				metricOutput += generateMetricOutput(rc, sample.Metric.String(), sample.Value.String())
 
@@ -133,12 +136,16 @@ Note: Time range values e.G. 'go_memstats_alloc_bytes_total[0s]' only the latest
 				perf := generatePerfdata(sample.Metric.String(), sample.Value.String())
 				perfList.Add(&perf)
 			}
+			states = vStates
 		case model.ValMatrix:
 			// Range vector - a set of time series containing a range of data points over time for each time series -> Matrix
 			// An example query for a matrix 'go_goroutines{job="prometheus"}[5m]'
 
 			// Note: Only the latest value will be evaluated, other values will be ignored!
 			matrixVal := result.(model.Matrix)
+
+			// Set initial capacity to reduce memory allocations
+			mStates := make([]int, 0, len(matrixVal))
 
 			for _, samplestream := range matrixVal {
 				metricsCounter++
@@ -155,7 +162,7 @@ Note: Time range values e.G. 'go_memstats_alloc_bytes_total[0s]' only the latest
 					okCounter++
 				}
 
-				states = append(states, rc)
+				mStates = append(states, rc)
 				// Format the metric and RC output for console output
 				metricOutput += generateMetricOutput(rc, samplepair.String(), samplepair.Value.String())
 
@@ -163,6 +170,7 @@ Note: Time range values e.G. 'go_memstats_alloc_bytes_total[0s]' only the latest
 				perf := generatePerfdata(samplestream.Metric.String(), samplepair.Value.String())
 				perfList.Add(&perf)
 			}
+			states = mStates
 		}
 
 		// The worst state of all metrics determines the final return state. Example:
