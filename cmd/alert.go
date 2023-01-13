@@ -135,6 +135,7 @@ inactive = 0`,
 						counterFiring++
 					}
 
+					// Set the alert in the internal Type to generate the output
 					rl.Alert = alert
 					// Gather the state to evaluate the worst at the end
 					rStates = append(states, rl.GetStatus())

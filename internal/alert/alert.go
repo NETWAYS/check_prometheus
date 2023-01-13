@@ -9,6 +9,7 @@ import (
 )
 
 // Internal representation of Prometheus Rules
+// Alert attribute will be used when iterating over multiple AlertingRules
 type Rule struct {
 	AlertingRule v1.AlertingRule
 	Alert        *v1.Alert
@@ -29,6 +30,8 @@ func FlattenRules(groups []v1.RuleGroup) []Rule {
 
 	for _, grp := range groups {
 		for _, rl := range grp.Rules {
+			// For now we only care about AlertingRules
+			// since RecodingRules can simply be queried
 			if _, ok := rl.(v1.AlertingRule); ok {
 				r.AlertingRule = rl.(v1.AlertingRule)
 				rules = append(rules, r)
