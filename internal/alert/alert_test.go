@@ -43,19 +43,9 @@ func TestGetStatus(t *testing.T) {
 		State:          "firing",
 	}
 
-	rr := v1.RecordingRule{
-		Health:         v1.RuleHealthGood,
-		Name:           "job:http_inprogress_requests:sum",
-		Query:          "sum(http_inprogress_requests) by (job)",
-		LastError:      "",
-		EvaluationTime: 0.3,
-		LastEvaluation: time.Date(2020, 5, 18, 15, 52, 53, 450311300, time.UTC),
-	}
-
 	r := Rule{
-		AlertingRule:  ar,
-		Alert:         ar.Alerts[0],
-		RecordingRule: rr,
+		AlertingRule: ar,
+		Alert:        ar.Alerts[0],
 	}
 
 	actual := r.GetStatus()
@@ -107,19 +97,9 @@ func TestGetOutput(t *testing.T) {
 		State:          "firing",
 	}
 
-	rr := v1.RecordingRule{
-		Health:         v1.RuleHealthGood,
-		Name:           "job:http_inprogress_requests:sum",
-		Query:          "sum(http_inprogress_requests) by (job)",
-		LastError:      "",
-		EvaluationTime: 0.3,
-		LastEvaluation: time.Date(2020, 5, 18, 15, 52, 53, 450311300, time.UTC),
-	}
-
 	r := Rule{
-		AlertingRule:  ar,
-		Alert:         ar.Alerts[0],
-		RecordingRule: rr,
+		AlertingRule: ar,
+		Alert:        ar.Alerts[0],
 	}
 
 	var expected string

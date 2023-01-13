@@ -114,6 +114,15 @@ exit status 2
 			args:     []string{"run", "../main.go", "alert", "--name", "InactiveAlert"},
 			expected: "OK - Alerts inactive | firing=0 pending=0 inactive=1\n",
 		},
+		{
+			name: "alert-recording-rule",
+			server: httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				w.WriteHeader(http.StatusOK)
+				w.Write([]byte(`{"status":"success","data":{"groups":[{"name":"example","file":"recoding.yaml","rules":[{"name":"job:foo","query":"sum by(job) (requests_total)","health":"ok","evaluationTime":0.000391321,"lastEvaluation":"2023-01-13T14:26:08.687065894Z","type":"recording"}],"interval":10,"evaluationTime":0.000403777,"lastEvaluation":"2023-01-13T14:26:08.687058029Z"},{"name":"Foo","file":"alerts.yaml","rules":[{"state":"inactive","name":"InactiveAlert","query":"foo","duration":120,"labels":{"severity":"critical"},"annotations":{"description":"Inactive","summary":"Inactive"},"alerts":[],"health":"ok","evaluationTime":0.000462382,"lastEvaluation":"2022-11-18T14:01:07.597034323Z","type":"alerting"}],"interval":10,"limit":0,"evaluationTime":0.000478395,"lastEvaluation":"2022-11-18T14:01:07.597021953Z"}]}}`))
+			})),
+			args:     []string{"run", "../main.go", "alert", "--name", "InactiveAlert"},
+			expected: "OK - Alerts inactive | firing=0 pending=0 inactive=1\n",
+		},
 	}
 
 	for _, test := range tests {

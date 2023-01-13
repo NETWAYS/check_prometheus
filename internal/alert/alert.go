@@ -10,9 +10,8 @@ import (
 
 // Internal representation of Prometheus Rules
 type Rule struct {
-	AlertingRule  v1.AlertingRule
-	Alert         *v1.Alert
-	RecordingRule v1.RecordingRule
+	AlertingRule v1.AlertingRule
+	Alert        *v1.Alert
 }
 
 func FlattenRules(groups []v1.RuleGroup) []Rule {
