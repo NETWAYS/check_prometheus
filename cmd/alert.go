@@ -83,6 +83,13 @@ inactive = 0`,
 		// Get all rules from all groups into a single list
 		rules := alert.FlattenRules(alerts.Groups)
 
+		// Set initial capacity to reduce memory allocations
+		var l int
+		for _, rl := range rules {
+			l = l * len(rl.AlertingRule.Alerts)
+		}
+		rStates := make([]int, 0, l)
+
 		for _, rl := range rules {
 
 			// If it's not the Alert we're looking for, Skip!
@@ -110,9 +117,12 @@ inactive = 0`,
 				}
 
 				// Gather the state to evaluate the worst at the end
-				states = append(states, rl.GetStatus())
+				rStates = append(states, rl.GetStatus())
 				output += generateOutput(rl, cliAlertConfig)
-			} else {
+			}
+
+			// Handle active alerts
+			if len(rl.AlertingRule.Alerts) > 0 {
 				// Handle Pending or Firing Alerts
 				for _, alert := range rl.AlertingRule.Alerts {
 					// Counting states for perfdata
@@ -127,11 +137,12 @@ inactive = 0`,
 
 					rl.Alert = alert
 					// Gather the state to evaluate the worst at the end
-					states = append(states, rl.GetStatus())
+					rStates = append(states, rl.GetStatus())
 					output += generateOutput(rl, cliAlertConfig)
 				}
 			}
 		}
+		states = rStates
 
 		counterAlert := counterFiring + counterPending + counterInactive
 		if len(cliAlertConfig.AlertName) > 1 || counterAlert > 1 {

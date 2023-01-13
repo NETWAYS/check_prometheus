@@ -17,9 +17,15 @@ type Rule struct {
 func FlattenRules(groups []v1.RuleGroup) []Rule {
 	// Flattens a list of RuleGroup containing a list of Rules into
 	// a list of internal Alertingrules
-	var r Rule
+	var l int
+	// Set initial capacity to reduce memory allocations
+	for _, grp := range groups {
+		l = l + len(grp.Rules)
+	}
 
-	var rules []Rule
+	rules := make([]Rule, 0, l)
+
+	var r Rule
 
 	for _, grp := range groups {
 		for _, rl := range grp.Rules {
