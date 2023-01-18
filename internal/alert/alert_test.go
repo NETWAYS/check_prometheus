@@ -131,3 +131,56 @@ func TestGetOutput(t *testing.T) {
 		t.Error("\nActual: ", r.GetOutput(), "\nExpected: ", expected)
 	}
 }
+
+func TestFlattenRules(t *testing.T) {
+	testTime := time.Now()
+
+	rg := []v1.RuleGroup{
+		{
+			Name:     "example",
+			File:     "/rules.yaml",
+			Interval: 60,
+			Rules: []interface{}{
+				v1.AlertingRule{
+					Alerts: []*v1.Alert{
+						{
+							ActiveAt: testTime.UTC(),
+							Annotations: model.LabelSet{
+								"summary": "High request latency",
+							},
+							Labels: model.LabelSet{
+								"alertname": "HighRequestLatency",
+								"severity":  "page",
+							},
+							State: v1.AlertStateFiring,
+							Value: "1e+00",
+						},
+					},
+					Annotations: model.LabelSet{
+						"summary": "High request latency",
+					},
+					Labels: model.LabelSet{
+						"severity": "page",
+					},
+					Duration:  600,
+					Health:    v1.RuleHealthGood,
+					Name:      "HighRequestLatency",
+					Query:     "job:request_latency_seconds:mean5m{job=\"myjob\"} > 0.5",
+					LastError: "",
+				},
+				v1.RecordingRule{
+					Health:    v1.RuleHealthGood,
+					Name:      "job:http_inprogress_requests:sum",
+					Query:     "sum(http_inprogress_requests) by (job)",
+					LastError: "",
+				},
+			},
+		},
+	}
+
+	fr := FlattenRules(rg)
+	if len(fr) != 1 {
+		t.Error("\nActual: ", fr)
+	}
+
+}
