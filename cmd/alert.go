@@ -48,7 +48,7 @@ inactive = 0`,
 	 \_[CRITICAL] [PrometheusAlertmanagerJobMissing] - Job: [alertmanager] is firing - value: 1.00
 	 | firing=1 pending=0 inactive=0
 
-	$ check_prometheus a alert --name "PrometheusAlertmanagerJobMissing" --name "PrometheusTargetMissing"
+	$ check_prometheus alert --name "PrometheusAlertmanagerJobMissing" --name "PrometheusTargetMissing"
 	CRITICAL - 2 Alerts: 1 Firing - 0 Pending - 1 Inactive
 	 \_[OK] [PrometheusTargetMissing] is inactive
 	 \_[CRITICAL] [PrometheusAlertmanagerJobMissing] - Job: [alertmanager] is firing - value: 1.00
@@ -185,5 +185,5 @@ func init() {
 			"\nThis parameter can be repeated e.G.: '--name alert1 --name alert2'"+
 			"\nIf no name is given, all alerts will be evaluated")
 	fs.BoolVarP(&cliAlertConfig.ProblemsOnly, "problems", "P", false,
-		"Display only alerts which status is not inactive/OK. Note that in combination with the --name flag this might result in no Alerts being displayed")
+		"Display only alerts which status is not inactive/OK. Note that in combination with the --name flag this might result in no alerts being displayed")
 }
