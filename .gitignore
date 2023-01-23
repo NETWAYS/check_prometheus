@@ -3,3 +3,4 @@ check_prometheus
 vendor/
 coverage.html
 coverage.out
+dist/
