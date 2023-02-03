@@ -6,6 +6,7 @@ import (
 	v1 "github.com/prometheus/client_golang/api/prometheus/v1"
 	"github.com/prometheus/common/model"
 	"strconv"
+	"strings"
 )
 
 // Internal representation of Prometheus Rules
@@ -68,28 +69,27 @@ func (a *Rule) GetOutput() (output string) {
 		value float64
 		v     model.LabelValue
 		ok    bool
+		out   strings.Builder
 	)
 
 	// Base Output
-	output += fmt.Sprintf("[%s]", a.AlertingRule.Name)
+	out.WriteString(fmt.Sprintf("[%s]", a.AlertingRule.Name))
 
 	// Add job if available
 	v, ok = a.Alert.Labels["job"]
 	if ok {
-		output += fmt.Sprintf(" - Job: [%s]", string(v))
+		out.WriteString(fmt.Sprintf(" - Job: [%s]", string(v)))
 	}
 
 	// Add instance if available
 	v, ok = a.Alert.Labels["instance"]
 	if ok {
-		output += fmt.Sprintf(" on Instance: [%s]", string(v))
+		out.WriteString(fmt.Sprintf(" on Instance: [%s]", string(v)))
 	}
 
 	// Add current value to output
 	value, _ = strconv.ParseFloat(a.Alert.Value, 32)
-	output += fmt.Sprintf(" is %s - value: %.2f",
-		a.AlertingRule.State,
-		value)
+	out.WriteString(fmt.Sprintf(" is %s - value: %.2f", a.AlertingRule.State, value))
 
-	return output
+	return out.String()
 }

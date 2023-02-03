@@ -7,21 +7,24 @@ import (
 	"github.com/NETWAYS/go-check/perfdata"
 	"github.com/NETWAYS/go-check/result"
 	"github.com/spf13/cobra"
+	"strings"
 )
 
 func generateOutput(rl alert.Rule, cfg AlertConfig) (output string) {
 	// Generates the console output for the AlertingRules
-	if len(cfg.AlertName) > 1 || cfg.Group == nil {
-		output += " \\_"
-	}
-
-	output += fmt.Sprintf("[%s] %s", check.StatusText(rl.GetStatus()), rl.GetOutput())
+	var out strings.Builder
 
 	if len(cfg.AlertName) > 1 || cfg.Group == nil {
-		output += "\n"
+		out.WriteString(" \\_")
 	}
 
-	return output
+	out.WriteString(fmt.Sprintf("[%s] %s", check.StatusText(rl.GetStatus()), rl.GetOutput()))
+
+	if len(cfg.AlertName) > 1 || cfg.Group == nil {
+		out.WriteString("\n")
+	}
+
+	return out.String()
 }
 
 func contains(s string, list []string) bool {
@@ -56,7 +59,7 @@ inactive = 0`,
 	Run: func(cmd *cobra.Command, args []string) {
 		var (
 			states          []int
-			output          string
+			output          strings.Builder
 			summary         string
 			counterFiring   int
 			counterPending  int
@@ -118,7 +121,7 @@ inactive = 0`,
 
 				// Gather the state to evaluate the worst at the end
 				rStates = append(states, rl.GetStatus())
-				output += generateOutput(rl, cliAlertConfig)
+				output.WriteString(generateOutput(rl, cliAlertConfig))
 			}
 
 			// Handle active alerts
@@ -139,7 +142,7 @@ inactive = 0`,
 					rl.Alert = alert
 					// Gather the state to evaluate the worst at the end
 					rStates = append(states, rl.GetStatus())
-					output += generateOutput(rl, cliAlertConfig)
+					output.WriteString(generateOutput(rl, cliAlertConfig))
 				}
 			}
 		}
@@ -163,7 +166,7 @@ inactive = 0`,
 			}
 		}
 
-		summary += fmt.Sprintf("%d Alerts: %d Firing - %d Pending - %d Inactive",
+		summary = fmt.Sprintf("%d Alerts: %d Firing - %d Pending - %d Inactive",
 			counterAlert,
 			counterFiring,
 			counterPending,
@@ -172,7 +175,7 @@ inactive = 0`,
 		if result.WorstState(states...) == 0 {
 			check.ExitRaw(result.WorstState(states...), "Alerts inactive", "|", perfList.String())
 		} else {
-			check.ExitRaw(result.WorstState(states...), summary+"\n"+output, "|", perfList.String())
+			check.ExitRaw(result.WorstState(states...), summary+"\n"+output.String(), "|", perfList.String())
 		}
 	},
 }
