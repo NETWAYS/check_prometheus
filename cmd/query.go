@@ -59,8 +59,8 @@ Note: Time range values e.G. 'go_memstats_alloc_bytes_total[0s]' only the latest
 		var (
 			rc             int
 			states         []int
-			metricOutput   string
-			summary        string
+			metricOutput   strings.Builder
+			summary        strings.Builder
 			metricsCounter int
 			critCounter    int
 			warnCounter    int
@@ -130,7 +130,7 @@ Note: Time range values e.G. 'go_memstats_alloc_bytes_total[0s]' only the latest
 
 				vStates = append(states, rc)
 				// Format the metric and RC output for console output
-				metricOutput += generateMetricOutput(rc, sample.Metric.String(), sample.Value.String())
+				metricOutput.WriteString(generateMetricOutput(rc, sample.Metric.String(), sample.Value.String()))
 
 				// Generate Perfdata from API return
 				perf := generatePerfdata(sample.Metric.String(), sample.Value.String())
@@ -164,7 +164,7 @@ Note: Time range values e.G. 'go_memstats_alloc_bytes_total[0s]' only the latest
 
 				mStates = append(states, rc)
 				// Format the metric and RC output for console output
-				metricOutput += generateMetricOutput(rc, samplepair.String(), samplepair.Value.String())
+				metricOutput.WriteString(generateMetricOutput(rc, samplepair.String(), samplepair.Value.String()))
 
 				// Generate Perfdata from API return
 				perf := generatePerfdata(samplestream.Metric.String(), samplepair.Value.String())
@@ -178,19 +178,19 @@ Note: Time range values e.G. 'go_memstats_alloc_bytes_total[0s]' only the latest
 		// Critical, OK, OK > Critical
 		worstState := goresult.WorstState(states...)
 		if worstState == check.OK {
-			summary += fmt.Sprintf("%d Metrics OK", metricsCounter)
+			summary.WriteString(fmt.Sprintf("%d Metrics OK", metricsCounter))
 		} else {
-			summary += fmt.Sprintf("%d Metrics: %d Critical - %d Warning - %d Ok\n", metricsCounter, critCounter, warnCounter, okCounter)
-			summary += metricOutput
+			summary.WriteString(fmt.Sprintf("%d Metrics: %d Critical - %d Warning - %d Ok\n", metricsCounter, critCounter, warnCounter, okCounter))
+			summary.WriteString(metricOutput.String())
 		}
 
 		// Should be printed after the Check Plugin output
 		// Defer doesn't work because of the os.Exit
 		if len(warnings) > 0 {
-			summary += fmt.Sprintf("HTTP Warnings: %v\n", strings.Join(warnings, ", "))
+			summary.WriteString(fmt.Sprintf("HTTP Warnings: %v\n", strings.Join(warnings, ", ")))
 		}
 
-		check.ExitRaw(goresult.WorstState(states...), summary, "|", perfList.String())
+		check.ExitRaw(goresult.WorstState(states...), summary.String(), "|", perfList.String())
 	},
 }
 
