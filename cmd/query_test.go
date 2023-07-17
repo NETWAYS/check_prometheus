@@ -15,7 +15,7 @@ func TestQuery_ConnectionRefused(t *testing.T) {
 	out, _ := cmd.CombinedOutput()
 
 	actual := string(out)
-	expected := "UNKNOWN - Post \"http://localhost:9999/api/v1/query\""
+	expected := "[UNKNOWN] - Post \"http://localhost:9999/api/v1/query\""
 
 	if !strings.Contains(actual, expected) {
 		t.Error("\nActual: ", actual, "\nExpected: ", expected)
@@ -27,7 +27,7 @@ func TestQuery_MissingParameter(t *testing.T) {
 	cmd := exec.Command("go", "run", "../main.go", "query")
 	out, _ := cmd.CombinedOutput()
 
-	expected := "UNKNOWN - required flag(s) \"query\" not set (*errors.errorString)"
+	expected := "[UNKNOWN] - required flag(s) \"query\" not set (*errors.errorString)"
 
 	actual := string(out)
 
@@ -52,7 +52,7 @@ func TestQueryCmd(t *testing.T) {
 				w.Write([]byte(`{"status":"success","data":{"resultType":"vector","result":[]},"warnings": ["hic sunt dracones", "foo"]}`))
 			})),
 			args:     []string{"run", "../main.go", "query", "--query", "foo"},
-			expected: "UNKNOWN - 0 Metrics: 0 Critical - 0 Warning - 0 Ok\nHTTP Warnings: hic sunt dracones, foo\n | \nexit status 3\n",
+			expected: "[UNKNOWN] - 0 Metrics: 0 Critical - 0 Warning - 0 Ok\nHTTP Warnings: hic sunt dracones, foo\n | \nexit status 3\n",
 		},
 		{
 			name: "query-no-such-metric",
@@ -61,7 +61,7 @@ func TestQueryCmd(t *testing.T) {
 				w.Write([]byte(`{"status":"success","data":{"resultType":"vector","result":[]}}`))
 			})),
 			args:     []string{"run", "../main.go", "query", "--query", "foo"},
-			expected: "UNKNOWN - 0 Metrics: 0 Critical - 0 Warning - 0 Ok\n | \nexit status 3\n",
+			expected: "[UNKNOWN] - 0 Metrics: 0 Critical - 0 Warning - 0 Ok\n | \nexit status 3\n",
 		},
 		{
 			name: "query-no-such-matrix",
@@ -70,7 +70,7 @@ func TestQueryCmd(t *testing.T) {
 				w.Write([]byte(`{"status":"success","data":{"resultType":"matrix","result":[]}}`))
 			})),
 			args:     []string{"run", "../main.go", "query", "--query", "foo"},
-			expected: "UNKNOWN - 0 Metrics: 0 Critical - 0 Warning - 0 Ok\n | \nexit status 3\n",
+			expected: "[UNKNOWN] - 0 Metrics: 0 Critical - 0 Warning - 0 Ok\n | \nexit status 3\n",
 		},
 		{
 			name: "query-scalar",
@@ -79,7 +79,7 @@ func TestQueryCmd(t *testing.T) {
 				w.Write([]byte(`{"status":"success","data":{"resultType":"scalar","result":[1670339013.992,"1"]}}`))
 			})),
 			args:     []string{"run", "../main.go", "query", "--query", "1"},
-			expected: "UNKNOWN - Scalar value results are not supported (*errors.errorString)\nexit status 3\n",
+			expected: "[UNKNOWN] - Scalar value results are not supported (*errors.errorString)\nexit status 3\n",
 		},
 		{
 			name: "query-string",
@@ -88,7 +88,7 @@ func TestQueryCmd(t *testing.T) {
 				w.Write([]byte(`{"status":"success","data":{"resultType":"string","result":[1670339013.992,"up"]}}`))
 			})),
 			args:     []string{"run", "../main.go", "query", "--query", "up"},
-			expected: "UNKNOWN - String value results are not supported (*errors.errorString)\nexit status 3\n",
+			expected: "[UNKNOWN] - String value results are not supported (*errors.errorString)\nexit status 3\n",
 		},
 		{
 			name: "query-matrix-exists",
@@ -97,7 +97,7 @@ func TestQueryCmd(t *testing.T) {
 				w.Write([]byte(`{"status":"success","data":{"resultType":"matrix","result":[{"metric":{"__name__":"up","instance":"localhost","job":"node"},"values":[[1670340712.988,"1"],[1670340772.988,"1"],[1670340832.990,"1"],[1670340892.990,"1"],[1670340952.990,"1"]]}]}}`))
 			})),
 			args:     []string{"run", "../main.go", "query", "--query", "up{job=\"prometheus\"}[5m]"},
-			expected: "OK - 1 Metrics OK | up_instance_localhost_job_node=1\n",
+			expected: "[OK] - 1 Metrics OK | up_instance_localhost_job_node=1\n",
 		},
 		{
 			name: "query-metric-exists",
@@ -106,7 +106,7 @@ func TestQueryCmd(t *testing.T) {
 				w.Write([]byte(`{"status":"success","data":{"resultType":"vector","result":[{"metric":{"__name__":"up","instance":"localhost","job":"prometheus"},"value":[1668782473.835,"1"]}]}}`))
 			})),
 			args:     []string{"run", "../main.go", "query", "--query", "up{job=\"prometheus\"}"},
-			expected: "OK - 1 Metrics OK | up_instance_localhost_job_prometheus=1\n",
+			expected: "[OK] - 1 Metrics OK | up_instance_localhost_job_prometheus=1\n",
 		},
 	}
 
