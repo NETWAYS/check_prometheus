@@ -26,6 +26,8 @@ type User struct {
 
 var cliQueryConfig QueryConfig
 
+var replacer = strings.NewReplacer("{", "_", "}", "", "\"", "", ",", "_", " ", "")
+
 func generateMetricOutput(rc int, metric string, value string) string {
 	// Format the metric and RC output for console output
 	return fmt.Sprintf(" \\_[%s] %s - value: %s\n", check.StatusText(rc), metric, value)
@@ -34,7 +36,7 @@ func generateMetricOutput(rc int, metric string, value string) string {
 func generatePerfdata(metric string, value string) perfdata.Perfdata {
 	// We trim the trailing "} from the string, so that the Perfdata won't have a trailing _
 	return perfdata.Perfdata{
-		Label: strings.ReplaceAll(strings.TrimRight(metric, "\"}"), " ", ""),
+		Label: replacer.Replace(metric),
 		Value: value,
 	}
 }
