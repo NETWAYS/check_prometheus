@@ -7,7 +7,7 @@ import (
 func TestConfig(t *testing.T) {
 	c := cliConfig.NewClient()
 	expected := "http://localhost:9090"
-	if c.Url != "http://localhost:9090" {
-		t.Error("\nActual: ", c.Url, "\nExpected: ", expected)
+	if c.URL != "http://localhost:9090" {
+		t.Error("\nActual: ", c.URL, "\nExpected: ", expected)
 	}
 }

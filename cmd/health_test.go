@@ -15,7 +15,7 @@ func TestHealth_ConnectionRefused(t *testing.T) {
 	out, _ := cmd.CombinedOutput()
 
 	actual := string(out)
-	expected := "[UNKNOWN] - Could not get status: Get \"http://localhost:9999/-/healthy\": dial"
+	expected := "[UNKNOWN] - could not get status: Get \"http://localhost:9999/-/healthy\": dial"
 
 	if !strings.Contains(actual, expected) {
 		t.Error("\nActual: ", actual, "\nExpected: ", expected)
@@ -133,7 +133,7 @@ func TestHealthCmd(t *testing.T) {
 				w.Write([]byte(`Access Denied!`))
 			})),
 			args:     []string{"run", "../main.go", "--user", "passwordmissing", "health"},
-			expected: "[UNKNOWN] - Specify the user name and password for server authentication <user:password> (*errors.errorString)\nexit status 3\n",
+			expected: "[UNKNOWN] - specify the user name and password for server authentication <user:password> (*errors.errorString)\nexit status 3\n",
 		},
 	}
 

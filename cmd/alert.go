@@ -2,12 +2,13 @@ package cmd
 
 import (
 	"fmt"
+	"strings"
+
 	"github.com/NETWAYS/check_prometheus/internal/alert"
 	"github.com/NETWAYS/go-check"
 	"github.com/NETWAYS/go-check/perfdata"
 	"github.com/NETWAYS/go-check/result"
 	"github.com/spf13/cobra"
-	"strings"
 )
 
 func generateOutput(rl alert.Rule, cfg AlertConfig) (output string) {
@@ -78,7 +79,7 @@ inactive = 0`,
 		// We use the Rules endpoint since it contains
 		// the state of inactive Alert Rules, unlike the Alert endpoint
 		// Search requested Alert in all Groups and all Rules
-		alerts, err := c.Api.Rules(ctx)
+		alerts, err := c.API.Rules(ctx)
 		if err != nil {
 			check.ExitError(err)
 		}
@@ -89,7 +90,7 @@ inactive = 0`,
 		// Set initial capacity to reduce memory allocations
 		var l int
 		for _, rl := range rules {
-			l = l * len(rl.AlertingRule.Alerts)
+			l *= len(rl.AlertingRule.Alerts)
 		}
 		rStates := make([]int, 0, l)
 
