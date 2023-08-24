@@ -9,6 +9,7 @@ linters:
      - exhaustivestruct
      - exhaustruct
      - forbidigo
+     - forcetypeassert
      - gci
      - gochecknoglobals
      - gochecknoinits

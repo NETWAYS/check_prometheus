@@ -3,24 +3,25 @@ package client
 import (
 	"context"
 	"fmt"
-	"github.com/NETWAYS/go-check"
-	"github.com/prometheus/client_golang/api"
-	v1 "github.com/prometheus/client_golang/api/prometheus/v1"
 	"net/http"
 	"net/url"
 	"strings"
+
+	"github.com/NETWAYS/go-check"
+	"github.com/prometheus/client_golang/api"
+	v1 "github.com/prometheus/client_golang/api/prometheus/v1"
 )
 
 type Client struct {
-	Url          string
+	URL          string
 	Client       api.Client
-	Api          v1.API
+	API          v1.API
 	RoundTripper http.RoundTripper
 }
 
 func NewClient(url string, rt http.RoundTripper) *Client {
 	return &Client{
-		Url:          url,
+		URL:          url,
 		RoundTripper: rt,
 	}
 }
@@ -28,16 +29,16 @@ func NewClient(url string, rt http.RoundTripper) *Client {
 // nolint: gosec
 func (c *Client) Connect() error {
 	cfg, err := api.NewClient(api.Config{
-		Address:      c.Url,
+		Address:      c.URL,
 		RoundTripper: c.RoundTripper,
 	})
 
 	if err != nil {
-		return fmt.Errorf("Error creating client: %w\n", err)
+		return fmt.Errorf("error creating client: %w", err)
 	}
 
 	c.Client = cfg
-	c.Api = v1.NewAPI(c.Client)
+	c.API = v1.NewAPI(c.Client)
 
 	return nil
 }
@@ -46,11 +47,11 @@ func (c *Client) GetStatus(ctx context.Context, endpoint string) (returncode int
 	// Parses the response from the Prometheus /healthy and /ready endpoint
 	// Return: Exit Status Code, HTTP Status Code, HTTP Body, Error
 	// Building the final URL with the endpoint parameter
-	u, _ := url.JoinPath(c.Url, "/-/", endpoint)
-	req, err := http.NewRequest(http.MethodGet, u, nil)
+	u, _ := url.JoinPath(c.URL, "/-/", endpoint)
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, u, nil)
 
 	if err != nil {
-		e := fmt.Sprintf("Could not create request: %s", err)
+		e := fmt.Sprintf("could not create request: %s", err)
 		return check.Unknown, 0, e, err
 	}
 
@@ -59,9 +60,11 @@ func (c *Client) GetStatus(ctx context.Context, endpoint string) (returncode int
 	resp, b, err := c.Client.Do(ctx, req)
 
 	if err != nil {
-		e := fmt.Sprintf("Could not get status: %s", err)
+		e := fmt.Sprintf("could not get status: %s", err)
 		return check.Unknown, 0, e, err
 	}
+
+	defer resp.Body.Close()
 
 	// Getting the response body
 	respBody := strings.TrimSpace(string(b))
@@ -72,11 +75,11 @@ func (c *Client) GetStatus(ctx context.Context, endpoint string) (returncode int
 		statusOk = "Prometheus Server is Ready."
 	}
 
-	if resp.StatusCode == 200 && respBody == statusOk {
+	if resp.StatusCode == http.StatusOK && respBody == statusOk {
 		return check.OK, resp.StatusCode, respBody, err
 	}
 
-	if resp.StatusCode != 200 {
+	if resp.StatusCode != http.StatusOK {
 		return check.Critical, resp.StatusCode, respBody, err
 	}
 

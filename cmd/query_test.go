@@ -79,7 +79,7 @@ func TestQueryCmd(t *testing.T) {
 				w.Write([]byte(`{"status":"success","data":{"resultType":"scalar","result":[1670339013.992,"1"]}}`))
 			})),
 			args:     []string{"run", "../main.go", "query", "--query", "1"},
-			expected: "[UNKNOWN] - Scalar value results are not supported (*errors.errorString)\nexit status 3\n",
+			expected: "[UNKNOWN] - scalar value results are not supported (*errors.errorString)\nexit status 3\n",
 		},
 		{
 			name: "query-string",
@@ -88,7 +88,7 @@ func TestQueryCmd(t *testing.T) {
 				w.Write([]byte(`{"status":"success","data":{"resultType":"string","result":[1670339013.992,"up"]}}`))
 			})),
 			args:     []string{"run", "../main.go", "query", "--query", "up"},
-			expected: "[UNKNOWN] - String value results are not supported (*errors.errorString)\nexit status 3\n",
+			expected: "[UNKNOWN] - string value results are not supported (*errors.errorString)\nexit status 3\n",
 		},
 		{
 			name: "query-matrix-exists",

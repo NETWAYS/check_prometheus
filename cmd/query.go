@@ -2,13 +2,14 @@ package cmd
 
 import (
 	"fmt"
+	"strings"
+	"time"
+
 	"github.com/NETWAYS/go-check"
 	"github.com/NETWAYS/go-check/perfdata"
 	goresult "github.com/NETWAYS/go-check/result"
 	"github.com/prometheus/common/model"
 	"github.com/spf13/cobra"
-	"strings"
-	"time"
 )
 
 type QueryConfig struct {
@@ -54,7 +55,7 @@ Note: Time range values e.G. 'go_memstats_alloc_bytes_total[0s]' only the latest
 	 | value_go_gc_duration_seconds_count_localhost:9090_prometheus=1599 value_go_gc_duration_seconds_count_node-exporter:9100_node-exporter=79610`,
 	PreRun: func(cmd *cobra.Command, args []string) {
 		if cliQueryConfig.Warning == "" || cliQueryConfig.Critical == "" {
-			check.ExitError(fmt.Errorf("Please specify warning and critical thresholds"))
+			check.ExitError(fmt.Errorf("please specify warning and critical thresholds"))
 		}
 	},
 	Run: func(cmd *cobra.Command, args []string) {
@@ -89,26 +90,26 @@ Note: Time range values e.G. 'go_memstats_alloc_bytes_total[0s]' only the latest
 		ctx, cancel := cliConfig.timeoutContext()
 		defer cancel()
 
-		result, warnings, err := c.Api.Query(ctx, cliQueryConfig.RawQuery, time.Now())
+		result, warnings, err := c.API.Query(ctx, cliQueryConfig.RawQuery, time.Now())
 
 		if err != nil {
 			if strings.Contains(err.Error(), "unmarshalerDecoder: unexpected value type \"string\"") {
-				err = fmt.Errorf("String value results are not supported")
+				err = fmt.Errorf("string value results are not supported")
 			}
 			check.ExitError(err)
 		}
 
 		switch result.Type() {
 		default:
-			check.ExitError(fmt.Errorf("None value results are not supported"))
+			check.ExitError(fmt.Errorf("none value results are not supported"))
 		// Scalar - a simple numeric floating point value
 		case model.ValScalar:
-			check.ExitError(fmt.Errorf("Scalar value results are not supported"))
+			check.ExitError(fmt.Errorf("scalar value results are not supported"))
 		case model.ValNone:
-			check.ExitError(fmt.Errorf("None value results are not supported"))
+			check.ExitError(fmt.Errorf("none value results are not supported"))
 		case model.ValString:
 			// String - a simple string value; currently unused
-			check.ExitError(fmt.Errorf("String value results are not supported"))
+			check.ExitError(fmt.Errorf("string value results are not supported"))
 		case model.ValVector:
 			// Instant vector - a set of time series containing a single sample for each time series, all sharing the same timestamp
 			vectorVal := result.(model.Vector)
@@ -175,9 +176,7 @@ Note: Time range values e.G. 'go_memstats_alloc_bytes_total[0s]' only the latest
 			states = mStates
 		}
 
-		// The worst state of all metrics determines the final return state. Example:
-		// OK, OK, OK > OK
-		// Critical, OK, OK > Critical
+		// The worst state of all metrics determines the final return state.
 		worstState := goresult.WorstState(states...)
 		if worstState == check.OK {
 			summary.WriteString(fmt.Sprintf("%d Metrics OK", metricsCounter))

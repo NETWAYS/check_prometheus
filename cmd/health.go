@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+
 	"github.com/NETWAYS/go-check"
 	"github.com/NETWAYS/go-check/perfdata"
 	"github.com/spf13/cobra"
@@ -53,7 +54,7 @@ Ready: Checks the readiness of an endpoint, which returns OK if the Prometheus s
 
 		if cliConfig.Info {
 			// Displays various build information properties about the Prometheus server
-			info, err := c.Api.Buildinfo(ctx)
+			info, err := c.API.Buildinfo(ctx)
 			if err != nil {
 				check.ExitError(err)
 			}
