@@ -29,6 +29,8 @@ Flags:
   -v, --version            version for check_prometheus
 ```
 
+The check plugin respects the environment variables `HTTP_PROXY`, `HTTPS_PROXY` and `NO_PROXY`.
+
 ### Health
 
 Checks the health or readiness status of the Prometheus server.
