@@ -70,12 +70,12 @@ func (c *Client) GetStatus(ctx context.Context, endpoint string) (returncode int
 	respBody := strings.TrimSpace(string(b))
 
 	// What we expect from the Prometheus Server
-	statusOk := "Prometheus Server is Healthy."
+	statusOk := "is Healthy."
 	if endpoint == "ready" {
-		statusOk = "Prometheus Server is Ready."
+		statusOk = "is Ready."
 	}
 
-	if resp.StatusCode == http.StatusOK && respBody == statusOk {
+	if resp.StatusCode == http.StatusOK && strings.Contains(respBody, statusOk) {
 		return check.OK, resp.StatusCode, respBody, err
 	}
 

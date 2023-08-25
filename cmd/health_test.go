@@ -41,6 +41,15 @@ func TestHealthCmd(t *testing.T) {
 			expected: "[OK] - Prometheus Server is Healthy. | statuscode=200\n",
 		},
 		{
+			name: "health-ok-older-versions",
+			server: httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				w.WriteHeader(http.StatusOK)
+				w.Write([]byte(`Prometheus is Healthy.`))
+			})),
+			args:     []string{"run", "../main.go", "health"},
+			expected: "[OK] - Prometheus is Healthy. | statuscode=200\n",
+		},
+		{
 			name: "ready-ok",
 			server: httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 				w.WriteHeader(http.StatusOK)
