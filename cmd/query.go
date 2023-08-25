@@ -34,11 +34,13 @@ func generateMetricOutput(rc int, metric string, value string) string {
 	return fmt.Sprintf(" \\_[%s] %s - value: %s\n", check.StatusText(rc), metric, value)
 }
 
-func generatePerfdata(metric string, value string) perfdata.Perfdata {
+func generatePerfdata(metric, value string, warning, critical *check.Threshold) perfdata.Perfdata {
 	// We trim the trailing "} from the string, so that the Perfdata won't have a trailing _
 	return perfdata.Perfdata{
 		Label: replacer.Replace(metric),
 		Value: value,
+		Warn:  warning,
+		Crit:  critical,
 	}
 }
 
@@ -136,7 +138,7 @@ Note: Time range values e.G. 'go_memstats_alloc_bytes_total[0s]' only the latest
 				metricOutput.WriteString(generateMetricOutput(rc, sample.Metric.String(), sample.Value.String()))
 
 				// Generate Perfdata from API return
-				perf := generatePerfdata(sample.Metric.String(), sample.Value.String())
+				perf := generatePerfdata(sample.Metric.String(), sample.Value.String(), warn, crit)
 				perfList.Add(&perf)
 			}
 			states = vStates
@@ -170,7 +172,7 @@ Note: Time range values e.G. 'go_memstats_alloc_bytes_total[0s]' only the latest
 				metricOutput.WriteString(generateMetricOutput(rc, samplepair.String(), samplepair.Value.String()))
 
 				// Generate Perfdata from API return
-				perf := generatePerfdata(samplestream.Metric.String(), samplepair.Value.String())
+				perf := generatePerfdata(samplestream.Metric.String(), samplepair.Value.String(), warn, crit)
 				perfList.Add(&perf)
 			}
 			states = mStates
