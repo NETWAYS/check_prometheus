@@ -97,7 +97,7 @@ func TestQueryCmd(t *testing.T) {
 				w.Write([]byte(`{"status":"success","data":{"resultType":"matrix","result":[{"metric":{"__name__":"up","instance":"localhost","job":"node"},"values":[[1670340712.988,"1"],[1670340772.988,"1"],[1670340832.990,"1"],[1670340892.990,"1"],[1670340952.990,"1"]]}]}}`))
 			})),
 			args:     []string{"run", "../main.go", "query", "--query", "up{job=\"prometheus\"}[5m]"},
-			expected: "[OK] - 1 Metrics OK | up_instance_localhost_job_node=1\n",
+			expected: "[OK] - 1 Metrics OK | up_instance_localhost_job_node=1;10;20\n",
 		},
 		{
 			name: "query-metric-exists",
@@ -106,7 +106,7 @@ func TestQueryCmd(t *testing.T) {
 				w.Write([]byte(`{"status":"success","data":{"resultType":"vector","result":[{"metric":{"__name__":"up","instance":"localhost","job":"prometheus"},"value":[1668782473.835,"1"]}]}}`))
 			})),
 			args:     []string{"run", "../main.go", "query", "--query", "up{job=\"prometheus\"}"},
-			expected: "[OK] - 1 Metrics OK | up_instance_localhost_job_prometheus=1\n",
+			expected: "[OK] - 1 Metrics OK | up_instance_localhost_job_prometheus=1;10;20\n",
 		},
 	}
 
