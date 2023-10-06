@@ -108,6 +108,24 @@ func TestQueryCmd(t *testing.T) {
 			args:     []string{"run", "../main.go", "query", "--query", "up{job=\"prometheus\"}"},
 			expected: "[OK] - 1 Metrics OK | up_instance_localhost_job_prometheus=1;10;20\n",
 		},
+		{
+			name: "query-threshold-ok",
+			server: httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				w.WriteHeader(http.StatusOK)
+				w.Write([]byte(`{"status":"success","data":{"resultType":"vector","result":[{"metric":{"__name__":"up","instance":"localhost","job":"prometheus"},"value":[1668782473.835,"100"]}]}}`))
+			})),
+			args:     []string{"run", "../main.go", "query", "--query", "up{job=\"prometheus\"}", "-w", "0:", "-c", "0:"},
+			expected: "[OK] - 1 Metrics OK | up_instance_localhost_job_prometheus=100\n",
+		},
+		{
+			name: "query-threshold-critical",
+			server: httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				w.WriteHeader(http.StatusOK)
+				w.Write([]byte(`{"status":"success","data":{"resultType":"vector","result":[{"metric":{"__name__":"up","instance":"localhost","job":"prometheus"},"value":[1668782473.835,"-100"]}]}}`))
+			})),
+			args:     []string{"run", "../main.go", "query", "--query", "up{job=\"prometheus\"}", "-w", "0:", "-c", "0:"},
+			expected: "[CRITICAL] - 1 Metrics: 1 Critical - 0 Warning - 0 Ok\n \\_[CRITICAL] up{instance=\"localhost\", job=\"prometheus\"} - value: -100\n | up_instance_localhost_job_prometheus=-100\nexit status 2\n",
+		},
 	}
 
 	for _, test := range tests {
