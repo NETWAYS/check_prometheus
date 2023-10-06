@@ -14,6 +14,7 @@ linters:
      - gochecknoglobals
      - gochecknoinits
      - godox
+     - godot
      - goerr113
      - gofumpt
      - gomnd
