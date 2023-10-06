@@ -146,3 +146,62 @@ func TestQueryCmd(t *testing.T) {
 		})
 	}
 }
+
+func TestExtendedQueryCmd(t *testing.T) {
+	tests := []QueryTest{
+		{
+			name: "vector-multiple-ok",
+			server: httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				w.WriteHeader(http.StatusOK)
+				w.Write([]byte(`{"status":"success","data":{"resultType":"vector","result":[{"metric":{"__name__":"up","instance":"localhost:9100","job":"node"},"value":[1696589905.608,"1"]},{"metric":{"__name__":"up","instance":"localhost:9104","job":"mysqld"},"value":[1696589905.608,"99"]},{"metric":{"__name__":"up","instance":"localhost:9117","job":"apache"},"value":[1696589905.608,"1"]}]}}`))
+			})),
+			args:     []string{"run", "../main.go", "query", "--query", "up", "-w", "100", "-c", "200"},
+			expected: "[OK] - 3 Metrics OK |",
+		},
+		{
+			name: "vector-multiple-critical",
+			server: httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				w.WriteHeader(http.StatusOK)
+				w.Write([]byte(`{"status":"success","data":{"resultType":"vector","result":[{"metric":{"__name__":"up","instance":"localhost:9100","job":"node"},"value":[1696589905.608,"1"]},{"metric":{"__name__":"up","instance":"localhost:9104","job":"mysqld"},"value":[1696589905.608,"11"]},{"metric":{"__name__":"up","instance":"localhost:9117","job":"apache"},"value":[1696589905.608,"6"]}]}}`))
+			})),
+			args:     []string{"run", "../main.go", "query", "--query", "up", "-w", "5", "-c", "10"},
+			expected: "[CRITICAL] - 3 Metrics: 1 Critical - 1 Warning - 1 Ok",
+		},
+		{
+			name: "matrix-multiple-critical",
+			server: httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				w.WriteHeader(http.StatusOK)
+				w.Write([]byte(`{"status":"success","data":{"resultType":"matrix","result":[{"metric":{"__name__":"up","instance":"localhost:9100","job":"node"},"values":[[1696589212.987,"1"],[1696589272.987,"1"],[1696589332.987,"1"],[1696589392.987,"1"],[1696589452.987,"1"]]},{"metric":{"__name__":"up","instance":"localhost:9104","job":"mysqld"},"values":[[1696589209.089,"25"],[1696589269.089,"25"],[1696589329.089,"25"],[1696589389.089,"25"],[1696589449.089,"25"]]},{"metric":{"__name__":"up","instance":"localhost:9117","job":"apache"},"values":[[1696589209.369,"1"],[1696589269.369,"1"],[1696589329.369,"1"],[1696589389.369,"1"],[1696589449.369,"1"]]}]}}`))
+			})),
+			args:     []string{"run", "../main.go", "query", "--query", "up", "-w", "10", "-c", "20"},
+			expected: "[CRITICAL] - 3 Metrics: 1 Critical - 0 Warning - 2 Ok",
+		},
+		{
+			name: "matrix-multiple-warning",
+			server: httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				w.WriteHeader(http.StatusOK)
+				w.Write([]byte(`{"status":"success","data":{"resultType":"matrix","result":[{"metric":{"__name__":"up","instance":"localhost:9100","job":"node"},"values":[[1696589212.987,"1"],[1696589272.987,"1"],[1696589332.987,"1"],[1696589392.987,"1"],[1696589452.987,"1"]]},{"metric":{"__name__":"up","instance":"localhost:9104","job":"mysqld"},"values":[[1696589209.089,"15"],[1696589269.089,"15"],[1696589329.089,"15"],[1696589389.089,"15"],[1696589449.089,"15"]]},{"metric":{"__name__":"up","instance":"localhost:9117","job":"apache"},"values":[[1696589209.369,"1"],[1696589269.369,"1"],[1696589329.369,"1"],[1696589389.369,"1"],[1696589449.369,"1"]]}]}}`))
+			})),
+			args:     []string{"run", "../main.go", "query", "--query", "up", "-w", "10", "-c", "20"},
+			expected: "[WARNING] - 3 Metrics: 0 Critical - 1 Warning - 2 Ok",
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			defer test.server.Close()
+
+			// We need the random Port extracted
+			u, _ := url.Parse(test.server.URL)
+			cmd := exec.Command("go", append(test.args, "--port", u.Port())...)
+			out, _ := cmd.CombinedOutput()
+
+			actual := string(out)
+
+			if !strings.Contains(actual, test.expected) {
+				t.Error("\nActual: ", actual, "\nExpected: ", test.expected)
+			}
+
+		})
+	}
+}

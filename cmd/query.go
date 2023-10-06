@@ -133,7 +133,7 @@ Note: Time range values e.G. 'go_memstats_alloc_bytes_total[0s]' only the latest
 					okCounter++
 				}
 
-				vStates = append(states, rc)
+				vStates = append(vStates, rc)
 				// Format the metric and RC output for console output
 				metricOutput.WriteString(generateMetricOutput(rc, sample.Metric.String(), sample.Value.String()))
 
@@ -167,7 +167,7 @@ Note: Time range values e.G. 'go_memstats_alloc_bytes_total[0s]' only the latest
 					okCounter++
 				}
 
-				mStates = append(states, rc)
+				mStates = append(mStates, rc)
 				// Format the metric and RC output for console output
 				metricOutput.WriteString(generateMetricOutput(rc, samplepair.String(), samplepair.Value.String()))
 
