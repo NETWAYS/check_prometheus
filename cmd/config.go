@@ -22,12 +22,12 @@ type AlertConfig struct {
 }
 
 type Config struct {
-	BasicAuth string
-	Bearer    string
-	CAFile    string
-	CertFile  string
-	KeyFile   string
-	Hostname  string
+	BasicAuth string `env:"CHECK_PROMETHEUS_BASICAUTH"`
+	Bearer    string `env:"CHECK_PROMETHEUS_BEARER"`
+	CAFile    string `env:"CHECK_PROMETHEUS_CA_FILE"`
+	CertFile  string `env:"CHECK_PROMETHEUS_CERT_FILE"`
+	KeyFile   string `env:"CHECK_PROMETHEUS_KEY_FILE"`
+	Hostname  string `env:"CHECK_PROMETHEUS_HOSTNAME"`
 	Port      int
 	Info      bool
 	Insecure  bool
