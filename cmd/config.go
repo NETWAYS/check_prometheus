@@ -110,7 +110,7 @@ func (c *Config) NewClient() *client.Client {
 
 		var p = config.Secret(s[1])
 
-		rt = config.NewBasicAuthRoundTripper(u, p, "", rt)
+		rt = config.NewBasicAuthRoundTripper(u, p, "", "", rt)
 	}
 
 	return client.NewClient(u.String(), rt)
