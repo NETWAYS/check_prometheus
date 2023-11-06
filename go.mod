@@ -6,7 +6,7 @@ require (
 	github.com/NETWAYS/go-check v0.6.0
 	github.com/prometheus/client_golang v1.17.0
 	github.com/prometheus/common v0.45.0
-	github.com/spf13/cobra v1.7.0
+	github.com/spf13/cobra v1.8.0
 )
 
 require (
