@@ -1,5 +1,5 @@
-github.com/NETWAYS/go-check v0.6.0 h1:/fbQ3oVii4tei6vF/nuJQ2JUerT2rHNr3XQMUFdGg3A=
-github.com/NETWAYS/go-check v0.6.0/go.mod h1:3G1p9ZCv41UcKirl+nZWne8oKVPUY5HbtyjRwGgyw6A=
+github.com/NETWAYS/go-check v0.6.1 h1:fwya2nBWoRTUt2U6j3BCe0aUvNw+EbFYji4t1JrloC4=
+github.com/NETWAYS/go-check v0.6.1/go.mod h1:3G1p9ZCv41UcKirl+nZWne8oKVPUY5HbtyjRwGgyw6A=
 github.com/beorn7/perks v1.0.1 h1:VlbKKnNfV8bJzeqoa4cOKqO6bYr3WgKZxO8Z16+hsOM=
 github.com/beorn7/perks v1.0.1/go.mod h1:G2ZrVWU2WbWT9wwq4/hrbKbnv/1ERSJQ0ibhJ6rlkpw=
 github.com/cespare/xxhash/v2 v2.2.0 h1:DC2CZ1Ep5Y4k3ZQ899DldepgrayRUGE6BBZ/cd9Cj44=
