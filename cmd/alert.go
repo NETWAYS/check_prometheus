@@ -59,7 +59,6 @@ inactive = 0`,
 	 | total=2 firing=1 pending=0 inactive=1`,
 	Run: func(cmd *cobra.Command, args []string) {
 		var (
-			states          []int
 			output          strings.Builder
 			summary         string
 			counterFiring   int
@@ -92,7 +91,7 @@ inactive = 0`,
 		for _, rl := range rules {
 			l *= len(rl.AlertingRule.Alerts)
 		}
-		rStates := make([]int, 0, l)
+		states := make([]int, 0, l)
 
 		for _, rl := range rules {
 
@@ -121,7 +120,7 @@ inactive = 0`,
 				}
 
 				// Gather the state to evaluate the worst at the end
-				rStates = append(states, rl.GetStatus())
+				states = append(states, rl.GetStatus())
 				output.WriteString(generateOutput(rl, cliAlertConfig))
 			}
 
@@ -142,12 +141,11 @@ inactive = 0`,
 					// Set the alert in the internal Type to generate the output
 					rl.Alert = alert
 					// Gather the state to evaluate the worst at the end
-					rStates = append(states, rl.GetStatus())
+					states = append(states, rl.GetStatus())
 					output.WriteString(generateOutput(rl, cliAlertConfig))
 				}
 			}
 		}
-		states = rStates
 
 		counterAlert := counterFiring + counterPending + counterInactive
 		if len(cliAlertConfig.AlertName) > 1 || counterAlert > 1 {
