@@ -65,7 +65,7 @@ func TestHealthCmd(t *testing.T) {
 				w.Write([]byte(`{"status":"success","data":{"version":"2.30.3","revision":"foo","branch":"HEAD","buildUser":"root@foo","buildDate":"20211005-16:10:52","goVersion":"go1.17.1"}}`))
 			})),
 			args:     []string{"run", "../main.go", "health", "--info"},
-			expected: "[OK] - Prometheus Server information\n\nVersion: 2.30.3\nBranch: HEAD\nBuildDate: 20211005-16:10:52\nBuildUser: root@foo\nRevision: foo | statuscode=200 version=2.30.3 builddate=20211005-16:10:52 builduser=root@foo revision=foo\n",
+			expected: "[OK] - Prometheus Server information\n\nVersion: 2.30.3\nBranch: HEAD\nBuildDate: 20211005-16:10:52\nBuildUser: root@foo\nRevision: foo | statuscode=200\n",
 		},
 		{
 			name: "health-bearer-ok",

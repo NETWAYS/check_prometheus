@@ -46,7 +46,7 @@ Ready: Checks the readiness of an endpoint, which returns OK if the Prometheus s
 				check.ExitError(fmt.Errorf(output))
 			}
 			p := perfdata.PerfdataList{
-				{Label: "statuscode", Value: sc},
+				{Label: "statuscode", Value: float64(sc)},
 			}
 
 			check.ExitRaw(rc, output, "|", p.String())
@@ -68,10 +68,6 @@ Ready: Checks the readiness of an endpoint, which returns OK if the Prometheus s
 
 			p := perfdata.PerfdataList{
 				{Label: "statuscode", Value: 200},
-				{Label: "version", Value: info.Version},
-				{Label: "builddate", Value: info.BuildDate},
-				{Label: "builduser", Value: info.BuildUser},
-				{Label: "revision", Value: info.Revision},
 			}
 
 			check.ExitRaw(rc, output, "|", p.String())
@@ -85,7 +81,7 @@ Ready: Checks the readiness of an endpoint, which returns OK if the Prometheus s
 		}
 
 		p := perfdata.PerfdataList{
-			{Label: "statuscode", Value: sc},
+			{Label: "statuscode", Value: float64(sc)},
 		}
 
 		check.ExitRaw(rc, output, "|", p.String())
