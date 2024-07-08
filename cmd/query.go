@@ -33,7 +33,7 @@ var replacer = strings.NewReplacer("{", "_", "}", "", "\"", "", ",", "_", " ", "
 
 func generateMetricOutput(metric string, value string) string {
 	// Format the metric and RC output for console output
-	return fmt.Sprintf(" %s - value: %s\n", metric, value)
+	return fmt.Sprintf(" %s - value: %s", metric, value)
 }
 
 type Number interface {
@@ -181,7 +181,7 @@ Note: Time range values e.G. 'go_memstats_alloc_bytes_total[0s]' only the latest
 		}
 
 		if len(warnings) != 0 {
-			appendum := fmt.Sprintf("HTTP Warnings: %v\n", strings.Join(warnings, ", "))
+			appendum := fmt.Sprintf("HTTP Warnings: %v", strings.Join(warnings, ", "))
 			overall.Summary = overall.GetOutput() + appendum
 		}
 		check.ExitRaw(overall.GetStatus(), overall.GetOutput())
