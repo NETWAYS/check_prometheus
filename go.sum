@@ -1,5 +1,3 @@
-github.com/NETWAYS/go-check v0.6.1 h1:fwya2nBWoRTUt2U6j3BCe0aUvNw+EbFYji4t1JrloC4=
-github.com/NETWAYS/go-check v0.6.1/go.mod h1:3G1p9ZCv41UcKirl+nZWne8oKVPUY5HbtyjRwGgyw6A=
 github.com/NETWAYS/go-check v0.6.2 h1:H/9Q/+rVzLbSUV/6QS9eDhyMUml7sf67TF4nSuHBwJo=
 github.com/NETWAYS/go-check v0.6.2/go.mod h1:qx8m3s2Xul9wqfUjrCSArEFkOdtwxIyUmBYYrCkqA/8=
 github.com/beorn7/perks v1.0.1 h1:VlbKKnNfV8bJzeqoa4cOKqO6bYr3WgKZxO8Z16+hsOM=
