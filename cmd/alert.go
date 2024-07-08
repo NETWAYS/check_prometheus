@@ -99,11 +99,11 @@ inactive = 0`,
 					counterFiring++
 				}
 
-				sc1 := result.NewPartialResult()
+				sc := result.NewPartialResult()
 
-				sc1.SetState(rl.GetStatus())
-				sc1.Output = rl.GetOutput()
-				overall.AddSubcheck(sc1)
+				_ = sc.SetState(rl.GetStatus())
+				sc.Output = rl.GetOutput()
+				overall.AddSubcheck(sc)
 			}
 
 			// Handle active alerts
@@ -120,13 +120,13 @@ inactive = 0`,
 						counterFiring++
 					}
 
-					sc1 := result.NewPartialResult()
+					sc := result.NewPartialResult()
 
-					sc1.SetState(rl.GetStatus())
+					_ = sc.SetState(rl.GetStatus())
 					// Set the alert in the internal Type to generate the output
 					rl.Alert = alert
-					sc1.Output = rl.GetOutput()
-					overall.AddSubcheck(sc1)
+					sc.Output = rl.GetOutput()
+					overall.AddSubcheck(sc)
 				}
 			}
 		}

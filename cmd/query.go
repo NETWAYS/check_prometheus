@@ -119,11 +119,11 @@ Note: Time range values e.G. 'go_memstats_alloc_bytes_total[0s]' only the latest
 				partial := goresult.NewPartialResult()
 
 				if crit.DoesViolate(numberValue) {
-					partial.SetState(check.Critical)
+					_ = partial.SetState(check.Critical)
 				} else if warn.DoesViolate(numberValue) {
-					partial.SetState(check.Warning)
+					_ = partial.SetState(check.Warning)
 				} else {
-					partial.SetState(check.OK)
+					_ = partial.SetState(check.OK)
 				}
 
 				// Format the metric and RC output for console output
@@ -154,11 +154,11 @@ Note: Time range values e.G. 'go_memstats_alloc_bytes_total[0s]' only the latest
 				partial := goresult.NewPartialResult()
 
 				if crit.DoesViolate(numberValue) {
-					partial.SetState(check.Critical)
+					_ = partial.SetState(check.Critical)
 				} else if warn.DoesViolate(numberValue) {
-					partial.SetState(check.Warning)
+					_ = partial.SetState(check.Warning)
 				} else {
-					partial.SetState(check.OK)
+					_ = partial.SetState(check.OK)
 				}
 
 				// Format the metric and RC output for console output

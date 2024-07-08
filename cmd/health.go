@@ -48,7 +48,7 @@ Ready: Checks the readiness of an endpoint, which returns OK if the Prometheus s
 
 			partialResult := result.NewPartialResult()
 
-			partialResult.SetState(rc)
+			_ = partialResult.SetState(rc)
 			partialResult.Output = output
 			overall.AddSubcheck(partialResult)
 
@@ -63,7 +63,7 @@ Ready: Checks the readiness of an endpoint, which returns OK if the Prometheus s
 			}
 			partialResult := result.NewPartialResult()
 
-			partialResult.SetState(rc)
+			_ = partialResult.SetState(rc)
 
 			partialResult.Output = "Prometheus Server information\n\n" +
 				"Version: " + info.Version + "\n" +
@@ -90,7 +90,7 @@ Ready: Checks the readiness of an endpoint, which returns OK if the Prometheus s
 		}
 =======
 		partialResult := result.NewPartialResult()
-		partialResult.SetState(rc)
+		_ = partialResult.SetState(rc)
 		partialResult.Output = output
 		overall.AddSubcheck(partialResult)
 >>>>>>> 9761a63 (wip: use more gocheck)
