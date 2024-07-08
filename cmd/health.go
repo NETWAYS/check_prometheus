@@ -84,16 +84,10 @@ Ready: Checks the readiness of an endpoint, which returns OK if the Prometheus s
 			check.ExitError(fmt.Errorf(output))
 		}
 
-<<<<<<< HEAD
-		p := perfdata.PerfdataList{
-			{Label: "statuscode", Value: float64(sc)},
-		}
-=======
 		partialResult := result.NewPartialResult()
 		_ = partialResult.SetState(rc)
 		partialResult.Output = output
 		overall.AddSubcheck(partialResult)
->>>>>>> 9761a63 (wip: use more gocheck)
 
 		check.ExitRaw(overall.GetStatus(), overall.GetOutput())
 	},
