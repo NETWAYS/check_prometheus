@@ -38,7 +38,7 @@ func TestHealthCmd(t *testing.T) {
 				w.Write([]byte(`Prometheus Server is Healthy.`))
 			})),
 			args:     []string{"run", "../main.go", "health"},
-			expected: "[OK] - Prometheus Server is Healthy. | statuscode=200\n",
+			expected: "[OK] - states: ok=1\n\\_ [OK] Prometheus Server is Healthy.\n\n",
 		},
 		{
 			name: "health-ok-older-versions",
@@ -47,7 +47,7 @@ func TestHealthCmd(t *testing.T) {
 				w.Write([]byte(`Prometheus is Healthy.`))
 			})),
 			args:     []string{"run", "../main.go", "health"},
-			expected: "[OK] - Prometheus is Healthy. | statuscode=200\n",
+			expected: "[OK] - states: ok=1\n\\_ [OK] Prometheus is Healthy.\n\n",
 		},
 		{
 			name: "ready-ok",
@@ -56,7 +56,7 @@ func TestHealthCmd(t *testing.T) {
 				w.Write([]byte(`Prometheus Server is Ready.`))
 			})),
 			args:     []string{"run", "../main.go", "health", "--ready"},
-			expected: "[OK] - Prometheus Server is Ready. | statuscode=200\n",
+			expected: "[OK] - states: ok=1\n\\_ [OK] Prometheus Server is Ready.\n\n",
 		},
 		{
 			name: "info-ok",
@@ -65,7 +65,7 @@ func TestHealthCmd(t *testing.T) {
 				w.Write([]byte(`{"status":"success","data":{"version":"2.30.3","revision":"foo","branch":"HEAD","buildUser":"root@foo","buildDate":"20211005-16:10:52","goVersion":"go1.17.1"}}`))
 			})),
 			args:     []string{"run", "../main.go", "health", "--info"},
-			expected: "[OK] - Prometheus Server information\n\nVersion: 2.30.3\nBranch: HEAD\nBuildDate: 20211005-16:10:52\nBuildUser: root@foo\nRevision: foo | statuscode=200\n",
+			expected: "[OK] - states: ok=1\n\\_ [OK] Prometheus Server information\n\nVersion: 2.30.3\nBranch: HEAD\nBuildDate: 20211005-16:10:52\nBuildUser: root@foo\nRevision: foo\n\n",
 		},
 		{
 			name: "health-bearer-ok",
@@ -81,7 +81,7 @@ func TestHealthCmd(t *testing.T) {
 				w.Write([]byte(`The Authorization header wasn't set`))
 			})),
 			args:     []string{"run", "../main.go", "--bearer", "secret", "health"},
-			expected: "[OK] - Prometheus Server is Healthy. | statuscode=200\n",
+			expected: "[OK] - states: ok=1\n\\_ [OK] Prometheus Server is Healthy.\n\n",
 		},
 		{
 			name: "health-bearer-unauthorized",
@@ -97,7 +97,7 @@ func TestHealthCmd(t *testing.T) {
 				w.Write([]byte(`Access Denied!`))
 			})),
 			args:     []string{"run", "../main.go", "--bearer", "wrong-token", "health"},
-			expected: "[CRITICAL] - Access Denied! | statuscode=401\nexit status 2\n",
+			expected: "[CRITICAL] - states: critical=1\n\\_ [CRITICAL] Access Denied!\n\nexit status 2\n",
 		},
 		{
 			name: "health-basic-auth-ok",
@@ -115,7 +115,7 @@ func TestHealthCmd(t *testing.T) {
 				w.Write([]byte(`The Authorization header wasn't set`))
 			})),
 			args:     []string{"run", "../main.go", "--user", "username:password", "health"},
-			expected: "[OK] - Prometheus Server is Healthy. | statuscode=200\n",
+			expected: "[OK] - states: ok=1\n\\_ [OK] Prometheus Server is Healthy.\n\n",
 		},
 		{
 			name: "health-basic-auth-unauthorized",
@@ -133,7 +133,7 @@ func TestHealthCmd(t *testing.T) {
 				w.Write([]byte(`Access Denied!`))
 			})),
 			args:     []string{"run", "../main.go", "health"},
-			expected: "[CRITICAL] - Access Denied! | statuscode=401\nexit status 2\n",
+			expected: "[CRITICAL] - states: critical=1\n\\_ [CRITICAL] Access Denied!\n\nexit status 2\n",
 		},
 		{
 			name: "health-basic-auth-wrong-use",
@@ -158,7 +158,7 @@ func TestHealthCmd(t *testing.T) {
 			actual := string(out)
 
 			if actual != test.expected {
-				t.Error("\nActual: ", actual, "\nExpected: ", test.expected)
+				t.Errorf("\nActual:\n%#v\nExpected:\n%#v\n", actual, test.expected)
 			}
 
 		})

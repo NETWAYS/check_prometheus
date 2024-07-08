@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/NETWAYS/go-check"
-	"github.com/NETWAYS/go-check/perfdata"
+	"github.com/NETWAYS/go-check/result"
 	"github.com/spf13/cobra"
 )
 
@@ -22,10 +22,10 @@ Ready: Checks the readiness of an endpoint, which returns OK if the Prometheus s
 	OK - Prometheus Server is Ready. | statuscode=200`,
 	Run: func(cmd *cobra.Command, args []string) {
 		var (
-			output string
-			rc     int
-			sc     int
+			rc int
 		)
+
+		overall := result.Overall{}
 
 		// Creating an client and connecting to the API
 		c := cliConfig.NewClient()
@@ -40,16 +40,19 @@ Ready: Checks the readiness of an endpoint, which returns OK if the Prometheus s
 
 		if cliConfig.PReady {
 			// Getting the ready status
-			rc, sc, output, err = c.GetStatus(ctx, "ready")
+			rc, _, output, err := c.GetStatus(ctx, "ready")
 
 			if err != nil {
 				check.ExitError(fmt.Errorf(output))
 			}
-			p := perfdata.PerfdataList{
-				{Label: "statuscode", Value: float64(sc)},
-			}
 
-			check.ExitRaw(rc, output, "|", p.String())
+			partialResult := result.NewPartialResult()
+
+			partialResult.SetState(rc)
+			partialResult.Output = output
+			overall.AddSubcheck(partialResult)
+
+			check.ExitRaw(overall.GetStatus(), overall.GetOutput())
 		}
 
 		if cliConfig.Info {
@@ -58,33 +61,41 @@ Ready: Checks the readiness of an endpoint, which returns OK if the Prometheus s
 			if err != nil {
 				check.ExitError(err)
 			}
+			partialResult := result.NewPartialResult()
 
-			output = "Prometheus Server information\n\n" +
+			partialResult.SetState(rc)
+
+			partialResult.Output = "Prometheus Server information\n\n" +
 				"Version: " + info.Version + "\n" +
 				"Branch: " + info.Branch + "\n" +
 				"BuildDate: " + info.BuildDate + "\n" +
 				"BuildUser: " + info.BuildUser + "\n" +
 				"Revision: " + info.Revision
 
-			p := perfdata.PerfdataList{
-				{Label: "statuscode", Value: 200},
-			}
+			overall.AddSubcheck(partialResult)
 
-			check.ExitRaw(rc, output, "|", p.String())
+			check.ExitRaw(overall.GetStatus(), overall.GetOutput())
 		}
 
 		// Getting the health status is the default
-		rc, sc, output, err = c.GetStatus(ctx, "healthy")
+		rc, _, output, err := c.GetStatus(ctx, "healthy")
 
 		if err != nil {
 			check.ExitError(fmt.Errorf(output))
 		}
 
+<<<<<<< HEAD
 		p := perfdata.PerfdataList{
 			{Label: "statuscode", Value: float64(sc)},
 		}
+=======
+		partialResult := result.NewPartialResult()
+		partialResult.SetState(rc)
+		partialResult.Output = output
+		overall.AddSubcheck(partialResult)
+>>>>>>> 9761a63 (wip: use more gocheck)
 
-		check.ExitRaw(rc, output, "|", p.String())
+		check.ExitRaw(overall.GetStatus(), overall.GetOutput())
 	},
 }
 

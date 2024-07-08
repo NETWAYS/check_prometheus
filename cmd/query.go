@@ -2,6 +2,8 @@ package cmd
 
 import (
 	"fmt"
+	"math"
+	"strconv"
 	"strings"
 	"time"
 
@@ -29,12 +31,16 @@ var cliQueryConfig QueryConfig
 
 var replacer = strings.NewReplacer("{", "_", "}", "", "\"", "", ",", "_", " ", "")
 
-func generateMetricOutput(rc int, metric string, value string) string {
+func generateMetricOutput(metric string, value string) string {
 	// Format the metric and RC output for console output
-	return fmt.Sprintf(" \\_[%s] %s - value: %s\n", check.StatusText(rc), metric, value)
+	return fmt.Sprintf(" %s - value: %s\n", metric, value)
 }
 
-func generatePerfdata(metric string, value float64, warning, critical *check.Threshold) perfdata.Perfdata {
+type Number interface {
+	~int | ~int8 | ~int16 | ~int32 | ~int64 | ~uint | ~uint8 | ~uint16 | ~uint32 | ~uint64 | ~uintptr | ~float32 | ~float64
+}
+
+func generatePerfdata[T Number](metric string, value T, warning, critical *check.Threshold) perfdata.Perfdata {
 	// We trim the trailing "} from the string, so that the Perfdata won't have a trailing _
 	return perfdata.Perfdata{
 		Label: replacer.Replace(metric),
@@ -61,18 +67,6 @@ Note: Time range values e.G. 'go_memstats_alloc_bytes_total[0s]' only the latest
 		}
 	},
 	Run: func(cmd *cobra.Command, args []string) {
-		var (
-			rc             int
-			states         []int
-			metricOutput   strings.Builder
-			summary        strings.Builder
-			metricsCounter int
-			critCounter    int
-			warnCounter    int
-			okCounter      int
-			perfList       perfdata.PerfdataList
-		)
-
 		crit, err := check.ParseThreshold(cliQueryConfig.Critical)
 		if err != nil {
 			check.ExitError(err)
@@ -101,6 +95,8 @@ Note: Time range values e.G. 'go_memstats_alloc_bytes_total[0s]' only the latest
 			check.ExitError(err)
 		}
 
+		overall := goresult.Overall{}
+
 		switch result.Type() {
 		default:
 			check.ExitError(fmt.Errorf("none value results are not supported"))
@@ -117,31 +113,32 @@ Note: Time range values e.G. 'go_memstats_alloc_bytes_total[0s]' only the latest
 			vectorVal := result.(model.Vector)
 
 			// Set initial capacity to reduce memory allocations
-			vStates := make([]int, 0, len(vectorVal))
-
 			for _, sample := range vectorVal {
-				metricsCounter++
 
-				if crit.DoesViolate(float64(sample.Value)) {
-					rc = check.Critical
-					critCounter++
-				} else if warn.DoesViolate(float64(sample.Value)) {
-					rc = check.Warning
-					warnCounter++
+				numberValue := float64(sample.Value)
+				partial := goresult.NewPartialResult()
+
+				if crit.DoesViolate(numberValue) {
+					partial.SetState(check.Critical)
+				} else if warn.DoesViolate(numberValue) {
+					partial.SetState(check.Warning)
 				} else {
-					rc = check.OK
-					okCounter++
+					partial.SetState(check.OK)
 				}
 
-				vStates = append(vStates, rc)
 				// Format the metric and RC output for console output
-				metricOutput.WriteString(generateMetricOutput(rc, sample.Metric.String(), sample.Value.String()))
+				partial.Output = generateMetricOutput(sample.Metric.String(), sample.Value.String())
 
 				// Generate Perfdata from API return
-				perf := generatePerfdata(sample.Metric.String(), float64(sample.Value), warn, crit)
-				perfList.Add(&perf)
+				if math.IsInf(numberValue, 0) || math.IsNaN(numberValue) {
+					continue
+				}
+
+				perf := generatePerfdata(sample.Metric.String(), numberValue, warn, crit)
+				partial.Perfdata.Add(&perf)
+				overall.AddSubcheck(partial)
 			}
-			states = vStates
+
 		case model.ValMatrix:
 			// Range vector - a set of time series containing a range of data points over time for each time series -> Matrix
 			// An example query for a matrix 'go_goroutines{job="prometheus"}[5m]'
@@ -149,51 +146,45 @@ Note: Time range values e.G. 'go_memstats_alloc_bytes_total[0s]' only the latest
 			// Note: Only the latest value will be evaluated, other values will be ignored!
 			matrixVal := result.(model.Matrix)
 
-			// Set initial capacity to reduce memory allocations
-			mStates := make([]int, 0, len(matrixVal))
-
 			for _, samplestream := range matrixVal {
-				metricsCounter++
 				samplepair := samplestream.Values[len(samplestream.Values)-1]
 
-				if crit.DoesViolate(float64(samplepair.Value)) {
-					rc = check.Critical
-					critCounter++
-				} else if warn.DoesViolate(float64(samplepair.Value)) {
-					rc = check.Warning
-					warnCounter++
+				numberValue := float64(samplepair.Value)
+
+				partial := goresult.NewPartialResult()
+
+				if crit.DoesViolate(numberValue) {
+					partial.SetState(check.Critical)
+				} else if warn.DoesViolate(numberValue) {
+					partial.SetState(check.Warning)
 				} else {
-					rc = check.OK
-					okCounter++
+					partial.SetState(check.OK)
 				}
 
-				mStates = append(mStates, rc)
 				// Format the metric and RC output for console output
-				metricOutput.WriteString(generateMetricOutput(rc, samplepair.String(), samplepair.Value.String()))
+				partial.Output = generateMetricOutput(samplepair.String(), samplepair.Value.String())
 
-				// Generate Perfdata from API return
-				perf := generatePerfdata(samplestream.Metric.String(), float64(samplepair.Value), warn, crit)
-				perfList.Add(&perf)
+				valueString := samplepair.Value.String()
+
+				valueNumber, err := strconv.ParseFloat(valueString, 64)
+				if err == nil {
+					pd := generatePerfdata(samplestream.Metric.String(), valueNumber, warn, crit)
+
+					// Generate Perfdata from API return
+					if !math.IsInf(numberValue, 0) && !math.IsNaN(numberValue) {
+						partial.Perfdata.Add(&pd)
+					}
+				}
+
+				overall.AddSubcheck(partial)
 			}
-			states = mStates
 		}
 
-		// The worst state of all metrics determines the final return state.
-		worstState := goresult.WorstState(states...)
-		if worstState == check.OK {
-			summary.WriteString(fmt.Sprintf("%d Metrics OK", metricsCounter))
-		} else {
-			summary.WriteString(fmt.Sprintf("%d Metrics: %d Critical - %d Warning - %d Ok\n", metricsCounter, critCounter, warnCounter, okCounter))
-			summary.WriteString(metricOutput.String())
+		if len(warnings) != 0 {
+			appendum := fmt.Sprintf("HTTP Warnings: %v\n", strings.Join(warnings, ", "))
+			overall.Summary = overall.GetOutput() + appendum
 		}
-
-		// Should be printed after the Check Plugin output
-		// Defer doesn't work because of the os.Exit
-		if len(warnings) > 0 {
-			summary.WriteString(fmt.Sprintf("HTTP Warnings: %v\n", strings.Join(warnings, ", ")))
-		}
-
-		check.ExitRaw(goresult.WorstState(states...), summary.String(), "|", perfList.String())
+		check.ExitRaw(overall.GetStatus(), overall.GetOutput())
 	},
 }
 

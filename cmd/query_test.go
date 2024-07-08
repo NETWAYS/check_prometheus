@@ -52,7 +52,7 @@ func TestQueryCmd(t *testing.T) {
 				w.Write([]byte(`{"status":"success","data":{"resultType":"vector","result":[]},"warnings": ["hic sunt dracones", "foo"]}`))
 			})),
 			args:     []string{"run", "../main.go", "query", "--query", "foo"},
-			expected: "[UNKNOWN] - 0 Metrics: 0 Critical - 0 Warning - 0 Ok\nHTTP Warnings: hic sunt dracones, foo\n | \nexit status 3\n",
+			expected: "[UNKNOWN] - 0 Metrics: 0 Critical - 0 Warning - 0 Ok\nHTTP Warnings: hic sunt dracones, foo\n",
 		},
 		{
 			name: "query-no-such-metric",
