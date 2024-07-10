@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"fmt"
-	"strings"
 
 	"github.com/NETWAYS/check_prometheus/internal/alert"
 	"github.com/NETWAYS/go-check"
@@ -10,23 +9,6 @@ import (
 	"github.com/NETWAYS/go-check/result"
 	"github.com/spf13/cobra"
 )
-
-func generateOutput(rl alert.Rule, cfg AlertConfig) (output string) {
-	// Generates the console output for the AlertingRules
-	var out strings.Builder
-
-	if len(cfg.AlertName) > 1 || cfg.Group == nil {
-		out.WriteString(" \\_")
-	}
-
-	out.WriteString(fmt.Sprintf("[%s] %s", check.StatusText(rl.GetStatus()), rl.GetOutput()))
-
-	if len(cfg.AlertName) > 1 || cfg.Group == nil {
-		out.WriteString("\n")
-	}
-
-	return out.String()
-}
 
 func contains(s string, list []string) bool {
 	// Tiny helper to see if a string is in a list of strings
@@ -59,12 +41,9 @@ inactive = 0`,
 	 | total=2 firing=1 pending=0 inactive=1`,
 	Run: func(cmd *cobra.Command, args []string) {
 		var (
-			output          strings.Builder
-			summary         string
 			counterFiring   int
 			counterPending  int
 			counterInactive int
-			perfList        perfdata.PerfdataList
 		)
 
 		c := cliConfig.NewClient()
@@ -91,7 +70,8 @@ inactive = 0`,
 		for _, rl := range rules {
 			l *= len(rl.AlertingRule.Alerts)
 		}
-		states := make([]int, 0, l)
+
+		var overall result.Overall
 
 		for _, rl := range rules {
 
@@ -119,9 +99,11 @@ inactive = 0`,
 					counterFiring++
 				}
 
-				// Gather the state to evaluate the worst at the end
-				states = append(states, rl.GetStatus())
-				output.WriteString(generateOutput(rl, cliAlertConfig))
+				sc := result.NewPartialResult()
+
+				_ = sc.SetState(rl.GetStatus())
+				sc.Output = rl.GetOutput()
+				overall.AddSubcheck(sc)
 			}
 
 			// Handle active alerts
@@ -138,44 +120,45 @@ inactive = 0`,
 						counterFiring++
 					}
 
+					sc := result.NewPartialResult()
+
+					_ = sc.SetState(rl.GetStatus())
 					// Set the alert in the internal Type to generate the output
 					rl.Alert = alert
-					// Gather the state to evaluate the worst at the end
-					states = append(states, rl.GetStatus())
-					output.WriteString(generateOutput(rl, cliAlertConfig))
+					sc.Output = rl.GetOutput()
+					overall.AddSubcheck(sc)
 				}
 			}
 		}
 
 		counterAlert := counterFiring + counterPending + counterInactive
 		if len(cliAlertConfig.AlertName) > 1 || counterAlert > 1 {
-			perfList = perfdata.PerfdataList{
+			perfList := perfdata.PerfdataList{
 				{Label: "total", Value: counterAlert},
 				{Label: "firing", Value: counterFiring},
 				{Label: "pending", Value: counterPending},
 				{Label: "inactive", Value: counterInactive},
 			}
+
+			overall.PartialResults[0].Perfdata = append(overall.PartialResults[0].Perfdata, perfList...)
 		}
 
 		if len(cliAlertConfig.AlertName) == 1 && counterAlert == 1 {
-			perfList = perfdata.PerfdataList{
+			perfList := perfdata.PerfdataList{
 				{Label: "firing", Value: counterFiring},
 				{Label: "pending", Value: counterPending},
 				{Label: "inactive", Value: counterInactive},
 			}
+			overall.PartialResults[0].Perfdata = append(overall.PartialResults[0].Perfdata, perfList...)
 		}
 
-		summary = fmt.Sprintf("%d Alerts: %d Firing - %d Pending - %d Inactive",
+		overall.Summary = fmt.Sprintf("%d Alerts: %d Firing - %d Pending - %d Inactive",
 			counterAlert,
 			counterFiring,
 			counterPending,
 			counterInactive)
 
-		if result.WorstState(states...) == 0 {
-			check.ExitRaw(result.WorstState(states...), "Alerts inactive", "|", perfList.String())
-		} else {
-			check.ExitRaw(result.WorstState(states...), summary+"\n"+output.String(), "|", perfList.String())
-		}
+		check.ExitRaw(overall.GetStatus(), overall.GetOutput())
 	},
 }
 

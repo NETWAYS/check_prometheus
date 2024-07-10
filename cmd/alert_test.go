@@ -39,10 +39,11 @@ func TestAlertCmd(t *testing.T) {
 			})),
 			args: []string{"run", "../main.go", "alert"},
 			expected: `[CRITICAL] - 3 Alerts: 1 Firing - 1 Pending - 1 Inactive
- \_[OK] [HostOutOfMemory] is inactive
- \_[WARNING] [SqlAccessDeniedRate] - Job: [mysql] on Instance: [localhost] is pending - value: 0.40
- \_[CRITICAL] [BlackboxTLS] - Job: [blackbox] on Instance: [https://localhost:443] is firing - value: -6065338.00
- | total=3 firing=1 pending=1 inactive=1
+\_ [OK] [HostOutOfMemory] is inactive
+\_ [WARNING] [SqlAccessDeniedRate] - Job: [mysql] on Instance: [localhost] is pending - value: 0.40
+\_ [CRITICAL] [BlackboxTLS] - Job: [blackbox] on Instance: [https://localhost:443] is firing - value: -6065338.00
+|total=3 firing=1 pending=1 inactive=1
+
 exit status 2
 `,
 		},
@@ -54,9 +55,10 @@ exit status 2
 			})),
 			args: []string{"run", "../main.go", "alert", "--problems"},
 			expected: `[CRITICAL] - 2 Alerts: 1 Firing - 1 Pending - 0 Inactive
- \_[WARNING] [SqlAccessDeniedRate] - Job: [mysql] on Instance: [localhost] is pending - value: 0.40
- \_[CRITICAL] [BlackboxTLS] - Job: [blackbox] on Instance: [https://localhost:443] is firing - value: -6065338.00
- | total=2 firing=1 pending=1 inactive=0
+\_ [WARNING] [SqlAccessDeniedRate] - Job: [mysql] on Instance: [localhost] is pending - value: 0.40
+\_ [CRITICAL] [BlackboxTLS] - Job: [blackbox] on Instance: [https://localhost:443] is firing - value: -6065338.00
+|total=2 firing=1 pending=1 inactive=0
+
 exit status 2
 `,
 		},
@@ -67,7 +69,7 @@ exit status 2
 				w.Write([]byte(`{"status":"success","data":{"groups":[{"name":"Foo","file":"alerts.yaml","rules":[{"state":"inactive","name":"InactiveAlert","query":"foo","duration":120,"labels":{"severity":"critical"},"annotations":{"description":"Inactive","summary":"Inactive"},"alerts":[],"health":"ok","evaluationTime":0.000462382,"lastEvaluation":"2022-11-18T14:01:07.597034323Z","type":"alerting"}],"interval":10,"limit":0,"evaluationTime":0.000478395,"lastEvaluation":"2022-11-18T14:01:07.597021953Z"}]}}`))
 			})),
 			args:     []string{"run", "../main.go", "alert", "--name", "NoSuchAlert"},
-			expected: "[UNKNOWN] - 0 Alerts: 0 Firing - 0 Pending - 0 Inactive\n | \nexit status 3\n",
+			expected: "[UNKNOWN] - 0 Alerts: 0 Firing - 0 Pending - 0 Inactive\n\nexit status 3\n",
 		},
 		{
 			name: "alert-inactive-with-problems",
@@ -76,7 +78,7 @@ exit status 2
 				w.Write([]byte(`{"status":"success","data":{"groups":[{"name":"Foo","file":"alerts.yaml","rules":[{"state":"inactive","name":"InactiveAlert","query":"foo","duration":120,"labels":{"severity":"critical"},"annotations":{"description":"Inactive","summary":"Inactive"},"alerts":[],"health":"ok","evaluationTime":0.000462382,"lastEvaluation":"2022-11-18T14:01:07.597034323Z","type":"alerting"}],"interval":10,"limit":0,"evaluationTime":0.000478395,"lastEvaluation":"2022-11-18T14:01:07.597021953Z"}]}}`))
 			})),
 			args:     []string{"run", "../main.go", "alert", "--name", "InactiveAlert", "--problems"},
-			expected: "[UNKNOWN] - 0 Alerts: 0 Firing - 0 Pending - 0 Inactive\n | \nexit status 3\n",
+			expected: "[UNKNOWN] - 0 Alerts: 0 Firing - 0 Pending - 0 Inactive\n\nexit status 3\n",
 		},
 		{
 			name: "alert-multiple-alerts",
@@ -86,9 +88,10 @@ exit status 2
 			})),
 			args: []string{"run", "../main.go", "alert", "--name", "HostOutOfMemory", "--name", "BlackboxTLS"},
 			expected: `[CRITICAL] - 2 Alerts: 1 Firing - 0 Pending - 1 Inactive
- \_[OK] [HostOutOfMemory] is inactive
- \_[CRITICAL] [BlackboxTLS] - Job: [blackbox] on Instance: [https://localhost:443] is firing - value: -6065338.00
- | total=2 firing=1 pending=0 inactive=1
+\_ [OK] [HostOutOfMemory] is inactive
+\_ [CRITICAL] [BlackboxTLS] - Job: [blackbox] on Instance: [https://localhost:443] is firing - value: -6065338.00
+|total=2 firing=1 pending=0 inactive=1
+
 exit status 2
 `,
 		},
@@ -100,8 +103,9 @@ exit status 2
 			})),
 			args: []string{"run", "../main.go", "alert", "--name", "HostOutOfMemory", "--name", "BlackboxTLS", "--problems"},
 			expected: `[CRITICAL] - 1 Alerts: 1 Firing - 0 Pending - 0 Inactive
- \_[CRITICAL] [BlackboxTLS] - Job: [blackbox] on Instance: [https://localhost:443] is firing - value: -6065338.00
- | total=1 firing=1 pending=0 inactive=0
+\_ [CRITICAL] [BlackboxTLS] - Job: [blackbox] on Instance: [https://localhost:443] is firing - value: -6065338.00
+|total=1 firing=1 pending=0 inactive=0
+
 exit status 2
 `,
 		},
@@ -112,7 +116,7 @@ exit status 2
 				w.Write([]byte(`{"status":"success","data":{"groups":[{"name":"Foo","file":"alerts.yaml","rules":[{"state":"inactive","name":"InactiveAlert","query":"foo","duration":120,"labels":{"severity":"critical"},"annotations":{"description":"Inactive","summary":"Inactive"},"alerts":[],"health":"ok","evaluationTime":0.000462382,"lastEvaluation":"2022-11-18T14:01:07.597034323Z","type":"alerting"}],"interval":10,"limit":0,"evaluationTime":0.000478395,"lastEvaluation":"2022-11-18T14:01:07.597021953Z"}]}}`))
 			})),
 			args:     []string{"run", "../main.go", "alert", "--name", "InactiveAlert"},
-			expected: "[OK] - Alerts inactive | firing=0 pending=0 inactive=1\n",
+			expected: "[OK] - 1 Alerts: 0 Firing - 0 Pending - 1 Inactive\n\\_ [OK] [InactiveAlert] is inactive\n|firing=0 pending=0 inactive=1\n\n",
 		},
 		{
 			name: "alert-recording-rule",
@@ -121,7 +125,7 @@ exit status 2
 				w.Write([]byte(`{"status":"success","data":{"groups":[{"name":"example","file":"recoding.yaml","rules":[{"name":"job:foo","query":"sum by(job) (requests_total)","health":"ok","evaluationTime":0.000391321,"lastEvaluation":"2023-01-13T14:26:08.687065894Z","type":"recording"}],"interval":10,"evaluationTime":0.000403777,"lastEvaluation":"2023-01-13T14:26:08.687058029Z"},{"name":"Foo","file":"alerts.yaml","rules":[{"state":"inactive","name":"InactiveAlert","query":"foo","duration":120,"labels":{"severity":"critical"},"annotations":{"description":"Inactive","summary":"Inactive"},"alerts":[],"health":"ok","evaluationTime":0.000462382,"lastEvaluation":"2022-11-18T14:01:07.597034323Z","type":"alerting"}],"interval":10,"limit":0,"evaluationTime":0.000478395,"lastEvaluation":"2022-11-18T14:01:07.597021953Z"}]}}`))
 			})),
 			args:     []string{"run", "../main.go", "alert", "--name", "InactiveAlert"},
-			expected: "[OK] - Alerts inactive | firing=0 pending=0 inactive=1\n",
+			expected: "[OK] - 1 Alerts: 0 Firing - 0 Pending - 1 Inactive\n\\_ [OK] [InactiveAlert] is inactive\n|firing=0 pending=0 inactive=1\n\n",
 		},
 	}
 
