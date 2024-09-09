@@ -95,7 +95,7 @@ func (c *Config) NewClient() *client.Client {
 
 	// Using a Bearer Token for authentication
 	if c.Bearer != "" {
-		var t = config.Secret(c.Bearer)
+		var t = config.NewInlineSecret(c.Bearer)
 		rt = config.NewAuthorizationCredentialsRoundTripper("Bearer", t, rt)
 	}
 
@@ -106,11 +106,11 @@ func (c *Config) NewClient() *client.Client {
 			check.ExitError(fmt.Errorf("specify the user name and password for server authentication <user:password>"))
 		}
 
-		var u = s[0]
+		var u = config.NewInlineSecret(s[0])
 
-		var p = config.Secret(s[1])
+		var p = config.NewInlineSecret(s[1])
 
-		rt = config.NewBasicAuthRoundTripper(u, p, "", "", rt)
+		rt = config.NewBasicAuthRoundTripper(u, p, rt)
 	}
 
 	return client.NewClient(u.String(), rt)
