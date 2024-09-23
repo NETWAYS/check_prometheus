@@ -4,7 +4,7 @@ go 1.21
 
 require (
 	github.com/NETWAYS/go-check v0.6.2
-	github.com/prometheus/client_golang v1.20.3
+	github.com/prometheus/client_golang v1.20.4
 	github.com/prometheus/common v0.55.0
 	github.com/spf13/cobra v1.8.1
 )
