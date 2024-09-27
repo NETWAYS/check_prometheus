@@ -1,7 +1,7 @@
 package cmd
 
 import (
-	"fmt"
+	"errors"
 
 	"github.com/NETWAYS/go-check"
 	"github.com/NETWAYS/go-check/result"
@@ -20,7 +20,7 @@ Ready: Checks the readiness of an endpoint, which returns OK if the Prometheus s
 
 	$ check_prometheus --bearer secrettoken health --ready
 	OK - Prometheus Server is Ready. | statuscode=200`,
-	Run: func(cmd *cobra.Command, args []string) {
+	Run: func(_ *cobra.Command, _ []string) {
 		var (
 			rc int
 		)
@@ -43,7 +43,7 @@ Ready: Checks the readiness of an endpoint, which returns OK if the Prometheus s
 			rc, _, output, err := c.GetStatus(ctx, "ready")
 
 			if err != nil {
-				check.ExitError(fmt.Errorf(output))
+				check.ExitError(errors.New(output))
 			}
 
 			partialResult := result.NewPartialResult()
@@ -81,7 +81,7 @@ Ready: Checks the readiness of an endpoint, which returns OK if the Prometheus s
 		rc, _, output, err := c.GetStatus(ctx, "healthy")
 
 		if err != nil {
-			check.ExitError(fmt.Errorf(output))
+			check.ExitError(errors.New(output))
 		}
 
 		partialResult := result.NewPartialResult()
