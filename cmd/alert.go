@@ -39,7 +39,7 @@ inactive = 0`,
 	 \_[OK] [PrometheusTargetMissing] is inactive
 	 \_[CRITICAL] [PrometheusAlertmanagerJobMissing] - Job: [alertmanager] is firing - value: 1.00
 	 | total=2 firing=1 pending=0 inactive=1`,
-	Run: func(cmd *cobra.Command, args []string) {
+	Run: func(_ *cobra.Command, _ []string) {
 		var (
 			counterFiring   int
 			counterPending  int

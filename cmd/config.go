@@ -2,7 +2,7 @@ package cmd
 
 import (
 	"context"
-	"fmt"
+	"errors"
 	"net"
 	"net/http"
 	"net/url"
@@ -103,7 +103,7 @@ func (c *Config) NewClient() *client.Client {
 	if c.BasicAuth != "" {
 		s := strings.Split(c.BasicAuth, ":")
 		if len(s) != 2 {
-			check.ExitError(fmt.Errorf("specify the user name and password for server authentication <user:password>"))
+			check.ExitError(errors.New("specify the user name and password for server authentication <user:password>"))
 		}
 
 		var u = config.NewInlineSecret(s[0])

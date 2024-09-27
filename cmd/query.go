@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"errors"
 	"fmt"
 	"math"
 	"strconv"
@@ -61,12 +62,12 @@ Note: Time range values e.G. 'go_memstats_alloc_bytes_total[0s]' only the latest
 	 \_[OK] go_gc_duration_seconds_count{instance="localhost:9090", job="prometheus"} - value: 1599
 	 \_[CRITICAL] go_gc_duration_seconds_count{instance="node-exporter:9100", job="node-exporter"} - value: 79610
 	 | value_go_gc_duration_seconds_count_localhost:9090_prometheus=1599 value_go_gc_duration_seconds_count_node-exporter:9100_node-exporter=79610`,
-	PreRun: func(cmd *cobra.Command, args []string) {
+	PreRun: func(_ *cobra.Command, _ []string) {
 		if cliQueryConfig.Warning == "" || cliQueryConfig.Critical == "" {
-			check.ExitError(fmt.Errorf("please specify warning and critical thresholds"))
+			check.ExitError(errors.New("please specify warning and critical thresholds"))
 		}
 	},
-	Run: func(cmd *cobra.Command, args []string) {
+	Run: func(_ *cobra.Command, _ []string) {
 		crit, err := check.ParseThreshold(cliQueryConfig.Critical)
 		if err != nil {
 			check.ExitError(err)
@@ -90,7 +91,7 @@ Note: Time range values e.G. 'go_memstats_alloc_bytes_total[0s]' only the latest
 
 		if err != nil {
 			if strings.Contains(err.Error(), "unmarshalerDecoder: unexpected value type \"string\"") {
-				err = fmt.Errorf("string value results are not supported")
+				err = errors.New("string value results are not supported")
 			}
 			check.ExitError(err)
 		}
@@ -99,15 +100,15 @@ Note: Time range values e.G. 'go_memstats_alloc_bytes_total[0s]' only the latest
 
 		switch result.Type() {
 		default:
-			check.ExitError(fmt.Errorf("none value results are not supported"))
+			check.ExitError(errors.New("none value results are not supported"))
 		// Scalar - a simple numeric floating point value
 		case model.ValScalar:
-			check.ExitError(fmt.Errorf("scalar value results are not supported"))
+			check.ExitError(errors.New("scalar value results are not supported"))
 		case model.ValNone:
-			check.ExitError(fmt.Errorf("none value results are not supported"))
+			check.ExitError(errors.New("none value results are not supported"))
 		case model.ValString:
 			// String - a simple string value; currently unused
-			check.ExitError(fmt.Errorf("string value results are not supported"))
+			check.ExitError(errors.New("string value results are not supported"))
 		case model.ValVector:
 			// Instant vector - a set of time series containing a single sample for each time series, all sharing the same timestamp
 			vectorVal := result.(model.Vector)
