@@ -17,6 +17,7 @@ Available Commands:
 Flags:
   -H, --hostname string    Hostname of the Prometheus server (CHECK_PROMETHEUS_HOSTNAME) (default "localhost")
   -p, --port int           Port of the Prometheus server (default 9090)
+  -U, --url string         URL/Path to append to the Promethes Hostname (default "/")
   -s, --secure             Use a HTTPS connection
   -i, --insecure           Skip the verification of the server's TLS certificate
   -b, --bearer string      Specify the Bearer Token for server authentication (CHECK_PROMETHEUS_BEARER)
@@ -161,6 +162,7 @@ CRITICAL - 6 Alerts: 3 Firing - 0 Pending - 3 Inactive
  | total=6 firing=3 pending=0 inactive=3
 
 ```
+
 #### Checking multiple alerts
 
 ```bash

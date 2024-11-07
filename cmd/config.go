@@ -28,6 +28,7 @@ type Config struct {
 	CertFile  string `env:"CHECK_PROMETHEUS_CERT_FILE"`
 	KeyFile   string `env:"CHECK_PROMETHEUS_KEY_FILE"`
 	Hostname  string `env:"CHECK_PROMETHEUS_HOSTNAME"`
+	URL       string `env:"CHECK_PROMETHEUS_URL"`
 	Port      int
 	Info      bool
 	Insecure  bool
@@ -65,6 +66,7 @@ func (c *Config) NewClient() *client.Client {
 	u := url.URL{
 		Scheme: "http",
 		Host:   c.Hostname + ":" + strconv.Itoa(c.Port),
+		Path:   c.URL,
 	}
 
 	if c.Secure {

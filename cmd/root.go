@@ -43,6 +43,8 @@ func init() {
 		"Hostname of the Prometheus server (CHECK_PROMETHEUS_HOSTNAME)")
 	pfs.IntVarP(&cliConfig.Port, "port", "p", 9090,
 		"Port of the Prometheus server")
+	pfs.StringVarP(&cliConfig.URL, "url", "U", "/",
+		"URL/Path to append to the Promethes Hostname")
 	pfs.BoolVarP(&cliConfig.Secure, "secure", "s", false,
 		"Use a HTTPS connection")
 	pfs.BoolVarP(&cliConfig.Insecure, "insecure", "i", false,
