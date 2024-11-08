@@ -17,7 +17,7 @@ Available Commands:
 Flags:
   -H, --hostname string    Hostname of the Prometheus server (CHECK_PROMETHEUS_HOSTNAME) (default "localhost")
   -p, --port int           Port of the Prometheus server (default 9090)
-  -U, --url string         URL/Path to append to the Promethes Hostname (default "/")
+  -U, --url string         URL/Path to append to the Promethes Hostname (CHECK_PROMETHEUS_URL) (default "/")
   -s, --secure             Use a HTTPS connection
   -i, --insecure           Skip the verification of the server's TLS certificate
   -b, --bearer string      Specify the Bearer Token for server authentication (CHECK_PROMETHEUS_BEARER)
@@ -177,6 +177,17 @@ CRITICAL - 3 Alerts: 2 Firing - 0 Pending - 1 Inactive
 ```bash
 $ check_prometheus alert --name "HostHighCpuLoad" --name "PrometheusTargetMissing"
 OK - Alerts inactive | total=2 firing=0 pending=0 inactive=2
+```
+
+### Special cases
+
+#### Your Prometheus runs behind a reverse proxy
+
+>Example: <https://monitoring.example.com:443/subpath>
+
+```bash
+$ check_prometheus health --hostname 'monitoring.example.com' --port 443 --secure --url /subpath
+OK - Prometheus Server is Healthy. | statuscode=200
 ```
 
 ## License
