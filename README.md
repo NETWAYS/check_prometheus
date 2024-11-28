@@ -34,6 +34,15 @@ The check plugin respects the environment variables `HTTP_PROXY`, `HTTPS_PROXY` 
 
 Various flags can be set with environment variables, refer to the help to see which flags.
 
+In the case Prometheus runs behind a reverse proxy, the `--url` parameter can be used:
+
+```bash
+# https://monitoring.example.com:443/subpath
+
+$ check_prometheus health -H 'monitoring.example.com' --port 443 --secure --url /subpath
+OK - Prometheus Server is Healthy. | statuscode=200
+```
+
 ### Health
 
 Checks the health or readiness status of the Prometheus server.
@@ -177,17 +186,6 @@ CRITICAL - 3 Alerts: 2 Firing - 0 Pending - 1 Inactive
 ```bash
 $ check_prometheus alert --name "HostHighCpuLoad" --name "PrometheusTargetMissing"
 OK - Alerts inactive | total=2 firing=0 pending=0 inactive=2
-```
-
-### Special cases
-
-#### Your Prometheus runs behind a reverse proxy
-
->Example: <https://monitoring.example.com:443/subpath>
-
-```bash
-$ check_prometheus health --hostname 'monitoring.example.com' --port 443 --secure --url /subpath
-OK - Prometheus Server is Healthy. | statuscode=200
 ```
 
 ## License
