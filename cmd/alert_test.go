@@ -32,6 +32,24 @@ type AlertTest struct {
 func TestAlertCmd(t *testing.T) {
 	tests := []AlertTest{
 		{
+			name: "alert-none",
+			server: httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				w.WriteHeader(http.StatusOK)
+				w.Write([]byte(`{"status":"success","data":{"groups":[]}}`))
+			})),
+			args:     []string{"run", "../main.go", "alert"},
+			expected: "[UNKNOWN] - 0 Alerts: 0 Firing - 0 Pending - 0 Inactive\n\nexit status 3\n",
+		},
+		{
+			name: "alert-none-with-problems",
+			server: httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				w.WriteHeader(http.StatusOK)
+				w.Write([]byte(`{"status":"success","data":{"groups":[]}}`))
+			})),
+			args:     []string{"run", "../main.go", "alert", "--problems"},
+			expected: "[UNKNOWN] - 0 Alerts: 0 Firing - 0 Pending - 0 Inactive\n\nexit status 3\n",
+		},
+		{
 			name: "alert-default",
 			server: httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 				w.WriteHeader(http.StatusOK)
