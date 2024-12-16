@@ -15,12 +15,6 @@ import (
 	"github.com/prometheus/common/config"
 )
 
-type AlertConfig struct {
-	AlertName    []string
-	Group        []string
-	ProblemsOnly bool
-}
-
 type Config struct {
 	BasicAuth string `env:"CHECK_PROMETHEUS_BASICAUTH"`
 	Bearer    string `env:"CHECK_PROMETHEUS_BEARER"`
@@ -57,10 +51,7 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see https://www.gnu.org/licenses/.
 `
 
-var (
-	cliConfig      Config
-	cliAlertConfig AlertConfig
-)
+var cliConfig Config
 
 func (c *Config) NewClient() *client.Client {
 	u := url.URL{

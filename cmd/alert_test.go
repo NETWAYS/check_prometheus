@@ -38,7 +38,7 @@ func TestAlertCmd(t *testing.T) {
 				w.Write([]byte(`{"status":"success","data":{"groups":[]}}`))
 			})),
 			args:     []string{"run", "../main.go", "alert"},
-			expected: "[UNKNOWN] - 0 Alerts: 0 Firing - 0 Pending - 0 Inactive\n\nexit status 3\n",
+			expected: "[OK] - No alerts defined\n",
 		},
 		{
 			name: "alert-none-with-problems",
@@ -47,7 +47,25 @@ func TestAlertCmd(t *testing.T) {
 				w.Write([]byte(`{"status":"success","data":{"groups":[]}}`))
 			})),
 			args:     []string{"run", "../main.go", "alert", "--problems"},
-			expected: "[UNKNOWN] - 0 Alerts: 0 Firing - 0 Pending - 0 Inactive\n\nexit status 3\n",
+			expected: "[OK] - No alerts defined\n",
+		},
+		{
+			name: "alert-none-with-no-state",
+			server: httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				w.WriteHeader(http.StatusOK)
+				w.Write([]byte(`{"status":"success","data":{"groups":[]}}`))
+			})),
+			args:     []string{"run", "../main.go", "alert", "--no-alerts-state", "3"},
+			expected: "[UNKNOWN] - No alerts defined\nexit status 3\n",
+		},
+		{
+			name: "alert-none-with-name",
+			server: httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				w.WriteHeader(http.StatusOK)
+				w.Write([]byte(`{"status":"success","data":{"groups":[]}}`))
+			})),
+			args:     []string{"run", "../main.go", "alert", "--name", "MyPreciousAlert"},
+			expected: "[UNKNOWN] - No such alert defined\nexit status 3\n",
 		},
 		{
 			name: "alert-default",
