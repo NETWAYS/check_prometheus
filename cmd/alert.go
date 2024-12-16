@@ -3,6 +3,7 @@ package cmd
 import (
 	"errors"
 	"fmt"
+	"regexp"
 	"strings"
 
 	"github.com/NETWAYS/check_prometheus/internal/alert"
@@ -15,6 +16,7 @@ import (
 type AlertConfig struct {
 	AlertName     []string
 	Group         []string
+	ExcludeAlerts []string
 	ProblemsOnly  bool
 	NoAlertsState string
 }
@@ -115,6 +117,17 @@ inactive = 0`,
 				continue
 			}
 
+			alertMatched, regexErr := matches(rl.AlertingRule.Name, cliAlertConfig.ExcludeAlerts)
+
+			if regexErr != nil {
+				check.ExitRaw(check.Unknown, "Invalid regular expression provided:", regexErr.Error())
+			}
+
+			if alertMatched {
+				// If the alert matches a regex from the list we can skip it.
+				continue
+			}
+
 			// Handle Inactive Alerts
 			if len(rl.AlertingRule.Alerts) == 0 {
 				// Counting states for perfdata
@@ -197,6 +210,8 @@ func init() {
 
 	fs.StringVarP(&cliAlertConfig.NoAlertsState, "no-alerts-state", "T", "OK", "State to assign when no alerts are found (0, 1, 2, 3, OK, WARNING, CRITICAL, UNKNOWN). If not set this defaults to OK")
 
+	fs.StringArrayVar(&cliAlertConfig.ExcludeAlerts, "exclude-alert", []string{}, "Alerts to ignore. Can be used multiple times and supports regex.")
+
 	fs.StringSliceVarP(&cliAlertConfig.AlertName, "name", "n", nil,
 		"The name of one or more specific alerts to check."+
 			"\nThis parameter can be repeated e.G.: '--name alert1 --name alert2'"+
@@ -221,4 +236,21 @@ func convertStateToInt(state string) (int, error) {
 	default:
 		return check.Unknown, errors.New("invalid state")
 	}
+}
+
+// Matches a list of regular expressions against a string.
+func matches(input string, regexToExclude []string) (bool, error) {
+	for _, regex := range regexToExclude {
+		re, err := regexp.Compile(regex)
+
+		if err != nil {
+			return false, err
+		}
+
+		if re.MatchString(input) {
+			return true, nil
+		}
+	}
+
+	return false, nil
 }
