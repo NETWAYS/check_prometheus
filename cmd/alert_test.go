@@ -32,6 +32,42 @@ type AlertTest struct {
 func TestAlertCmd(t *testing.T) {
 	tests := []AlertTest{
 		{
+			name: "alert-none",
+			server: httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				w.WriteHeader(http.StatusOK)
+				w.Write([]byte(`{"status":"success","data":{"groups":[]}}`))
+			})),
+			args:     []string{"run", "../main.go", "alert"},
+			expected: "[OK] - No alerts defined\n",
+		},
+		{
+			name: "alert-none-with-problems",
+			server: httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				w.WriteHeader(http.StatusOK)
+				w.Write([]byte(`{"status":"success","data":{"groups":[]}}`))
+			})),
+			args:     []string{"run", "../main.go", "alert", "--problems"},
+			expected: "[OK] - No alerts defined\n",
+		},
+		{
+			name: "alert-none-with-no-state",
+			server: httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				w.WriteHeader(http.StatusOK)
+				w.Write([]byte(`{"status":"success","data":{"groups":[]}}`))
+			})),
+			args:     []string{"run", "../main.go", "alert", "--no-alerts-state", "3"},
+			expected: "[UNKNOWN] - No alerts defined\nexit status 3\n",
+		},
+		{
+			name: "alert-none-with-name",
+			server: httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				w.WriteHeader(http.StatusOK)
+				w.Write([]byte(`{"status":"success","data":{"groups":[]}}`))
+			})),
+			args:     []string{"run", "../main.go", "alert", "--name", "MyPreciousAlert"},
+			expected: "[UNKNOWN] - No such alert defined\nexit status 3\n",
+		},
+		{
 			name: "alert-default",
 			server: httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 				w.WriteHeader(http.StatusOK)
