@@ -150,12 +150,13 @@ Examples:
    | total=2 firing=1 pending=0 inactive=1
 
 Flags:
-  -h, --help                     help for alert
-  -n, --name strings             The name of one or more specific alerts to check.
-                                 This parameter can be repeated e.G.: '--name alert1 --name alert2'
-                                 If no name is given, all alerts will be evaluated
-  -T, --no-alerts-state string   State to assign when no alerts are found (0, 1, 2, 3, OK, WARNING, CRITICAL, UNKNOWN). If not set this defaults to OK (default "OK")
-  -P, --problems                 Display only alerts which status is not inactive/OK. Note that in combination with the --name flag this might result in no alerts being displayed
+      --exclude-alert stringArray  Alerts to ignore. Can be used multiple times and supports regex.
+  -h, --help                       help for alert
+  -n, --name strings               The name of one or more specific alerts to check.
+                                   This parameter can be repeated e.G.: '--name alert1 --name alert2'
+                                   If no name is given, all alerts will be evaluated
+  -T, --no-alerts-state string     State to assign when no alerts are found (0, 1, 2, 3, OK, WARNING, CRITICAL, UNKNOWN). If not set this defaults to OK (default "OK")
+  -P, --problems                   Display only alerts which status is not inactive/OK. Note that in combination with the --name flag this might result in no alerts being displayed
 ```
 
 #### Checking all defined alerts
