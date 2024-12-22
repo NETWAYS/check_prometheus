@@ -155,6 +155,9 @@ Flags:
   -n, --name strings               The name of one or more specific alerts to check.
                                    This parameter can be repeated e.G.: '--name alert1 --name alert2'
                                    If no name is given, all alerts will be evaluated
+  -g, --group strings              The name of one or more specific groups to check.
+                                   This parameter can be repeated e.G.: '--group group1 --group group2'
+                                   If no group is given, all groups will be scanned for alerts
   -T, --no-alerts-state string     State to assign when no alerts are found (0, 1, 2, 3, OK, WARNING, CRITICAL, UNKNOWN). If not set this defaults to OK (default "OK")
   -P, --problems                   Display only alerts which status is not inactive/OK. Note that in combination with the --name flag this might result in no alerts being displayed
 ```
@@ -188,17 +191,6 @@ CRITICAL - 3 Alerts: 2 Firing - 0 Pending - 1 Inactive
 ```bash
 $ check_prometheus alert --name "HostHighCpuLoad" --name "PrometheusTargetMissing"
 OK - Alerts inactive | total=2 firing=0 pending=0 inactive=2
-```
-
-### Special cases
-
-#### Your Prometheus runs behind a reverse proxy
-
->Example: <https://monitoring.example.com:443/subpath>
-
-```bash
-$ check_prometheus health --hostname 'monitoring.example.com' --port 443 --secure --url /subpath
-OK - Prometheus Server is Healthy. | statuscode=200
 ```
 
 ## License

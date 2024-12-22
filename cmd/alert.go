@@ -83,7 +83,7 @@ inactive = 0`,
 		}
 
 		// Get all rules from all groups into a single list
-		rules := alert.FlattenRules(alerts.Groups)
+		rules := alert.FlattenRules(alerts.Groups, cliAlertConfig.Group)
 
 		// If there are no rules we can exit early
 		if len(rules) == 0 {
@@ -216,6 +216,11 @@ func init() {
 		"The name of one or more specific alerts to check."+
 			"\nThis parameter can be repeated e.G.: '--name alert1 --name alert2'"+
 			"\nIf no name is given, all alerts will be evaluated")
+
+	fs.StringSliceVarP(&cliAlertConfig.Group, "group", "g", nil,
+		"The name of one or more specific groups to check for alerts."+
+			"\nThis parameter can be repeated e.G.: '--group group1 --group group2'"+
+			"\nIf no group is given, all groups will be scanned for alerts")
 
 	fs.BoolVarP(&cliAlertConfig.ProblemsOnly, "problems", "P", false,
 		"Display only alerts which status is not inactive/OK. Note that in combination with the --name flag this might result in no alerts being displayed")

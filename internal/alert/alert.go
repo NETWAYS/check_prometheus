@@ -2,6 +2,7 @@ package alert
 
 import (
 	"fmt"
+	"slices"
 	"strconv"
 	"strings"
 
@@ -17,13 +18,19 @@ type Rule struct {
 	Alert        *v1.Alert
 }
 
-func FlattenRules(groups []v1.RuleGroup) []Rule {
+func FlattenRules(groups []v1.RuleGroup, wantedGroups []string) []Rule {
 	// Flattens a list of RuleGroup containing a list of Rules into
 	// a list of internal Alertingrules.
 	var l int
 	// Set initial capacity to reduce memory allocations.
 	for _, grp := range groups {
-		l += len(grp.Rules)
+		if wantedGroups != nil {
+			if slices.Contains(wantedGroups, grp.Name) {
+				l += len(grp.Rules)
+			}
+		} else {
+			l += len(grp.Rules)
+		}
 	}
 
 	rules := make([]Rule, 0, l)
@@ -31,12 +38,25 @@ func FlattenRules(groups []v1.RuleGroup) []Rule {
 	var r Rule
 
 	for _, grp := range groups {
-		for _, rl := range grp.Rules {
-			// For now we only care about AlertingRules,
-			// since RecodingRules can simply be queried.
-			if _, ok := rl.(v1.AlertingRule); ok {
-				r.AlertingRule = rl.(v1.AlertingRule)
-				rules = append(rules, r)
+		if wantedGroups != nil {
+			if slices.Contains(wantedGroups, grp.Name) {
+				for _, rl := range grp.Rules {
+					// For now we only care about AlertingRules,
+					// since RecodingRules can simply be queried.
+					if _, ok := rl.(v1.AlertingRule); ok {
+						r.AlertingRule = rl.(v1.AlertingRule)
+						rules = append(rules, r)
+					}
+				}
+			}
+		} else {
+			for _, rl := range grp.Rules {
+				// For now we only care about AlertingRules,
+				// since RecodingRules can simply be queried.
+				if _, ok := rl.(v1.AlertingRule); ok {
+					r.AlertingRule = rl.(v1.AlertingRule)
+					rules = append(rules, r)
+				}
 			}
 		}
 	}
