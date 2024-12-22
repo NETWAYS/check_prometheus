@@ -34,6 +34,15 @@ The check plugin respects the environment variables `HTTP_PROXY`, `HTTPS_PROXY` 
 
 Various flags can be set with environment variables, refer to the help to see which flags.
 
+In the case Prometheus runs behind a reverse proxy, the `--url` parameter can be used:
+
+```bash
+# https://monitoring.example.com:443/subpath
+
+$ check_prometheus health -H 'monitoring.example.com' --port 443 --secure --url /subpath
+OK - Prometheus Server is Healthy. | statuscode=200
+```
+
 ### Health
 
 Checks the health or readiness status of the Prometheus server.
@@ -141,11 +150,13 @@ Examples:
    | total=2 firing=1 pending=0 inactive=1
 
 Flags:
-  -h, --help           help for alert
-  -n, --name strings   The name of one or more specific alerts to check.
-                       This parameter can be repeated e.G.: '--name alert1 --name alert2'
-                       If no name is given, all alerts will be evaluated
- -P, --problems       Display only alerts which status is not inactive/OK
+      --exclude-alert stringArray  Alerts to ignore. Can be used multiple times and supports regex.
+  -h, --help                       help for alert
+  -n, --name strings               The name of one or more specific alerts to check.
+                                   This parameter can be repeated e.G.: '--name alert1 --name alert2'
+                                   If no name is given, all alerts will be evaluated
+  -T, --no-alerts-state string     State to assign when no alerts are found (0, 1, 2, 3, OK, WARNING, CRITICAL, UNKNOWN). If not set this defaults to OK (default "OK")
+  -P, --problems                   Display only alerts which status is not inactive/OK. Note that in combination with the --name flag this might result in no alerts being displayed
 ```
 
 #### Checking all defined alerts
