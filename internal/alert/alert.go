@@ -25,12 +25,12 @@ func FlattenRules(groups []v1.RuleGroup, wantedGroups []string) []Rule {
 	// Set initial capacity to reduce memory allocations.
 	for _, grp := range groups {
 		if wantedGroups != nil {
-			if slices.Contains(wantedGroups, grp.Name) {
-				l += len(grp.Rules)
+			if !slices.Contains(wantedGroups, grp.Name) {
+				continue
 			}
-		} else {
-			l += len(grp.Rules)
 		}
+
+		l += len(grp.Rules)
 	}
 
 	rules := make([]Rule, 0, l)
@@ -39,24 +39,17 @@ func FlattenRules(groups []v1.RuleGroup, wantedGroups []string) []Rule {
 
 	for _, grp := range groups {
 		if wantedGroups != nil {
-			if slices.Contains(wantedGroups, grp.Name) {
-				for _, rl := range grp.Rules {
-					// For now we only care about AlertingRules,
-					// since RecodingRules can simply be queried.
-					if _, ok := rl.(v1.AlertingRule); ok {
-						r.AlertingRule = rl.(v1.AlertingRule)
-						rules = append(rules, r)
-					}
-				}
+			if !slices.Contains(wantedGroups, grp.Name) {
+				continue
 			}
-		} else {
-			for _, rl := range grp.Rules {
-				// For now we only care about AlertingRules,
-				// since RecodingRules can simply be queried.
-				if _, ok := rl.(v1.AlertingRule); ok {
-					r.AlertingRule = rl.(v1.AlertingRule)
-					rules = append(rules, r)
-				}
+		}
+
+		for _, rl := range grp.Rules {
+			// For now we only care about AlertingRules,
+			// since RecodingRules can simply be queried.
+			if _, ok := rl.(v1.AlertingRule); ok {
+				r.AlertingRule = rl.(v1.AlertingRule)
+				rules = append(rules, r)
 			}
 		}
 	}
