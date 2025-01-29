@@ -1,8 +1,14 @@
 package cmd
 
 import (
+	"os"
 	"testing"
 )
+
+func loadTestdata(filepath string) []byte {
+	data, _ := os.ReadFile(filepath)
+	return data
+}
 
 func TestConfig(t *testing.T) {
 	c := cliConfig.NewClient()

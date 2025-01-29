@@ -1,0 +1,123 @@
+{
+  "status": "success",
+  "data": {
+    "groups": [
+      {
+        "name": "Foo",
+        "file": "alerts.yaml",
+        "rules": [
+          {
+            "state": "inactive",
+            "name": "HostOutOfMemory",
+            "query": "up",
+            "duration": 120,
+            "labels": {
+              "severity": "critical"
+            },
+            "annotations": {
+              "description": "Foo",
+              "summary": "Foo"
+            },
+            "alerts": [],
+            "health": "ok",
+            "evaluationTime": 0.000553928,
+            "lastEvaluation": "2022-11-24T14:08:17.597083058Z",
+            "type": "alerting"
+          }
+        ],
+        "interval": 10,
+        "limit": 0,
+        "evaluationTime": 0.000581212,
+        "lastEvaluation": "2022-11-24T14:08:17.59706083Z"
+      },
+      {
+        "name": "SQL",
+        "file": "alerts.yaml",
+        "rules": [
+          {
+            "state": "pending",
+            "name": "SqlAccessDeniedRate",
+            "query": "mysql",
+            "duration": 17280000,
+            "labels": {
+              "severity": "warning"
+            },
+            "annotations": {
+              "description": "MySQL",
+              "summary": "MySQL"
+            },
+            "alerts": [
+              {
+                "labels": {
+                  "alertname": "SqlAccessDeniedRate",
+                  "instance": "localhost",
+                  "job": "mysql",
+                  "severity": "warning"
+                },
+                "annotations": {
+                  "description": "MySQL",
+                  "summary": "MySQL"
+                },
+                "state": "pending",
+                "activeAt": "2022-11-21T10:38:35.373483748Z",
+                "value": "4.03448275862069e-01"
+              }
+            ],
+            "health": "ok",
+            "evaluationTime": 0.002909617,
+            "lastEvaluation": "2022-11-24T14:08:25.375220595Z",
+            "type": "alerting"
+          }
+        ],
+        "interval": 10,
+        "limit": 0,
+        "evaluationTime": 0.003046259,
+        "lastEvaluation": "2022-11-24T14:08:25.375096825Z"
+      },
+      {
+        "name": "TLS",
+        "file": "alerts.yaml",
+        "rules": [
+          {
+            "state": "firing",
+            "name": "BlackboxTLS",
+            "query": "SSL",
+            "duration": 0,
+            "labels": {
+              "severity": "critical"
+            },
+            "annotations": {
+              "description": "TLS",
+              "summary": "TLS"
+            },
+            "alerts": [
+              {
+                "labels": {
+                  "alertname": "TLS",
+                  "instance": "https://localhost:443",
+                  "job": "blackbox",
+                  "severity": "critical"
+                },
+                "annotations": {
+                  "description": "TLS",
+                  "summary": "TLS"
+                },
+                "state": "firing",
+                "activeAt": "2022-11-24T05:11:27.211699259Z",
+                "value": "-6.065338210999966e+06"
+              }
+            ],
+            "health": "ok",
+            "evaluationTime": 0.000713955,
+            "lastEvaluation": "2022-11-24T14:08:17.212720815Z",
+            "type": "alerting"
+          }
+        ],
+        "interval": 10,
+        "limit": 0,
+        "evaluationTime": 0.000738927,
+        "lastEvaluation": "2022-11-24T14:08:17.212700182Z"
+      }
+    ]
+  }
+}
