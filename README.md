@@ -155,6 +155,9 @@ Flags:
   -n, --name strings               The name of one or more specific alerts to check.
                                    This parameter can be repeated e.G.: '--name alert1 --name alert2'
                                    If no name is given, all alerts will be evaluated
+  -g, --group strings              The name of one or more specific groups to check.
+                                   This parameter can be repeated e.G.: '--group group1 --group group2'
+                                   If no group is given, all groups will be scanned for alerts
   -T, --no-alerts-state string     State to assign when no alerts are found (0, 1, 2, 3, OK, WARNING, CRITICAL, UNKNOWN). If not set this defaults to OK (default "OK")
   -P, --problems                   Display only alerts which status is not inactive/OK. Note that in combination with the --name flag this might result in no alerts being displayed
 ```

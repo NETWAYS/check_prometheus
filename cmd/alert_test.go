@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
@@ -30,6 +31,224 @@ type AlertTest struct {
 }
 
 func TestAlertCmd(t *testing.T) {
+
+	alertTestDataSet1 := fmt.Sprintf(`
+	{
+		"status": "success",
+		"data": {
+			"groups": [
+				{
+					"name": "Foo",
+					"file": "alerts.yaml",
+					"rules": [
+						{
+							"state": "inactive",
+							"name": "HostOutOfMemory",
+							"query": "up",
+							"duration": 120,
+							"labels": {
+									"severity": "critical"
+							},
+							"annotations": {
+									"description": "Foo",
+									"summary": "Foo"
+							},
+							"alerts": [],
+							"health": "ok",
+							"evaluationTime": 0.000553928,
+							"lastEvaluation": "2022-11-24T14:08:17.597083058Z",
+							"type": "alerting"
+						}
+					],
+					"interval": 10,
+					"limit": 0,
+					"evaluationTime": 0.000581212,
+					"lastEvaluation": "2022-11-24T14:08:17.59706083Z"
+				},
+				{
+					"name": "SQL",
+					"file": "alerts.yaml",
+					"rules": [
+						{
+							"state": "pending",
+							"name": "SqlAccessDeniedRate",
+							"query": "mysql",
+							"duration": 17280000,
+							"labels": {
+								"severity": "warning"
+							},
+							"annotations": {
+								"description": "MySQL",
+								"summary": "MySQL"
+							},
+							"alerts": [
+								{
+									"labels": {
+										"alertname": "SqlAccessDeniedRate",
+										"instance": "localhost",
+										"job": "mysql",
+										"severity": "warning"
+									},
+									"annotations": {
+										"description": "MySQL",
+										"summary": "MySQL"
+									},
+									"state": "pending",
+									"activeAt": "2022-11-21T10:38:35.373483748Z",
+									"value": "4.03448275862069e-01"
+								}
+							],
+							"health": "ok",
+							"evaluationTime": 0.002909617,
+							"lastEvaluation": "2022-11-24T14:08:25.375220595Z",
+							"type": "alerting"
+						}
+					],
+					"interval": 10,
+					"limit": 0,
+					"evaluationTime": 0.003046259,
+					"lastEvaluation": "2022-11-24T14:08:25.375096825Z"
+				},
+				{
+					"name": "TLS",
+					"file": "alerts.yaml",
+					"rules": [
+						{
+							"state": "firing",
+							"name": "BlackboxTLS",
+							"query": "SSL",
+							"duration": 0,
+							"labels": {
+								"severity": "critical"
+							},
+							"annotations": {
+								"description": "TLS",
+								"summary": "TLS"
+							},
+							"alerts": [
+								{
+									"labels": {
+										"alertname": "TLS",
+										"instance": "https://localhost:443",
+										"job": "blackbox",
+										"severity": "critical"
+									},
+									"annotations": {
+										"description": "TLS",
+										"summary": "TLS"
+									},
+									"state": "firing",
+									"activeAt": "2022-11-24T05:11:27.211699259Z",
+									"value": "-6.065338210999966e+06"
+								}
+							],
+							"health": "ok",
+							"evaluationTime": 0.000713955,
+							"lastEvaluation": "2022-11-24T14:08:17.212720815Z",
+							"type": "alerting"
+						}
+					],
+					"interval": 10,
+					"limit": 0,
+					"evaluationTime": 0.000738927,
+					"lastEvaluation": "2022-11-24T14:08:17.212700182Z"
+				}
+			]
+		}
+	}`)
+
+	alertTestDataSet2 := fmt.Sprintf(`
+	{
+		"status": "success",
+		"data": {
+			"groups": [
+				{
+					"name": "Foo",
+					"file": "alerts.yaml",
+					"rules": [
+						{
+							"state": "inactive",
+							"name": "InactiveAlert",
+							"query": "foo",
+							"duration": 120,
+							"labels": {
+								"severity": "critical"
+							},
+							"annotations": {
+								"description": "Inactive",
+								"summary": "Inactive"
+							},
+							"alerts": [],
+							"health": "ok",
+							"evaluationTime": 0.000462382,
+							"lastEvaluation": "2022-11-18T14:01:07.597034323Z",
+							"type": "alerting"
+						}
+					],
+					"interval": 10,
+					"limit": 0,
+					"evaluationTime": 0.000478395,
+					"lastEvaluation": "2022-11-18T14:01:07.597021953Z"
+				}
+			]
+		}
+	}`)
+
+	alertTestDataSet3 := fmt.Sprintf(`
+	{
+		"status": "success",
+		"data": {
+			"groups": [
+				{
+					"name": "k8s",
+					"file": "/etc/prometheus/rules/al.yaml",
+					"rules": [
+						{
+							"state": "inactive",
+							"name": "NodeHasMemoryPressure",
+							"query": "kube_node{condition=\"MemoryPressure\",status=\"true\"} == 1",
+							"duration": 300,
+							"keepFiringFor": 0,
+							"labels": {},
+							"annotations": {
+								"summary": "Memory pressure on instance {{ $labels.instance }}"
+							},
+							"alerts": [],
+							"health": "ok",
+							"evaluationTime": 0.00023339,
+							"lastEvaluation": "2024-12-18T17:50:01.483161228Z",
+							"type": "alerting"
+						}
+					],
+					"interval": 15,
+					"limit": 0,
+					"evaluationTime": 0.000262616,
+					"lastEvaluation": "2024-12-18T17:50:01.483135426Z"
+				},
+				{
+					"name": "example",
+					"file": "/etc/prometheus/rules/rec.yaml",
+					"rules": [
+						{
+							"name": "rule:prometheus_http_requests_total:sum",
+							"query": "sum by (code) (rate(prometheus_http_requests_total[5m]))",
+							"health": "ok",
+							"evaluationTime": 0.000472562,
+							"lastEvaluation": "2024-12-18T17:50:12.420737469Z",
+							"type": "recording"
+						}
+					],
+					"interval": 15,
+					"limit": 0,
+					"evaluationTime": 0.000497618,
+					"lastEvaluation": "2024-12-18T17:50:12.42071533Z"
+				}
+			],
+			"groupNextToken:omitempty": ""
+		}
+	}
+	`)
+
 	tests := []AlertTest{
 		{
 			name: "alert-none",
@@ -71,7 +290,7 @@ func TestAlertCmd(t *testing.T) {
 			name: "alert-default",
 			server: httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 				w.WriteHeader(http.StatusOK)
-				w.Write([]byte(`{"status":"success","data":{"groups":[{"name":"Foo","file":"alerts.yaml","rules":[{"state":"inactive","name":"HostOutOfMemory","query":"up","duration":120,"labels":{"severity":"critical"},"annotations":{"description":"Foo","summary":"Foo"},"alerts":[],"health":"ok","evaluationTime":0.000553928,"lastEvaluation":"2022-11-24T14:08:17.597083058Z","type":"alerting"}],"interval":10,"limit":0,"evaluationTime":0.000581212,"lastEvaluation":"2022-11-24T14:08:17.59706083Z"},{"name":"SQL","file":"alerts.yaml","rules":[{"state":"pending","name":"SqlAccessDeniedRate","query":"mysql","duration":17280000,"labels":{"severity":"warning"},"annotations":{"description":"MySQL","summary":"MySQL"},"alerts":[{"labels":{"alertname":"SqlAccessDeniedRate","instance":"localhost","job":"mysql","severity":"warning"},"annotations":{"description":"MySQL","summary":"MySQL"},"state":"pending","activeAt":"2022-11-21T10:38:35.373483748Z","value":"4.03448275862069e-01"}],"health":"ok","evaluationTime":0.002909617,"lastEvaluation":"2022-11-24T14:08:25.375220595Z","type":"alerting"}],"interval":10,"limit":0,"evaluationTime":0.003046259,"lastEvaluation":"2022-11-24T14:08:25.375096825Z"},{"name":"TLS","file":"alerts.yaml","rules":[{"state":"firing","name":"BlackboxTLS","query":"SSL","duration":0,"labels":{"severity":"critical"},"annotations":{"description":"TLS","summary":"TLS"},"alerts":[{"labels":{"alertname":"TLS","instance":"https://localhost:443","job":"blackbox","severity":"critical"},"annotations":{"description":"TLS","summary":"TLS"},"state":"firing","activeAt":"2022-11-24T05:11:27.211699259Z","value":"-6.065338210999966e+06"}],"health":"ok","evaluationTime":0.000713955,"lastEvaluation":"2022-11-24T14:08:17.212720815Z","type":"alerting"}],"interval":10,"limit":0,"evaluationTime":0.000738927,"lastEvaluation":"2022-11-24T14:08:17.212700182Z"}]}}`))
+				w.Write([]byte(alertTestDataSet1))
 			})),
 			args: []string{"run", "../main.go", "alert"},
 			expected: `[CRITICAL] - 3 Alerts: 1 Firing - 1 Pending - 1 Inactive
@@ -87,9 +306,37 @@ exit status 2
 			name: "alert-problems-only",
 			server: httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 				w.WriteHeader(http.StatusOK)
-				w.Write([]byte(`{"status":"success","data":{"groups":[{"name":"Foo","file":"alerts.yaml","rules":[{"state":"inactive","name":"HostOutOfMemory","query":"up","duration":120,"labels":{"severity":"critical"},"annotations":{"description":"Foo","summary":"Foo"},"alerts":[],"health":"ok","evaluationTime":0.000553928,"lastEvaluation":"2022-11-24T14:08:17.597083058Z","type":"alerting"}],"interval":10,"limit":0,"evaluationTime":0.000581212,"lastEvaluation":"2022-11-24T14:08:17.59706083Z"},{"name":"SQL","file":"alerts.yaml","rules":[{"state":"pending","name":"SqlAccessDeniedRate","query":"mysql","duration":17280000,"labels":{"severity":"warning"},"annotations":{"description":"MySQL","summary":"MySQL"},"alerts":[{"labels":{"alertname":"SqlAccessDeniedRate","instance":"localhost","job":"mysql","severity":"warning"},"annotations":{"description":"MySQL","summary":"MySQL"},"state":"pending","activeAt":"2022-11-21T10:38:35.373483748Z","value":"4.03448275862069e-01"}],"health":"ok","evaluationTime":0.002909617,"lastEvaluation":"2022-11-24T14:08:25.375220595Z","type":"alerting"}],"interval":10,"limit":0,"evaluationTime":0.003046259,"lastEvaluation":"2022-11-24T14:08:25.375096825Z"},{"name":"TLS","file":"alerts.yaml","rules":[{"state":"firing","name":"BlackboxTLS","query":"SSL","duration":0,"labels":{"severity":"critical"},"annotations":{"description":"TLS","summary":"TLS"},"alerts":[{"labels":{"alertname":"TLS","instance":"https://localhost:443","job":"blackbox","severity":"critical"},"annotations":{"description":"TLS","summary":"TLS"},"state":"firing","activeAt":"2022-11-24T05:11:27.211699259Z","value":"-6.065338210999966e+06"}],"health":"ok","evaluationTime":0.000713955,"lastEvaluation":"2022-11-24T14:08:17.212720815Z","type":"alerting"}],"interval":10,"limit":0,"evaluationTime":0.000738927,"lastEvaluation":"2022-11-24T14:08:17.212700182Z"}]}}`))
+				w.Write([]byte(alertTestDataSet1))
 			})),
 			args: []string{"run", "../main.go", "alert", "--problems"},
+			expected: `[CRITICAL] - 2 Alerts: 1 Firing - 1 Pending - 0 Inactive
+\_ [WARNING] [SqlAccessDeniedRate] - Job: [mysql] on Instance: [localhost] is pending - value: 0.40
+\_ [CRITICAL] [BlackboxTLS] - Job: [blackbox] on Instance: [https://localhost:443] is firing - value: -6065338.00
+|total=2 firing=1 pending=1 inactive=0
+
+exit status 2
+`,
+		},
+		{
+			name: "alert-problems-only-with-exlude-on-one-group",
+			server: httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				w.WriteHeader(http.StatusOK)
+				w.Write([]byte(alertTestDataSet1))
+			})),
+			args: []string{"run", "../main.go", "alert", "--problems", "-g", "TLS"},
+			expected: `[CRITICAL] - 1 Alerts: 1 Firing - 0 Pending - 0 Inactive
+\_ [CRITICAL] [BlackboxTLS] - Job: [blackbox] on Instance: [https://localhost:443] is firing - value: -6065338.00
+
+exit status 2
+`,
+		},
+		{
+			name: "alert-problems-only-with-exlude-on-two-groups",
+			server: httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				w.WriteHeader(http.StatusOK)
+				w.Write([]byte(alertTestDataSet1))
+			})),
+			args: []string{"run", "../main.go", "alert", "--problems", "-g", "SQL", "-g", "TLS"},
 			expected: `[CRITICAL] - 2 Alerts: 1 Firing - 1 Pending - 0 Inactive
 \_ [WARNING] [SqlAccessDeniedRate] - Job: [mysql] on Instance: [localhost] is pending - value: 0.40
 \_ [CRITICAL] [BlackboxTLS] - Job: [blackbox] on Instance: [https://localhost:443] is firing - value: -6065338.00
@@ -102,7 +349,7 @@ exit status 2
 			name: "alert-problems-only-with-exlude",
 			server: httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 				w.WriteHeader(http.StatusOK)
-				w.Write([]byte(`{"status":"success","data":{"groups":[{"name":"Foo","file":"alerts.yaml","rules":[{"state":"inactive","name":"HostOutOfMemory","query":"up","duration":120,"labels":{"severity":"critical"},"annotations":{"description":"Foo","summary":"Foo"},"alerts":[],"health":"ok","evaluationTime":0.000553928,"lastEvaluation":"2022-11-24T14:08:17.597083058Z","type":"alerting"}],"interval":10,"limit":0,"evaluationTime":0.000581212,"lastEvaluation":"2022-11-24T14:08:17.59706083Z"},{"name":"SQL","file":"alerts.yaml","rules":[{"state":"pending","name":"SqlAccessDeniedRate","query":"mysql","duration":17280000,"labels":{"severity":"warning"},"annotations":{"description":"MySQL","summary":"MySQL"},"alerts":[{"labels":{"alertname":"SqlAccessDeniedRate","instance":"localhost","job":"mysql","severity":"warning"},"annotations":{"description":"MySQL","summary":"MySQL"},"state":"pending","activeAt":"2022-11-21T10:38:35.373483748Z","value":"4.03448275862069e-01"}],"health":"ok","evaluationTime":0.002909617,"lastEvaluation":"2022-11-24T14:08:25.375220595Z","type":"alerting"}],"interval":10,"limit":0,"evaluationTime":0.003046259,"lastEvaluation":"2022-11-24T14:08:25.375096825Z"},{"name":"TLS","file":"alerts.yaml","rules":[{"state":"firing","name":"BlackboxTLS","query":"SSL","duration":0,"labels":{"severity":"critical"},"annotations":{"description":"TLS","summary":"TLS"},"alerts":[{"labels":{"alertname":"TLS","instance":"https://localhost:443","job":"blackbox","severity":"critical"},"annotations":{"description":"TLS","summary":"TLS"},"state":"firing","activeAt":"2022-11-24T05:11:27.211699259Z","value":"-6.065338210999966e+06"}],"health":"ok","evaluationTime":0.000713955,"lastEvaluation":"2022-11-24T14:08:17.212720815Z","type":"alerting"}],"interval":10,"limit":0,"evaluationTime":0.000738927,"lastEvaluation":"2022-11-24T14:08:17.212700182Z"}]}}`))
+				w.Write([]byte(alertTestDataSet1))
 			})),
 			args: []string{"run", "../main.go", "alert", "--problems", "--exclude-alert", "Sql.*DeniedRate"},
 			expected: `[CRITICAL] - 1 Alerts: 1 Firing - 0 Pending - 0 Inactive
@@ -115,7 +362,7 @@ exit status 2
 			name: "alert-with-exclude-error",
 			server: httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 				w.WriteHeader(http.StatusOK)
-				w.Write([]byte(`{"status":"success","data":{"groups":[{"name":"k8s","file":"/etc/prometheus/rules/al.yaml","rules":[{"state":"inactive","name":"NodeHasMemoryPressure","query":"kube_node{condition=\"MemoryPressure\",status=\"true\"} == 1","duration":300,"keepFiringFor":0,"labels":{},"annotations":{"summary":"Memory pressure on instance {{ $labels.instance }}"},"alerts":[],"health":"ok","evaluationTime":0.00023339,"lastEvaluation":"2024-12-18T17:50:01.483161228Z","type":"alerting"}],"interval":15,"limit":0,"evaluationTime":0.000262616,"lastEvaluation":"2024-12-18T17:50:01.483135426Z"},{"name":"example","file":"/etc/prometheus/rules/rec.yaml","rules":[{"name":"rule:prometheus_http_requests_total:sum","query":"sum by (code) (rate(prometheus_http_requests_total[5m]))","health":"ok","evaluationTime":0.000472562,"lastEvaluation":"2024-12-18T17:50:12.420737469Z","type":"recording"}],"interval":15,"limit":0,"evaluationTime":0.000497618,"lastEvaluation":"2024-12-18T17:50:12.42071533Z"}],"groupNextToken:omitempty":""}}`))
+				w.Write([]byte(alertTestDataSet3))
 			})),
 			args:     []string{"run", "../main.go", "alert", "--exclude-alert", "[a-z"},
 			expected: "[UNKNOWN] - Invalid regular expression provided: error parsing regexp: missing closing ]: `[a-z`\nexit status 3\n",
@@ -124,7 +371,7 @@ exit status 2
 			name: "alert-no-such-alert",
 			server: httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 				w.WriteHeader(http.StatusOK)
-				w.Write([]byte(`{"status":"success","data":{"groups":[{"name":"Foo","file":"alerts.yaml","rules":[{"state":"inactive","name":"InactiveAlert","query":"foo","duration":120,"labels":{"severity":"critical"},"annotations":{"description":"Inactive","summary":"Inactive"},"alerts":[],"health":"ok","evaluationTime":0.000462382,"lastEvaluation":"2022-11-18T14:01:07.597034323Z","type":"alerting"}],"interval":10,"limit":0,"evaluationTime":0.000478395,"lastEvaluation":"2022-11-18T14:01:07.597021953Z"}]}}`))
+				w.Write([]byte(alertTestDataSet2))
 			})),
 			args:     []string{"run", "../main.go", "alert", "--name", "NoSuchAlert"},
 			expected: "[UNKNOWN] - 0 Alerts: 0 Firing - 0 Pending - 0 Inactive\n\nexit status 3\n",
@@ -133,7 +380,7 @@ exit status 2
 			name: "alert-inactive-with-problems",
 			server: httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 				w.WriteHeader(http.StatusOK)
-				w.Write([]byte(`{"status":"success","data":{"groups":[{"name":"Foo","file":"alerts.yaml","rules":[{"state":"inactive","name":"InactiveAlert","query":"foo","duration":120,"labels":{"severity":"critical"},"annotations":{"description":"Inactive","summary":"Inactive"},"alerts":[],"health":"ok","evaluationTime":0.000462382,"lastEvaluation":"2022-11-18T14:01:07.597034323Z","type":"alerting"}],"interval":10,"limit":0,"evaluationTime":0.000478395,"lastEvaluation":"2022-11-18T14:01:07.597021953Z"}]}}`))
+				w.Write([]byte(alertTestDataSet2))
 			})),
 			args:     []string{"run", "../main.go", "alert", "--name", "InactiveAlert", "--problems"},
 			expected: "[UNKNOWN] - 0 Alerts: 0 Firing - 0 Pending - 0 Inactive\n\nexit status 3\n",
@@ -142,7 +389,7 @@ exit status 2
 			name: "alert-multiple-alerts",
 			server: httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 				w.WriteHeader(http.StatusOK)
-				w.Write([]byte(`{"status":"success","data":{"groups":[{"name":"Foo","file":"alerts.yaml","rules":[{"state":"inactive","name":"HostOutOfMemory","query":"up","duration":120,"labels":{"severity":"critical"},"annotations":{"description":"Foo","summary":"Foo"},"alerts":[],"health":"ok","evaluationTime":0.000553928,"lastEvaluation":"2022-11-24T14:08:17.597083058Z","type":"alerting"}],"interval":10,"limit":0,"evaluationTime":0.000581212,"lastEvaluation":"2022-11-24T14:08:17.59706083Z"},{"name":"SQL","file":"alerts.yaml","rules":[{"state":"pending","name":"SqlAccessDeniedRate","query":"mysql","duration":17280000,"labels":{"severity":"warning"},"annotations":{"description":"MySQL","summary":"MySQL"},"alerts":[{"labels":{"alertname":"SqlAccessDeniedRate","instance":"localhost","job":"mysql","severity":"warning"},"annotations":{"description":"MySQL","summary":"MySQL"},"state":"pending","activeAt":"2022-11-21T10:38:35.373483748Z","value":"4.03448275862069e-01"}],"health":"ok","evaluationTime":0.002909617,"lastEvaluation":"2022-11-24T14:08:25.375220595Z","type":"alerting"}],"interval":10,"limit":0,"evaluationTime":0.003046259,"lastEvaluation":"2022-11-24T14:08:25.375096825Z"},{"name":"TLS","file":"alerts.yaml","rules":[{"state":"firing","name":"BlackboxTLS","query":"SSL","duration":0,"labels":{"severity":"critical"},"annotations":{"description":"TLS","summary":"TLS"},"alerts":[{"labels":{"alertname":"TLS","instance":"https://localhost:443","job":"blackbox","severity":"critical"},"annotations":{"description":"TLS","summary":"TLS"},"state":"firing","activeAt":"2022-11-24T05:11:27.211699259Z","value":"-6.065338210999966e+06"}],"health":"ok","evaluationTime":0.000713955,"lastEvaluation":"2022-11-24T14:08:17.212720815Z","type":"alerting"}],"interval":10,"limit":0,"evaluationTime":0.000738927,"lastEvaluation":"2022-11-24T14:08:17.212700182Z"}]}}`))
+				w.Write([]byte(alertTestDataSet1))
 			})),
 			args: []string{"run", "../main.go", "alert", "--name", "HostOutOfMemory", "--name", "BlackboxTLS"},
 			expected: `[CRITICAL] - 2 Alerts: 1 Firing - 0 Pending - 1 Inactive
@@ -157,7 +404,7 @@ exit status 2
 			name: "alert-multiple-alerts-problems-only",
 			server: httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 				w.WriteHeader(http.StatusOK)
-				w.Write([]byte(`{"status":"success","data":{"groups":[{"name":"Foo","file":"alerts.yaml","rules":[{"state":"inactive","name":"HostOutOfMemory","query":"up","duration":120,"labels":{"severity":"critical"},"annotations":{"description":"Foo","summary":"Foo"},"alerts":[],"health":"ok","evaluationTime":0.000553928,"lastEvaluation":"2022-11-24T14:08:17.597083058Z","type":"alerting"}],"interval":10,"limit":0,"evaluationTime":0.000581212,"lastEvaluation":"2022-11-24T14:08:17.59706083Z"},{"name":"SQL","file":"alerts.yaml","rules":[{"state":"pending","name":"SqlAccessDeniedRate","query":"mysql","duration":17280000,"labels":{"severity":"warning"},"annotations":{"description":"MySQL","summary":"MySQL"},"alerts":[{"labels":{"alertname":"SqlAccessDeniedRate","instance":"localhost","job":"mysql","severity":"warning"},"annotations":{"description":"MySQL","summary":"MySQL"},"state":"pending","activeAt":"2022-11-21T10:38:35.373483748Z","value":"4.03448275862069e-01"}],"health":"ok","evaluationTime":0.002909617,"lastEvaluation":"2022-11-24T14:08:25.375220595Z","type":"alerting"}],"interval":10,"limit":0,"evaluationTime":0.003046259,"lastEvaluation":"2022-11-24T14:08:25.375096825Z"},{"name":"TLS","file":"alerts.yaml","rules":[{"state":"firing","name":"BlackboxTLS","query":"SSL","duration":0,"labels":{"severity":"critical"},"annotations":{"description":"TLS","summary":"TLS"},"alerts":[{"labels":{"alertname":"TLS","instance":"https://localhost:443","job":"blackbox","severity":"critical"},"annotations":{"description":"TLS","summary":"TLS"},"state":"firing","activeAt":"2022-11-24T05:11:27.211699259Z","value":"-6.065338210999966e+06"}],"health":"ok","evaluationTime":0.000713955,"lastEvaluation":"2022-11-24T14:08:17.212720815Z","type":"alerting"}],"interval":10,"limit":0,"evaluationTime":0.000738927,"lastEvaluation":"2022-11-24T14:08:17.212700182Z"}]}}`))
+				w.Write([]byte(alertTestDataSet1))
 			})),
 			args: []string{"run", "../main.go", "alert", "--name", "HostOutOfMemory", "--name", "BlackboxTLS", "--problems"},
 			expected: `[CRITICAL] - 1 Alerts: 1 Firing - 0 Pending - 0 Inactive
@@ -171,7 +418,7 @@ exit status 2
 			name: "alert-inactive",
 			server: httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 				w.WriteHeader(http.StatusOK)
-				w.Write([]byte(`{"status":"success","data":{"groups":[{"name":"Foo","file":"alerts.yaml","rules":[{"state":"inactive","name":"InactiveAlert","query":"foo","duration":120,"labels":{"severity":"critical"},"annotations":{"description":"Inactive","summary":"Inactive"},"alerts":[],"health":"ok","evaluationTime":0.000462382,"lastEvaluation":"2022-11-18T14:01:07.597034323Z","type":"alerting"}],"interval":10,"limit":0,"evaluationTime":0.000478395,"lastEvaluation":"2022-11-18T14:01:07.597021953Z"}]}}`))
+				w.Write([]byte(alertTestDataSet2))
 			})),
 			args:     []string{"run", "../main.go", "alert", "--name", "InactiveAlert"},
 			expected: "[OK] - 1 Alerts: 0 Firing - 0 Pending - 1 Inactive\n\\_ [OK] [InactiveAlert] is inactive\n|firing=0 pending=0 inactive=1\n\n",
