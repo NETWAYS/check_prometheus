@@ -1,0 +1,52 @@
+{
+  "status": "success",
+  "data": {
+    "groups": [
+      {
+        "name": "k8s",
+        "file": "/etc/prometheus/rules/al.yaml",
+        "rules": [
+          {
+            "state": "inactive",
+            "name": "NodeHasMemoryPressure",
+            "query": "kube_node{condition=\"MemoryPressure\",status=\"true\"} == 1",
+            "duration": 300,
+            "keepFiringFor": 0,
+            "labels": {},
+            "annotations": {
+              "summary": "Memory pressure on instance {{ $labels.instance }}"
+            },
+            "alerts": [],
+            "health": "ok",
+            "evaluationTime": 0.00023339,
+            "lastEvaluation": "2024-12-18T17:50:01.483161228Z",
+            "type": "alerting"
+          }
+        ],
+        "interval": 15,
+        "limit": 0,
+        "evaluationTime": 0.000262616,
+        "lastEvaluation": "2024-12-18T17:50:01.483135426Z"
+      },
+      {
+        "name": "example",
+        "file": "/etc/prometheus/rules/rec.yaml",
+        "rules": [
+          {
+            "name": "rule:prometheus_http_requests_total:sum",
+            "query": "sum by (code) (rate(prometheus_http_requests_total[5m]))",
+            "health": "ok",
+            "evaluationTime": 0.000472562,
+            "lastEvaluation": "2024-12-18T17:50:12.420737469Z",
+            "type": "recording"
+          }
+        ],
+        "interval": 15,
+        "limit": 0,
+        "evaluationTime": 0.000497618,
+        "lastEvaluation": "2024-12-18T17:50:12.42071533Z"
+      }
+    ],
+    "groupNextToken:omitempty": ""
+  }
+}

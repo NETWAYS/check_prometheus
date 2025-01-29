@@ -44,6 +44,15 @@ type QueryTest struct {
 }
 
 func TestQueryCmd(t *testing.T) {
+
+	queryTestDataSet1 := "../testdata/unittest/queryDataset1.json"
+
+	queryTestDataSet2 := "../testdata/unittest/queryDataset2.json"
+
+	queryTestDataSet3 := "../testdata/unittest/queryDataset3.json"
+
+	queryTestDataSet4 := "../testdata/unittest/queryDataset4.json"
+
 	tests := []QueryTest{
 		{
 			name: "query-warning",
@@ -94,7 +103,7 @@ func TestQueryCmd(t *testing.T) {
 			name: "query-matrix-exists",
 			server: httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 				w.WriteHeader(http.StatusOK)
-				w.Write([]byte(`{"status":"success","data":{"resultType":"matrix","result":[{"metric":{"__name__":"up","instance":"localhost","job":"node"},"values":[[1670340712.988,"1"],[1670340772.988,"1"],[1670340832.990,"1"],[1670340892.990,"1"],[1670340952.990,"1"]]}]}}`))
+				w.Write(loadTestdata(queryTestDataSet1))
 			})),
 			args:     []string{"run", "../main.go", "query", "--query", "up{job=\"prometheus\"}[5m]"},
 			expected: "[OK] - states: ok=1\n\\_ [OK]  1 @[1670340952.99] - value: 1\n|up_instance_localhost_job_node=1;10;20\n\n",
@@ -103,7 +112,7 @@ func TestQueryCmd(t *testing.T) {
 			name: "query-metric-exists2",
 			server: httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 				w.WriteHeader(http.StatusOK)
-				w.Write([]byte(`{"status":"success","data":{"resultType":"vector","result":[{"metric":{"__name__":"up","instance":"localhost","job":"prometheus"},"value":[1668782473.835,"1"]}]}}`))
+				w.Write(loadTestdata(queryTestDataSet2))
 			})),
 			args:     []string{"run", "../main.go", "query", "--query", "up{job=\"prometheus\"}"},
 			expected: "[OK] - states: ok=1\n\\_ [OK]  up{instance=\"localhost\", job=\"prometheus\"} - value: 1\n|up_instance_localhost_job_prometheus=1;10;20\n\n",
@@ -112,7 +121,7 @@ func TestQueryCmd(t *testing.T) {
 			name: "query-threshold-ok",
 			server: httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 				w.WriteHeader(http.StatusOK)
-				w.Write([]byte(`{"status":"success","data":{"resultType":"vector","result":[{"metric":{"__name__":"up","instance":"localhost","job":"prometheus"},"value":[1668782473.835,"100"]}]}}`))
+				w.Write(loadTestdata(queryTestDataSet3))
 			})),
 			args:     []string{"run", "../main.go", "query", "--query", "up{job=\"prometheus\"}", "-w", "0:", "-c", "0:"},
 			expected: "[OK] - states: ok=1\n\\_ [OK]  up{instance=\"localhost\", job=\"prometheus\"} - value: 100\n|up_instance_localhost_job_prometheus=100\n\n",
@@ -121,7 +130,7 @@ func TestQueryCmd(t *testing.T) {
 			name: "query-threshold-critical",
 			server: httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 				w.WriteHeader(http.StatusOK)
-				w.Write([]byte(`{"status":"success","data":{"resultType":"vector","result":[{"metric":{"__name__":"up","instance":"localhost","job":"prometheus"},"value":[1668782473.835,"-100"]}]}}`))
+				w.Write(loadTestdata(queryTestDataSet4))
 			})),
 			args:     []string{"run", "../main.go", "query", "--query", "up{job=\"prometheus\"}", "-w", "0:", "-c", "0:"},
 			expected: "[CRITICAL] - states: critical=1\n\\_ [CRITICAL]  up{instance=\"localhost\", job=\"prometheus\"} - value: -100\n|up_instance_localhost_job_prometheus=-100\n\nexit status 2\n",
