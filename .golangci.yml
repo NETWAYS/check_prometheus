@@ -5,8 +5,8 @@ linters:
    enable-all: true
    disable:
      - cyclop
+     - exportloopref
      - depguard
-     - exhaustivestruct
      - exhaustruct
      - forbidigo
      - forcetypeassert
@@ -15,9 +15,8 @@ linters:
      - gochecknoinits
      - godox
      - godot
-     - goerr113
+     - err113
      - gofumpt
-     - gomnd
      - mnd
      - lll
      - musttag
@@ -28,8 +27,3 @@ linters:
      - tagliatelle
      - varnamelen
      - wrapcheck
-linters-settings:
-   estif:
-     min-complexity: 4
-   maligned:
-     suggest-new: true
