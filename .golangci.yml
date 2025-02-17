@@ -5,6 +5,7 @@ linters:
    enable-all: true
    disable:
      - cyclop
+     - exportloopref
      - depguard
      - exhaustruct
      - forbidigo
