@@ -27,8 +27,3 @@ linters:
      - tagliatelle
      - varnamelen
      - wrapcheck
-linters-settings:
-   estif:
-     min-complexity: 4
-   maligned:
-     suggest-new: true
