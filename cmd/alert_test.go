@@ -47,7 +47,7 @@ func TestAlertCmd(t *testing.T) {
 				w.Write([]byte(`{"status":"success","data":{"groups":[]}}`))
 			})),
 			args:     []string{"run", "../main.go", "alert"},
-			expected: "[OK] - No alerts defined\n",
+			expected: "[OK] - No alerts defined | total=0 firing=0 pending=0 inactive=0\n",
 		},
 		{
 			name: "alert-none-with-problems",
@@ -56,7 +56,7 @@ func TestAlertCmd(t *testing.T) {
 				w.Write([]byte(`{"status":"success","data":{"groups":[]}}`))
 			})),
 			args:     []string{"run", "../main.go", "alert", "--problems"},
-			expected: "[OK] - No alerts defined\n",
+			expected: "[OK] - No alerts defined | total=0 firing=0 pending=0 inactive=0\n",
 		},
 		{
 			name: "alert-none-with-no-state",
@@ -65,7 +65,7 @@ func TestAlertCmd(t *testing.T) {
 				w.Write([]byte(`{"status":"success","data":{"groups":[]}}`))
 			})),
 			args:     []string{"run", "../main.go", "alert", "--no-alerts-state", "3"},
-			expected: "[UNKNOWN] - No alerts defined\nexit status 3\n",
+			expected: "[UNKNOWN] - No alerts defined | total=0 firing=0 pending=0 inactive=0\nexit status 3\n",
 		},
 		{
 			name: "alert-none-with-name",
@@ -74,7 +74,7 @@ func TestAlertCmd(t *testing.T) {
 				w.Write([]byte(`{"status":"success","data":{"groups":[]}}`))
 			})),
 			args:     []string{"run", "../main.go", "alert", "--name", "MyPreciousAlert"},
-			expected: "[UNKNOWN] - No such alert defined\nexit status 3\n",
+			expected: "[UNKNOWN] - No such alert defined | total=0 firing=0 pending=0 inactive=0\nexit status 3\n",
 		},
 		{
 			name: "alert-default",
@@ -116,6 +116,7 @@ exit status 2
 			args: []string{"run", "../main.go", "alert", "--problems", "-g", "TLS"},
 			expected: `[CRITICAL] - 1 Alerts: 1 Firing - 0 Pending - 0 Inactive
 \_ [CRITICAL] [BlackboxTLS] - Job: [blackbox] on Instance: [https://localhost:443] is firing - value: -6065338.00
+|total=1 firing=1 pending=0 inactive=0
 
 exit status 2
 `,
@@ -144,6 +145,7 @@ exit status 2
 			args: []string{"run", "../main.go", "alert", "--problems", "--exclude-alert", "Sql.*DeniedRate"},
 			expected: `[CRITICAL] - 1 Alerts: 1 Firing - 0 Pending - 0 Inactive
 \_ [CRITICAL] [BlackboxTLS] - Job: [blackbox] on Instance: [https://localhost:443] is firing - value: -6065338.00
+|total=1 firing=1 pending=0 inactive=0
 
 exit status 2
 `,
@@ -163,8 +165,13 @@ exit status 2
 				w.WriteHeader(http.StatusOK)
 				w.Write(loadTestdata(alertTestDataSet2))
 			})),
-			args:     []string{"run", "../main.go", "alert", "--name", "NoSuchAlert"},
-			expected: "[UNKNOWN] - 0 Alerts: 0 Firing - 0 Pending - 0 Inactive\n\nexit status 3\n",
+			args: []string{"run", "../main.go", "alert", "--name", "NoSuchAlert"},
+			expected: `[UNKNOWN] - 0 Alerts: 0 Firing - 0 Pending - 0 Inactive
+\_ [UNKNOWN] No alerts retrieved
+|total=0 firing=0 pending=0 inactive=0
+
+exit status 3
+`,
 		},
 		{
 			name: "alert-inactive-with-problems",
@@ -172,8 +179,13 @@ exit status 2
 				w.WriteHeader(http.StatusOK)
 				w.Write(loadTestdata(alertTestDataSet2))
 			})),
-			args:     []string{"run", "../main.go", "alert", "--name", "InactiveAlert", "--problems"},
-			expected: "[UNKNOWN] - 0 Alerts: 0 Firing - 0 Pending - 0 Inactive\n\nexit status 3\n",
+			args: []string{"run", "../main.go", "alert", "--name", "InactiveAlert", "--problems"},
+			expected: `[UNKNOWN] - 0 Alerts: 0 Firing - 0 Pending - 0 Inactive
+\_ [UNKNOWN] No alerts retrieved
+|total=0 firing=0 pending=0 inactive=0
+
+exit status 3
+`,
 		},
 		{
 			name: "alert-multiple-alerts",
@@ -211,7 +223,7 @@ exit status 2
 				w.Write(loadTestdata(alertTestDataSet2))
 			})),
 			args:     []string{"run", "../main.go", "alert", "--name", "InactiveAlert"},
-			expected: "[OK] - 1 Alerts: 0 Firing - 0 Pending - 1 Inactive\n\\_ [OK] [InactiveAlert] is inactive\n|firing=0 pending=0 inactive=1\n\n",
+			expected: "[OK] - 1 Alerts: 0 Firing - 0 Pending - 1 Inactive\n\\_ [OK] [InactiveAlert] is inactive\n|total=1 firing=0 pending=0 inactive=1\n\n",
 		},
 		{
 			name: "alert-recording-rule",
@@ -220,7 +232,7 @@ exit status 2
 				w.Write(loadTestdata(alertTestDataSet4))
 			})),
 			args:     []string{"run", "../main.go", "alert", "--name", "InactiveAlert"},
-			expected: "[OK] - 1 Alerts: 0 Firing - 0 Pending - 1 Inactive\n\\_ [OK] [InactiveAlert] is inactive\n|firing=0 pending=0 inactive=1\n\n",
+			expected: "[OK] - 1 Alerts: 0 Firing - 0 Pending - 1 Inactive\n\\_ [OK] [InactiveAlert] is inactive\n|total=1 firing=0 pending=0 inactive=1\n\n",
 		},
 	}
 
