@@ -26,6 +26,8 @@ Flags:
       --cert-file string   Specify the Certificate File for TLS authentication (CHECK_PROMETHEUS_CERT_FILE)
       --key-file string    Specify the Key File for TLS authentication (CHECK_PROMETHEUS_KEY_FILE)
   -t, --timeout int        Timeout in seconds for the CheckPlugin (default 30)
+      --header strings     Additional HTTP header to include in the request. Can be used multiple times.
+                           Keys and values are separated by a colon (--header "X-Custom: example").
   -h, --help               help for check_prometheus
   -v, --version            version for check_prometheus
 ```

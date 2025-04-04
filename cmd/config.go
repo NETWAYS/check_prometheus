@@ -23,6 +23,7 @@ type Config struct {
 	KeyFile   string `env:"CHECK_PROMETHEUS_KEY_FILE"`
 	Hostname  string `env:"CHECK_PROMETHEUS_HOSTNAME"`
 	URL       string `env:"CHECK_PROMETHEUS_URL"`
+	Headers   []string
 	Port      int
 	Info      bool
 	Insecure  bool
@@ -104,6 +105,20 @@ func (c *Config) NewClient() *client.Client {
 		var p = config.NewInlineSecret(s[1])
 
 		rt = config.NewBasicAuthRoundTripper(u, p, rt)
+	}
+
+	// If extra headers are set, parse them and add them to the request
+	if len(c.Headers) > 0 {
+		headers := make(map[string]string)
+
+		for _, h := range c.Headers {
+			head := strings.Split(h, ":")
+			if len(head) == 2 {
+				headers[strings.TrimSpace(head[0])] = strings.TrimSpace(head[1])
+			}
+		}
+
+		rt = client.NewHeadersRoundTripper(headers, rt)
 	}
 
 	return client.NewClient(u.String(), rt)
