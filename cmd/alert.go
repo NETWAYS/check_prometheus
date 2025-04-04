@@ -173,7 +173,7 @@ inactive = 0`,
 		}
 
 		counterAlert := counterFiring + counterPending + counterInactive
-		if len(cliAlertConfig.AlertName) > 1 || counterAlert > 1 {
+		if len(cliAlertConfig.AlertName) > 1 && counterAlert > 1 {
 			perfList := perfdata.PerfdataList{
 				{Label: "total", Value: counterAlert},
 				{Label: "firing", Value: counterFiring},
