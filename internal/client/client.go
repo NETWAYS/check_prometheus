@@ -85,3 +85,39 @@ func (c *Client) GetStatus(ctx context.Context, endpoint string) (returncode int
 
 	return check.Unknown, resp.StatusCode, respBody, err
 }
+
+type headersRoundTripper struct {
+	headers map[string]string
+	rt      http.RoundTripper
+}
+
+// NewHeadersRoundTripper adds the given headers to a request
+func NewHeadersRoundTripper(headers map[string]string, rt http.RoundTripper) http.RoundTripper {
+	return &headersRoundTripper{headers, rt}
+}
+
+func (rt *headersRoundTripper) RoundTrip(req *http.Request) (*http.Response, error) {
+	// RoundTrip should not modify the request, except for
+	// consuming and closing the Request's Body.
+	req = cloneRequest(req)
+
+	for key, value := range rt.headers {
+		req.Header.Add(key, value)
+	}
+
+	return rt.rt.RoundTrip(req)
+}
+
+// cloneRequest returns a clone of the provided *http.Request
+func cloneRequest(r *http.Request) *http.Request {
+	// Shallow copy of the struct.
+	r2 := new(http.Request)
+	*r2 = *r
+	// Deep copy of the Header.
+	r2.Header = make(http.Header)
+	for k, s := range r.Header {
+		r2.Header[k] = s
+	}
+
+	return r2
+}

@@ -144,6 +144,21 @@ func TestHealthCmd(t *testing.T) {
 			args:     []string{"run", "../main.go", "--user", "passwordmissing", "health"},
 			expected: "[UNKNOWN] - specify the user name and password for server authentication <user:password> (*errors.errorString)\nexit status 3\n",
 		},
+		{
+			name: "health-extra-header",
+			server: httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				foobar := r.Header.Get("X-Foobar")
+				if foobar == "Barfoo" {
+					w.WriteHeader(http.StatusOK)
+					w.Write([]byte(`Prometheus Server is Healthy.`))
+					return
+				}
+				w.WriteHeader(http.StatusUnauthorized)
+				w.Write([]byte(`Wrong Header!`))
+			})),
+			args:     []string{"run", "../main.go", "--header", "X-Foobar: Barfoo", "health"},
+			expected: "[OK] - states: ok=1\n\\_ [OK] Prometheus Server is Healthy.\n\n",
+		},
 	}
 
 	for _, test := range tests {
