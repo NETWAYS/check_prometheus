@@ -87,12 +87,20 @@ inactive = 0`,
 
 		// If there are no rules we can exit early
 		if len(rules) == 0 {
+			// Just an empty PerfdataList to have consistent perfdata output
+			pdlist := perfdata.PerfdataList{
+				{Label: "total", Value: 0},
+				{Label: "firing", Value: 0},
+				{Label: "pending", Value: 0},
+				{Label: "inactive", Value: 0},
+			}
+
 			// Since the user is expecting the state of a certain alert and
 			// it that is not present it might be noteworthy.
 			if cliAlertConfig.AlertName != nil {
-				check.ExitRaw(check.Unknown, "No such alert defined")
+				check.ExitRaw(check.Unknown, "No such alert defined", "|", pdlist.String())
 			}
-			check.ExitRaw(noAlertsState, "No alerts defined")
+			check.ExitRaw(noAlertsState, "No alerts defined", "|", pdlist.String())
 		}
 
 		// Set initial capacity to reduce memory allocations
@@ -173,25 +181,22 @@ inactive = 0`,
 		}
 
 		counterAlert := counterFiring + counterPending + counterInactive
-		if len(cliAlertConfig.AlertName) > 1 || counterAlert > 1 {
-			perfList := perfdata.PerfdataList{
-				{Label: "total", Value: counterAlert},
-				{Label: "firing", Value: counterFiring},
-				{Label: "pending", Value: counterPending},
-				{Label: "inactive", Value: counterInactive},
-			}
 
-			overall.PartialResults[0].Perfdata = append(overall.PartialResults[0].Perfdata, perfList...)
+		perfList := perfdata.PerfdataList{
+			{Label: "total", Value: counterAlert},
+			{Label: "firing", Value: counterFiring},
+			{Label: "pending", Value: counterPending},
+			{Label: "inactive", Value: counterInactive},
 		}
 
-		if len(cliAlertConfig.AlertName) == 1 && counterAlert == 1 {
-			perfList := perfdata.PerfdataList{
-				{Label: "firing", Value: counterFiring},
-				{Label: "pending", Value: counterPending},
-				{Label: "inactive", Value: counterInactive},
-			}
-			overall.PartialResults[0].Perfdata = append(overall.PartialResults[0].Perfdata, perfList...)
+		// When there are no alerts we add an empty PartialResult just to have consistent output
+		if len(overall.PartialResults) == 0 {
+			sc := result.NewPartialResult()
+			sc.Output = "No alerts retrieved"
+			overall.AddSubcheck(sc)
 		}
+
+		overall.PartialResults[0].Perfdata = append(overall.PartialResults[0].Perfdata, perfList...)
 
 		overall.Summary = fmt.Sprintf("%d Alerts: %d Firing - %d Pending - %d Inactive",
 			counterAlert,
