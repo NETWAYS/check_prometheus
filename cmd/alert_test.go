@@ -85,8 +85,8 @@ func TestAlertCmd(t *testing.T) {
 			args: []string{"run", "../main.go", "alert"},
 			expected: `[CRITICAL] - 3 Alerts: 1 Firing - 1 Pending - 1 Inactive
 \_ [OK] [HostOutOfMemory] is inactive
-\_ [WARNING] [SqlAccessDeniedRate] - Job: [mysql] on Instance: [localhost] is pending - value: 0.40
-\_ [CRITICAL] [BlackboxTLS] - Job: [blackbox] on Instance: [https://localhost:443] is firing - value: -6065338.00
+\_ [WARNING] [SqlAccessDeniedRate] - Job: [mysql] on Instance: [localhost] is pending - value: 0.40 - {"alertname":"SqlAccessDeniedRate","instance":"localhost","job":"mysql","severity":"warning"}
+\_ [CRITICAL] [BlackboxTLS] - Job: [blackbox] on Instance: [https://localhost:443] is firing - value: -6065338.00 - {"alertname":"TLS","instance":"https://localhost:443","job":"blackbox","severity":"critical"}
 |total=3 firing=1 pending=1 inactive=1
 
 exit status 2
@@ -100,8 +100,8 @@ exit status 2
 			})),
 			args: []string{"run", "../main.go", "alert", "--problems"},
 			expected: `[CRITICAL] - 2 Alerts: 1 Firing - 1 Pending - 0 Inactive
-\_ [WARNING] [SqlAccessDeniedRate] - Job: [mysql] on Instance: [localhost] is pending - value: 0.40
-\_ [CRITICAL] [BlackboxTLS] - Job: [blackbox] on Instance: [https://localhost:443] is firing - value: -6065338.00
+\_ [WARNING] [SqlAccessDeniedRate] - Job: [mysql] on Instance: [localhost] is pending - value: 0.40 - {"alertname":"SqlAccessDeniedRate","instance":"localhost","job":"mysql","severity":"warning"}
+\_ [CRITICAL] [BlackboxTLS] - Job: [blackbox] on Instance: [https://localhost:443] is firing - value: -6065338.00 - {"alertname":"TLS","instance":"https://localhost:443","job":"blackbox","severity":"critical"}
 |total=2 firing=1 pending=1 inactive=0
 
 exit status 2
@@ -115,7 +115,7 @@ exit status 2
 			})),
 			args: []string{"run", "../main.go", "alert", "--problems", "-g", "TLS"},
 			expected: `[CRITICAL] - 1 Alerts: 1 Firing - 0 Pending - 0 Inactive
-\_ [CRITICAL] [BlackboxTLS] - Job: [blackbox] on Instance: [https://localhost:443] is firing - value: -6065338.00
+\_ [CRITICAL] [BlackboxTLS] - Job: [blackbox] on Instance: [https://localhost:443] is firing - value: -6065338.00 - {"alertname":"TLS","instance":"https://localhost:443","job":"blackbox","severity":"critical"}
 |total=1 firing=1 pending=0 inactive=0
 
 exit status 2
@@ -129,8 +129,8 @@ exit status 2
 			})),
 			args: []string{"run", "../main.go", "alert", "--problems", "-g", "SQL", "-g", "TLS"},
 			expected: `[CRITICAL] - 2 Alerts: 1 Firing - 1 Pending - 0 Inactive
-\_ [WARNING] [SqlAccessDeniedRate] - Job: [mysql] on Instance: [localhost] is pending - value: 0.40
-\_ [CRITICAL] [BlackboxTLS] - Job: [blackbox] on Instance: [https://localhost:443] is firing - value: -6065338.00
+\_ [WARNING] [SqlAccessDeniedRate] - Job: [mysql] on Instance: [localhost] is pending - value: 0.40 - {"alertname":"SqlAccessDeniedRate","instance":"localhost","job":"mysql","severity":"warning"}
+\_ [CRITICAL] [BlackboxTLS] - Job: [blackbox] on Instance: [https://localhost:443] is firing - value: -6065338.00 - {"alertname":"TLS","instance":"https://localhost:443","job":"blackbox","severity":"critical"}
 |total=2 firing=1 pending=1 inactive=0
 
 exit status 2
@@ -144,7 +144,7 @@ exit status 2
 			})),
 			args: []string{"run", "../main.go", "alert", "--problems", "--exclude-alert", "Sql.*DeniedRate"},
 			expected: `[CRITICAL] - 1 Alerts: 1 Firing - 0 Pending - 0 Inactive
-\_ [CRITICAL] [BlackboxTLS] - Job: [blackbox] on Instance: [https://localhost:443] is firing - value: -6065338.00
+\_ [CRITICAL] [BlackboxTLS] - Job: [blackbox] on Instance: [https://localhost:443] is firing - value: -6065338.00 - {"alertname":"TLS","instance":"https://localhost:443","job":"blackbox","severity":"critical"}
 |total=1 firing=1 pending=0 inactive=0
 
 exit status 2
@@ -196,7 +196,7 @@ exit status 3
 			args: []string{"run", "../main.go", "alert", "--name", "HostOutOfMemory", "--name", "BlackboxTLS"},
 			expected: `[CRITICAL] - 2 Alerts: 1 Firing - 0 Pending - 1 Inactive
 \_ [OK] [HostOutOfMemory] is inactive
-\_ [CRITICAL] [BlackboxTLS] - Job: [blackbox] on Instance: [https://localhost:443] is firing - value: -6065338.00
+\_ [CRITICAL] [BlackboxTLS] - Job: [blackbox] on Instance: [https://localhost:443] is firing - value: -6065338.00 - {"alertname":"TLS","instance":"https://localhost:443","job":"blackbox","severity":"critical"}
 |total=2 firing=1 pending=0 inactive=1
 
 exit status 2
@@ -210,7 +210,7 @@ exit status 2
 			})),
 			args: []string{"run", "../main.go", "alert", "--name", "HostOutOfMemory", "--name", "BlackboxTLS", "--problems"},
 			expected: `[CRITICAL] - 1 Alerts: 1 Firing - 0 Pending - 0 Inactive
-\_ [CRITICAL] [BlackboxTLS] - Job: [blackbox] on Instance: [https://localhost:443] is firing - value: -6065338.00
+\_ [CRITICAL] [BlackboxTLS] - Job: [blackbox] on Instance: [https://localhost:443] is firing - value: -6065338.00 - {"alertname":"TLS","instance":"https://localhost:443","job":"blackbox","severity":"critical"}
 |total=1 firing=1 pending=0 inactive=0
 
 exit status 2

@@ -105,7 +105,7 @@ func TestGetOutput(t *testing.T) {
 
 	var expected string
 
-	expected = "[HighRequestLatency] - Job: [bar] on Instance: [foo] is firing - value: 1.00"
+	expected = `[HighRequestLatency] - Job: [bar] on Instance: [foo] is firing - value: 1.00 - {"alertname":"HighRequestLatency","instance":"foo","job":"bar"}`
 	if r.GetOutput() != expected {
 		t.Error("\nActual: ", r.GetOutput(), "\nExpected: ", expected)
 	}
@@ -114,14 +114,14 @@ func TestGetOutput(t *testing.T) {
 		"alertname": "HighRequestLatency",
 	}
 
-	expected = "[HighRequestLatency] is firing - value: 1.00"
+	expected = `[HighRequestLatency] is firing - value: 1.00 - {"alertname":"HighRequestLatency"}`
 	if r.GetOutput() != expected {
 		t.Error("\nActual: ", r.GetOutput(), "\nExpected: ", expected)
 	}
 
 	r.AlertingRule.State = "inactive"
 
-	expected = "[HighRequestLatency] is inactive - value: 1.00"
+	expected = `[HighRequestLatency] is inactive - value: 1.00 - {"alertname":"HighRequestLatency"}`
 	if r.GetOutput() != expected {
 		t.Error("\nActual: ", r.GetOutput(), "\nExpected: ", expected)
 	}
