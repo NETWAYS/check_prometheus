@@ -1,6 +1,7 @@
 package alert
 
 import (
+	"encoding/json"
 	"fmt"
 	"slices"
 	"strconv"
@@ -104,6 +105,14 @@ func (a *Rule) GetOutput() (output string) {
 	// Add current value to output
 	value, _ = strconv.ParseFloat(a.Alert.Value, 32)
 	out.WriteString(fmt.Sprintf(" is %s - value: %.2f", a.AlertingRule.State, value))
+
+	// Add labels to the output
+	l, err := json.Marshal(a.Alert.Labels)
+
+	if err == nil {
+		out.WriteString(" - ")
+		out.Write(l)
+	}
 
 	return out.String()
 }
