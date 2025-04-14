@@ -26,7 +26,6 @@ func NewClient(url string, rt http.RoundTripper) *Client {
 	}
 }
 
-// nolint: gosec
 func (c *Client) Connect() error {
 	cfg, err := api.NewClient(api.Config{
 		Address:      c.URL,
