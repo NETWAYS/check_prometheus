@@ -77,6 +77,7 @@ OK - Prometheus Server is Ready. | statuscode=200
 ### Query
 
 Checks the status of a Prometheus query and evaluates the result of the alert.
+The warning and critical support thresholds in the common Nagios format (e.g. `~:10`).
 
 >Note: Time range values e.G. 'go_memstats_alloc_bytes_total[10s]', only the latest value will be evaluated, other values will be ignored!
 
