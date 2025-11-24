@@ -192,6 +192,9 @@ inactive = 0`,
 		// When there are no alerts we add an empty PartialResult just to have consistent output
 		if len(overall.PartialResults) == 0 {
 			sc := result.NewPartialResult()
+			// We already make sure it's valid
+			//nolint: errcheck
+			sc.SetDefaultState(noAlertsState)
 			sc.Output = "No alerts retrieved"
 			overall.AddSubcheck(sc)
 		}
