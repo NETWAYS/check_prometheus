@@ -165,7 +165,7 @@ exit status 2
 				w.WriteHeader(http.StatusOK)
 				w.Write(loadTestdata(alertTestDataSet2))
 			})),
-			args: []string{"run", "../main.go", "alert", "--name", "NoSuchAlert"},
+			args: []string{"run", "../main.go", "alert", "--name", "NoSuchAlert", "-T", "3"},
 			expected: `[UNKNOWN] - 0 Alerts: 0 Firing - 0 Pending - 0 Inactive
 \_ [UNKNOWN] No alerts retrieved
 |total=0 firing=0 pending=0 inactive=0
@@ -179,7 +179,7 @@ exit status 3
 				w.WriteHeader(http.StatusOK)
 				w.Write(loadTestdata(alertTestDataSet2))
 			})),
-			args: []string{"run", "../main.go", "alert", "--name", "InactiveAlert", "--problems"},
+			args: []string{"run", "../main.go", "alert", "--name", "InactiveAlert", "--problems", "-T", "3"},
 			expected: `[UNKNOWN] - 0 Alerts: 0 Firing - 0 Pending - 0 Inactive
 \_ [UNKNOWN] No alerts retrieved
 |total=0 firing=0 pending=0 inactive=0
