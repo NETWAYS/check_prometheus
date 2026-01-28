@@ -11,6 +11,7 @@ import (
 	"github.com/NETWAYS/go-check"
 	"github.com/NETWAYS/go-check/perfdata"
 	"github.com/NETWAYS/go-check/result"
+	"github.com/prometheus/common/model"
 	"github.com/spf13/cobra"
 )
 
@@ -18,6 +19,8 @@ type AlertConfig struct {
 	AlertName     []string
 	Group         []string
 	ExcludeAlerts []string
+	ExcludeLabels []string
+	IncludeLabels []string
 	ProblemsOnly  bool
 	NoAlertsState string
 }
@@ -102,7 +105,6 @@ inactive = 0`,
 		var overall result.Overall
 
 		for _, rl := range rules {
-
 			// If it's not the Alert we're looking for, Skip!
 			if cliAlertConfig.AlertName != nil {
 				if !slices.Contains(cliAlertConfig.AlertName, rl.AlertingRule.Name) {
@@ -110,19 +112,33 @@ inactive = 0`,
 				}
 			}
 
+			labelsMatchedInclude := matchesLabel(rl.AlertingRule.Labels, cliAlertConfig.IncludeLabels)
+
+			if len(cliAlertConfig.IncludeLabels) > 0 && !labelsMatchedInclude {
+				// If the alert labels don't match here we can skip it.
+				continue
+			}
+
 			// Skip inactive alerts if flag is set
 			if len(rl.AlertingRule.Alerts) == 0 && cliAlertConfig.ProblemsOnly {
 				continue
 			}
 
-			alertMatched, regexErr := matches(rl.AlertingRule.Name, cliAlertConfig.ExcludeAlerts)
+			alertMatchedExclude, regexErr := matches(rl.AlertingRule.Name, cliAlertConfig.ExcludeAlerts)
 
 			if regexErr != nil {
 				check.ExitRaw(check.Unknown, "Invalid regular expression provided:", regexErr.Error())
 			}
 
-			if alertMatched {
+			if alertMatchedExclude {
 				// If the alert matches a regex from the list we can skip it.
+				continue
+			}
+
+			labelsMatchedExclude := matchesLabel(rl.AlertingRule.Labels, cliAlertConfig.ExcludeLabels)
+
+			if len(cliAlertConfig.ExcludeLabels) > 0 && labelsMatchedExclude {
+				// If the alert labels matches here we can skip it.
 				continue
 			}
 
@@ -208,17 +224,27 @@ func init() {
 
 	fs.StringVarP(&cliAlertConfig.NoAlertsState, "no-alerts-state", "T", "OK", "State to assign when no alerts are found (0, 1, 2, 3, OK, WARNING, CRITICAL, UNKNOWN). If not set this defaults to OK")
 
-	fs.StringArrayVar(&cliAlertConfig.ExcludeAlerts, "exclude-alert", []string{}, "Alerts to ignore. Can be used multiple times and supports regex.")
+	fs.StringArrayVar(&cliAlertConfig.ExcludeAlerts, "exclude-alert", []string{},
+		"Alerts to ignore. Can be used multiple times and supports regex.")
 
 	fs.StringSliceVarP(&cliAlertConfig.AlertName, "name", "n", nil,
 		"The name of one or more specific alerts to check."+
-			"\nThis parameter can be repeated e.G.: '--name alert1 --name alert2'"+
+			"\nThis parameter can be repeated e.g.: '--name alert1 --name alert2'"+
 			"\nIf no name is given, all alerts will be evaluated")
 
 	fs.StringSliceVarP(&cliAlertConfig.Group, "group", "g", nil,
 		"The name of one or more specific groups to check for alerts."+
-			"\nThis parameter can be repeated e.G.: '--group group1 --group group2'"+
+			"\nThis parameter can be repeated e.g.: '--group group1 --group group2'"+
 			"\nIf no group is given, all groups will be scanned for alerts")
+
+	fs.StringArrayVar(&cliAlertConfig.IncludeLabels, "include-label", []string{},
+		"The label of one or more specific alerts to include. "+
+			"\nThis parameter can be repeated e.g.: '--include-label prio=high --include-label another=example'"+
+			"\nNote that repeated --include-label are combined using a union.")
+
+	fs.StringArrayVar(&cliAlertConfig.ExcludeLabels, "exclude-label", []string{},
+		"The label of one or more specific alerts to exclude."+
+			"\nThis parameter can be repeated e.g.: '--exclude-label prio=high --exclude-label another=example'")
 
 	fs.BoolVarP(&cliAlertConfig.ProblemsOnly, "problems", "P", false,
 		"Display only alerts which status is not inactive/OK. Note that in combination with the --name flag this might result in no alerts being displayed")
@@ -256,4 +282,23 @@ func matches(input string, regexToExclude []string) (bool, error) {
 	}
 
 	return false, nil
+}
+
+// Matches a list of labels against a list of labels
+func matchesLabel(labels model.LabelSet, labelsToMatch []string) bool {
+	for _, lb := range labelsToMatch {
+		kv := strings.SplitN(lb, "=", 2)
+
+		if len(kv) != 2 {
+			continue
+		}
+
+		key, value := model.LabelName(kv[0]), model.LabelValue(kv[1])
+
+		if val, ok := labels[key]; ok && val == value {
+			return true
+		}
+	}
+
+	return false
 }

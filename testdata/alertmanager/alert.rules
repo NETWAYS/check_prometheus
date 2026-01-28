@@ -15,7 +15,7 @@ groups:
     expr: absent(up{job="alertmanager"})
     for: 0m
     labels:
-      severity: warning
+      severity: low
     annotations:
       summary: Prometheus AlertManager job missing (instance {{ $labels.instance }})
       description: "A Prometheus AlertManager job has disappeared\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
@@ -33,7 +33,7 @@ groups:
     expr: 100 - (avg by(instance) (rate(node_cpu_seconds_total{mode="idle"}[2m])) * 100) > 80
     for: 0m
     labels:
-      severity: warning
+      severity: extreme
     annotations:
       summary: Host high CPU load (instance {{ $labels.instance }})
       description: "CPU load is > 80%\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
