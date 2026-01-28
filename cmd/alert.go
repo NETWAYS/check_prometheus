@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"regexp"
+	"slices"
 	"strings"
 
 	"github.com/NETWAYS/check_prometheus/internal/alert"
@@ -22,17 +23,6 @@ type AlertConfig struct {
 }
 
 var cliAlertConfig AlertConfig
-
-func contains(s string, list []string) bool {
-	// Tiny helper to see if a string is in a list of strings
-	for _, elem := range list {
-		if s == elem {
-			return true
-		}
-	}
-
-	return false
-}
 
 var alertCmd = &cobra.Command{
 	Use:   "alert",
@@ -115,7 +105,7 @@ inactive = 0`,
 
 			// If it's not the Alert we're looking for, Skip!
 			if cliAlertConfig.AlertName != nil {
-				if !contains(rl.AlertingRule.Name, cliAlertConfig.AlertName) {
+				if !slices.Contains(cliAlertConfig.AlertName, rl.AlertingRule.Name) {
 					continue
 				}
 			}
