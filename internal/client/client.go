@@ -2,10 +2,13 @@ package client
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"net/url"
 	"strings"
+
+	"github.com/NETWAYS/check_prometheus/internal/alert"
 
 	"github.com/NETWAYS/go-check"
 	"github.com/prometheus/client_golang/api"
@@ -83,6 +86,34 @@ func (c *Client) GetStatus(ctx context.Context, endpoint string) (returncode int
 	}
 
 	return check.Unknown, resp.StatusCode, respBody, err
+}
+
+func (c *Client) GetAlertmanagerAlerts(ctx context.Context) ([]alert.AlertmanagerAlert, error) {
+	u, _ := url.JoinPath(c.URL, "/api/v2/alerts")
+	req, errReq := http.NewRequestWithContext(ctx, http.MethodGet, u, nil)
+
+	if errReq != nil {
+		return []alert.AlertmanagerAlert{}, fmt.Errorf("could not create request: %w", errReq)
+	}
+
+	// Making the request with the preconfigured Client
+	// So that we can reuse the preconfigured Roundtripper
+	resp, b, errDo := c.Client.Do(ctx, req)
+
+	if errDo != nil {
+		return []alert.AlertmanagerAlert{}, fmt.Errorf("could not get status: %w", errDo)
+	}
+
+	defer resp.Body.Close()
+
+	var alerts []alert.AlertmanagerAlert
+	errJSON := json.Unmarshal(b, &alerts)
+
+	if errJSON != nil {
+		return []alert.AlertmanagerAlert{}, fmt.Errorf("could not parse alerts: %w", errJSON)
+	}
+
+	return alerts, nil
 }
 
 type headersRoundTripper struct {
