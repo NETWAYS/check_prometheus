@@ -234,6 +234,76 @@ exit status 2
 			args:     []string{"run", "../main.go", "alert", "--name", "InactiveAlert"},
 			expected: "[OK] - 1 Alerts: 0 Firing - 0 Pending - 1 Inactive\n\\_ [OK] [InactiveAlert] is inactive\n|total=1 firing=0 pending=0 inactive=1\n\n",
 		},
+		{
+			name: "alert-include-label",
+			server: httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				w.WriteHeader(http.StatusOK)
+				w.Write(loadTestdata(alertTestDataSet1))
+			})),
+			args: []string{"run", "../main.go", "alert", "--include-label", "severity=critical"},
+			expected: `[CRITICAL] - 2 Alerts: 1 Firing - 0 Pending - 1 Inactive
+\_ [OK] [HostOutOfMemory] is inactive
+\_ [CRITICAL] [BlackboxTLS] - Job: [blackbox] on Instance: [https://localhost:443] is firing - value: -6065338.00 - {"alertname":"TLS","instance":"https://localhost:443","job":"blackbox","severity":"critical"}
+|total=2 firing=1 pending=0 inactive=1
+
+exit status 2
+`,
+		},
+		{
+			name: "alert-exclude-label",
+			server: httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				w.WriteHeader(http.StatusOK)
+				w.Write(loadTestdata(alertTestDataSet1))
+			})),
+			args: []string{"run", "../main.go", "alert", "--exclude-label", "severity=critical"},
+			expected: `[WARNING] - 1 Alerts: 0 Firing - 1 Pending - 0 Inactive
+\_ [WARNING] [SqlAccessDeniedRate] - Job: [mysql] on Instance: [localhost] is pending - value: 0.40 - {"alertname":"SqlAccessDeniedRate","instance":"localhost","job":"mysql","severity":"warning"}
+|total=1 firing=0 pending=1 inactive=0
+
+exit status 1
+`,
+		},
+		{
+			name: "alert-include-label-multiple",
+			server: httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				w.WriteHeader(http.StatusOK)
+				w.Write(loadTestdata(alertTestDataSet1))
+			})),
+			args: []string{"run", "../main.go", "alert", "--include-label", "team=database", "--include-label", "severity=critical"},
+			expected: `[CRITICAL] - 3 Alerts: 1 Firing - 1 Pending - 1 Inactive
+\_ [OK] [HostOutOfMemory] is inactive
+\_ [WARNING] [SqlAccessDeniedRate] - Job: [mysql] on Instance: [localhost] is pending - value: 0.40 - {"alertname":"SqlAccessDeniedRate","instance":"localhost","job":"mysql","severity":"warning"}
+\_ [CRITICAL] [BlackboxTLS] - Job: [blackbox] on Instance: [https://localhost:443] is firing - value: -6065338.00 - {"alertname":"TLS","instance":"https://localhost:443","job":"blackbox","severity":"critical"}
+|total=3 firing=1 pending=1 inactive=1
+
+exit status 2
+`,
+		},
+		{
+			name: "alert-include-label-multiple-similar",
+			server: httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				w.WriteHeader(http.StatusOK)
+				w.Write(loadTestdata(alertTestDataSet1))
+			})),
+			args: []string{"run", "../main.go", "alert", "--include-label", "severity=warning", "--include-label", "severity=critical"},
+			expected: `[CRITICAL] - 3 Alerts: 1 Firing - 1 Pending - 1 Inactive
+\_ [OK] [HostOutOfMemory] is inactive
+\_ [WARNING] [SqlAccessDeniedRate] - Job: [mysql] on Instance: [localhost] is pending - value: 0.40 - {"alertname":"SqlAccessDeniedRate","instance":"localhost","job":"mysql","severity":"warning"}
+\_ [CRITICAL] [BlackboxTLS] - Job: [blackbox] on Instance: [https://localhost:443] is firing - value: -6065338.00 - {"alertname":"TLS","instance":"https://localhost:443","job":"blackbox","severity":"critical"}
+|total=3 firing=1 pending=1 inactive=1
+
+exit status 2
+`,
+		},
+		{
+			name: "alert-exclude-label-multiple",
+			server: httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				w.WriteHeader(http.StatusOK)
+				w.Write(loadTestdata(alertTestDataSet1))
+			})),
+			args:     []string{"run", "../main.go", "alert", "--exclude-label", "team=database", "--exclude-label", "severity=critical"},
+			expected: "[OK] - 0 Alerts: 0 Firing - 0 Pending - 0 Inactive\n\\_ [OK] No alerts retrieved\n|total=0 firing=0 pending=0 inactive=0\n\n",
+		},
 	}
 
 	for _, test := range tests {

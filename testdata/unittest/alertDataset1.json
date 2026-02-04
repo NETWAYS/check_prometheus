@@ -12,7 +12,8 @@
             "query": "up",
             "duration": 120,
             "labels": {
-              "severity": "critical"
+              "severity": "critical",
+              "team": "network"
             },
             "annotations": {
               "description": "Foo",
@@ -40,7 +41,8 @@
             "query": "mysql",
             "duration": 17280000,
             "labels": {
-              "severity": "warning"
+              "severity": "warning",
+              "team": "database"
             },
             "annotations": {
               "description": "MySQL",
@@ -84,7 +86,8 @@
             "query": "SSL",
             "duration": 0,
             "labels": {
-              "severity": "critical"
+              "severity": "critical",
+              "team": "network"
             },
             "annotations": {
               "description": "TLS",
