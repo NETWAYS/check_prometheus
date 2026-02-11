@@ -10,7 +10,6 @@ import (
 )
 
 func TestGetStatus(t *testing.T) {
-
 	testTime := time.Now()
 
 	ar := v1.AlertingRule{
@@ -49,17 +48,65 @@ func TestGetStatus(t *testing.T) {
 		Alert:        ar.Alerts[0],
 	}
 
-	actual := r.GetStatus()
+	actual := r.GetStatus("")
 	if actual != check.Critical {
 		t.Error("\nActual: ", actual, "\nExpected: ", check.Critical)
 	}
 
 	r.AlertingRule.State = "pending"
-	actual = r.GetStatus()
+	actual = r.GetStatus("")
 	if actual != check.Warning {
 		t.Error("\nActual: ", actual, "\nExpected: ", check.Warning)
 	}
 
+}
+
+func TestGetStatus_WithLabel(t *testing.T) {
+	ar := v1.AlertingRule{
+		Alerts: []*v1.Alert{
+			{
+				Annotations: model.LabelSet{
+					"summary": "High request latency",
+				},
+				Labels: model.LabelSet{
+					"alertname": "HighRequestLatency",
+					"severity":  "page",
+				},
+				State: v1.AlertStateFiring,
+				Value: "1e+00",
+			},
+		},
+		Annotations: model.LabelSet{
+			"summary": "High request latency",
+		},
+		Labels: model.LabelSet{
+			"severity":    "page",
+			"icingaState": "OK",
+		},
+		Duration:       600,
+		Health:         v1.RuleHealthGood,
+		Name:           "HighRequestLatency",
+		Query:          "job:request_latency_seconds:mean5m{job=\"myjob\"} > 0.5",
+		LastError:      "",
+		EvaluationTime: 0.5,
+		State:          "firing",
+	}
+
+	r := Rule{
+		AlertingRule: ar,
+		Alert:        ar.Alerts[0],
+	}
+
+	actual := r.GetStatus("icingaState")
+	if actual != check.OK {
+		t.Error("\nActual: ", actual, "\nExpected: ", check.Critical)
+	}
+
+	r.AlertingRule.State = "pending"
+	actual = r.GetStatus("icingaState")
+	if actual != check.Warning {
+		t.Error("\nActual: ", actual, "\nExpected: ", check.Warning)
+	}
 }
 
 func TestGetOutput(t *testing.T) {

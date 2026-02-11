@@ -7,6 +7,7 @@ groups:
     for: 0m
     labels:
       severity: critical
+      icingaState: warning
     annotations:
       summary: Prometheus target missing (instance {{ $labels.instance }})
       description: "A Prometheus target has disappeared. An exporter might be crashed.\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
@@ -16,6 +17,7 @@ groups:
     for: 0m
     labels:
       severity: low
+      icingaState: warning
     annotations:
       summary: Prometheus AlertManager job missing (instance {{ $labels.instance }})
       description: "A Prometheus AlertManager job has disappeared\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"

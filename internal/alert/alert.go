@@ -58,8 +58,10 @@ func FlattenRules(groups []v1.RuleGroup, wantedGroups []string) []Rule {
 	return rules
 }
 
-func (a *Rule) GetStatus() (status int) {
-	switch a.AlertingRule.State {
+func (a *Rule) GetStatus(labelKey string) (status int) {
+	state := a.AlertingRule.State
+
+	switch state {
 	case string(v1.AlertStateFiring):
 		status = check.Critical
 	case string(v1.AlertStatePending):
@@ -68,6 +70,26 @@ func (a *Rule) GetStatus() (status int) {
 		status = check.OK
 	default:
 		status = check.Unknown
+	}
+
+	if state == string(v1.AlertStateFiring) && labelKey != "" {
+		stateLabel, ok := a.AlertingRule.Labels[model.LabelName(labelKey)]
+		// If there is no such label key, we're done
+		if !ok {
+			return status
+		}
+
+		lb := strings.ToLower(string(stateLabel))
+		switch lb {
+		case "warning":
+			status = check.Warning
+		case "critical":
+			status = check.Critical
+		case "ok":
+			status = check.OK
+		default:
+			status = check.Unknown
+		}
 	}
 
 	return status

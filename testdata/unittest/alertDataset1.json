@@ -87,6 +87,7 @@
             "duration": 0,
             "labels": {
               "severity": "critical",
+              "icinga": "ok",
               "team": "network"
             },
             "annotations": {

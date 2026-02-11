@@ -153,6 +153,8 @@ Examples:
    | total=2 firing=1 pending=0 inactive=1
 
 Flags:
+  -S, --label-key-state string      Use the given AlertRule label to override the exit state for firing alerts.
+                                    If this flag is set the plugin looks for warning/critical/ok in the provided label key
       --exclude-alert stringArray   Alerts to ignore. Can be used multiple times and supports regex.
       --exclude-label stringArray   The label of one or more specific alerts to exclude.
                                     This parameter can be repeated e.g.: '--exclude-label prio=high --exclude-label another=example'
@@ -169,6 +171,11 @@ Flags:
   -T, --no-alerts-state string      State to assign when no alerts are found (0, 1, 2, 3, OK, WARNING, CRITICAL, UNKNOWN). If not set this defaults to OK (default "OK")
   -P, --problems                    Display only alerts which status is not inactive/OK. Note that in combination with the --name flag this might result in no alerts being displayed
 ```
+
+The `--label-key-state` can be used to override the exit code for firing alerts.
+When the flag is set, the plugin looks for the given label key on the AlertRule and uses
+the specified as label value (`warning/critical/ok`) as exit code.
+An invalid value will result in an UNKNOWN exit code.
 
 #### Checking all defined alerts
 

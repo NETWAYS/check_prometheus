@@ -22,6 +22,7 @@ type AlertConfig struct {
 	ExcludeLabels []string
 	IncludeLabels []string
 	ProblemsOnly  bool
+	StateLabelKey string
 	NoAlertsState string
 }
 
@@ -144,8 +145,9 @@ inactive = 0`,
 
 			// Handle Inactive Alerts
 			if len(rl.AlertingRule.Alerts) == 0 {
-				// Counting states for perfdata
-				switch rl.GetStatus() {
+				// Counting states for perfdata. We don't use the state-label override here
+				// to have the acutal count from Prometheus
+				switch rl.GetStatus("") {
 				case 0:
 					counterInactive++
 				case 1:
@@ -156,7 +158,7 @@ inactive = 0`,
 
 				sc := result.NewPartialResult()
 
-				_ = sc.SetState(rl.GetStatus())
+				_ = sc.SetState(rl.GetStatus(cliAlertConfig.StateLabelKey))
 				sc.Output = rl.GetOutput()
 				overall.AddSubcheck(sc)
 			}
@@ -165,8 +167,9 @@ inactive = 0`,
 			if len(rl.AlertingRule.Alerts) > 0 {
 				// Handle Pending or Firing Alerts
 				for _, alert := range rl.AlertingRule.Alerts {
-					// Counting states for perfdata
-					switch rl.GetStatus() {
+					// Counting states for perfdata. We don't use the state-label override here
+					// to have the acutal count from Prometheus
+					switch rl.GetStatus("") {
 					case 0:
 						counterInactive++
 					case 1:
@@ -177,7 +180,7 @@ inactive = 0`,
 
 					sc := result.NewPartialResult()
 
-					_ = sc.SetState(rl.GetStatus())
+					_ = sc.SetState(rl.GetStatus(cliAlertConfig.StateLabelKey))
 					// Set the alert in the internal Type to generate the output
 					rl.Alert = alert
 					sc.Output = rl.GetOutput()
@@ -248,6 +251,10 @@ func init() {
 
 	fs.BoolVarP(&cliAlertConfig.ProblemsOnly, "problems", "P", false,
 		"Display only alerts which status is not inactive/OK. Note that in combination with the --name flag this might result in no alerts being displayed")
+
+	fs.StringVarP(&cliAlertConfig.StateLabelKey, "label-key-state", "S", "",
+		"Use the given AlertRule label to override the exit state for firing alerts."+
+			"\nIf this flag is set the plugin looks for warning/critical/ok in the provided label key")
 }
 
 // Function to convert state to integer.
