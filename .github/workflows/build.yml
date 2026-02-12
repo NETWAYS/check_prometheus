@@ -18,6 +18,8 @@ jobs:
 
       - name: Set up Go
         uses: actions/setup-go@v6
+        with:
+          check-latest: true
 
       - name: Test
         run: go test -v ./...
