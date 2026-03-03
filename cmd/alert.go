@@ -71,13 +71,18 @@ inactive = 0`,
 		// We use the Rules endpoint since it contains
 		// the state of inactive Alert Rules, unlike the Alert endpoint
 		// Search requested Alert in all Groups and all Rules
-		alerts, err := c.API.Rules(ctx)
-		if err != nil {
-			check.ExitError(err)
+		alertrules, errR := c.API.Rules(ctx)
+		if errR != nil {
+			check.ExitError(errR)
+		}
+
+		alerts, errA := c.API.Alerts(ctx)
+		if errA != nil {
+			check.ExitError(errA)
 		}
 
 		// Get all rules from all groups into a single list
-		rules := alert.FlattenRules(alerts.Groups, cliAlertConfig.Group)
+		rules := alert.FlattenRules(alertrules.Groups, cliAlertConfig.Group, alerts.Alerts)
 
 		// If there are no rules we can exit early
 		if len(rules) == 0 {
