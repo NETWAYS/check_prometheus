@@ -226,9 +226,8 @@ func TestFlattenRules(t *testing.T) {
 		},
 	}
 
-	fr := FlattenRules(rg, nil)
+	fr := FlattenRules(rg, nil, []v1.Alert{})
 	if len(fr) != 1 {
 		t.Error("\nActual: ", fr)
 	}
-
 }
