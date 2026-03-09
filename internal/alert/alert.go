@@ -12,6 +12,10 @@ import (
 	"github.com/prometheus/common/model"
 )
 
+const (
+	alertnameLabelKey = "alertname"
+)
+
 // Internal representation of Prometheus Rules.
 // Alert attribute will be used when iterating over multiple AlertingRules.
 type Rule struct {
@@ -19,7 +23,7 @@ type Rule struct {
 	Alert        *v1.Alert
 }
 
-func FlattenRules(groups []v1.RuleGroup, wantedGroups []string) []Rule {
+func FlattenRules(groups []v1.RuleGroup, wantedGroups []string, alerts []v1.Alert) []Rule {
 	// Flattens a list of RuleGroup containing a list of Rules into
 	// a list of internal Alertingrules.
 	var l int
@@ -50,6 +54,14 @@ func FlattenRules(groups []v1.RuleGroup, wantedGroups []string) []Rule {
 			// since RecodingRules can simply be queried.
 			if _, ok := rl.(v1.AlertingRule); ok {
 				r.AlertingRule = rl.(v1.AlertingRule)
+				// Merge labels from active alerts
+				for _, al := range alerts {
+					alertName := al.Labels[alertnameLabelKey]
+					if r.AlertingRule.Name == string(alertName) {
+						r.AlertingRule.Labels = r.AlertingRule.Labels.Merge(al.Labels)
+					}
+				}
+
 				rules = append(rules, r)
 			}
 		}

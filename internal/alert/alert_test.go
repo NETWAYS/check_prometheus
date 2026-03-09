@@ -183,6 +183,15 @@ func TestGetOutput(t *testing.T) {
 func TestFlattenRules(t *testing.T) {
 	testTime := time.Now()
 
+	alerts := []v1.Alert{
+		v1.Alert{
+			Labels: model.LabelSet{
+				"alertname": "HighRequestLatency",
+				"instance":  "node01",
+			},
+		},
+	}
+
 	rg := []v1.RuleGroup{
 		{
 			Name:     "example",
@@ -226,9 +235,9 @@ func TestFlattenRules(t *testing.T) {
 		},
 	}
 
-	fr := FlattenRules(rg, nil)
-	if len(fr) != 1 {
-		t.Error("\nActual: ", fr)
-	}
+	actual := FlattenRules(rg, nil, alerts)
 
+	if len(actual) != 1 {
+		t.Error("\nActual: ", actual)
+	}
 }
