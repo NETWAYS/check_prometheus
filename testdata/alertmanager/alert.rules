@@ -1,7 +1,14 @@
 groups:
 - name: Test Alerts for check_plugin
   rules:
-
+  - alert: Watchdog
+    annotations:
+      message: |
+        This is an alert meant to ensure that the entire alerting pipeline is functional.
+        This alert is always firing.
+    expr: vector(1)
+    labels:
+      severity: none
   - alert: PrometheusTargetMissing
     expr: up == 0
     for: 0m
