@@ -226,6 +226,15 @@ exit status 2
 			expected: "[OK] - 1 Alerts: 0 Firing - 0 Pending - 1 Inactive\n\\_ [OK] [InactiveAlert] is inactive\n|total=1 firing=0 pending=0 inactive=1\n\n",
 		},
 		{
+			name: "alert-watchdog",
+			server: httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				w.WriteHeader(http.StatusOK)
+				w.Write(loadTestdata(alertTestDataSet2))
+			})),
+			args:     []string{"run", "../main.go", "alert", "--name", "InactiveAlert", "-W"},
+			expected: "[CRITICAL] - 1 Alerts: 0 Firing - 0 Pending - 1 Inactive\n\\_ [CRITICAL] [InactiveAlert] is inactive\n|total=1 firing=0 pending=0 inactive=1\n\nexit status 2\n",
+		},
+		{
 			name: "alert-recording-rule",
 			server: httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 				w.WriteHeader(http.StatusOK)

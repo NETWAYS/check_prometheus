@@ -22,6 +22,7 @@ type AlertConfig struct {
 	ExcludeLabels []string
 	IncludeLabels []string
 	ProblemsOnly  bool
+	FlipExitState bool
 	StateLabelKey string
 	NoAlertsState string
 }
@@ -163,7 +164,13 @@ inactive = 0`,
 
 				sc := result.NewPartialResult()
 
-				_ = sc.SetState(rl.GetStatus(cliAlertConfig.StateLabelKey))
+				rlStatus := rl.GetStatus(cliAlertConfig.StateLabelKey)
+				// If the negate flag is set we negate this state
+				if cliAlertConfig.FlipExitState {
+					rlStatus = negateStatus(rlStatus)
+				}
+
+				_ = sc.SetState(rlStatus)
 				sc.Output = rl.GetOutput()
 				overall.AddSubcheck(sc)
 			}
@@ -185,7 +192,13 @@ inactive = 0`,
 
 					sc := result.NewPartialResult()
 
-					_ = sc.SetState(rl.GetStatus(cliAlertConfig.StateLabelKey))
+					rlStatus := rl.GetStatus(cliAlertConfig.StateLabelKey)
+					// If the negate flag is set we negate this state
+					if cliAlertConfig.FlipExitState {
+						rlStatus = negateStatus(rlStatus)
+					}
+
+					_ = sc.SetState(rlStatus)
 					// Set the alert in the internal Type to generate the output
 					rl.Alert = alert
 					sc.Output = rl.GetOutput()
@@ -257,9 +270,12 @@ func init() {
 	fs.BoolVarP(&cliAlertConfig.ProblemsOnly, "problems", "P", false,
 		"Display only alerts which status is not inactive/OK. Note that in combination with the --name flag this might result in no alerts being displayed")
 
+	fs.BoolVarP(&cliAlertConfig.FlipExitState, "watchdog", "W", false,
+		"Flip the exit state for firing alerts. When this flag is set firing alerts will be OK and inactive alerts will be CRITICAL. This is intended for handling watchdog alerts")
+
 	fs.StringVarP(&cliAlertConfig.StateLabelKey, "label-key-state", "S", "",
 		"Use the given AlertRule label to override the exit state for firing alerts."+
-			"\nIf this flag is set the plugin looks for warning/critical/ok in the provided label key")
+			"\nIf this flag is set the plugin looks for the strings 'warning/critical/ok' in the provided label key")
 }
 
 // Function to convert state to integer.
@@ -313,4 +329,20 @@ func matchesLabel(labels model.LabelSet, labelsToMatch []string) bool {
 	}
 
 	return false
+}
+
+// negateStatus turns an OK state into critical and a warning/critical state into OK
+func negateStatus(state int) int {
+	switch state {
+	case check.OK:
+		return check.Critical
+	case check.Critical:
+		return check.OK
+	case check.Warning:
+		return check.OK
+	case check.Unknown:
+		return check.Unknown
+	default:
+		return check.Unknown
+	}
 }
