@@ -208,6 +208,24 @@ $ check_prometheus alert --name "HostHighCpuLoad" --name "PrometheusTargetMissin
 OK - Alerts inactive | total=2 firing=0 pending=0 inactive=2
 ```
 
+#### Checking watchdog alerts
+
+In Prometheus a "watchdog" or "dead man's switch" is an alert that is always firing to ensure alerting pipeline is working. The `-W, --watchdog` flag can be used to flip/negate the exit state of the plugin for these kind of alerts:
+
+```bash
+$ check_prometheus alert --name Watchdog -W --no-alerts-state 2
+[OK] - 1 Alerts: 1 Firing - 0 Pending - 0 Inactive
+\_ [OK] [Watchdog] is firing - value: 1.00 - {"alertname":"Watchdog","severity":"none"}
+|total=1 firing=1 pending=0 inactive=0
+```
+
+```bash
+$ check_prometheus alert --name Watchdog -W --no-alerts-state 2
+[CRITICAL] - 0 Alerts: 0 Firing - 0 Pending - 0 Inactive
+\_ [CRITICAL] No alerts retrieved
+|total=0 firing=0 pending=0 inactive=0
+```
+
 ## License
 
 Copyright (c) 2022 [NETWAYS GmbH](mailto:info@netways.de)
