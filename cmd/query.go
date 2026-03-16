@@ -79,6 +79,7 @@ Note: Time range values e.G. 'go_memstats_alloc_bytes_total[0s]' only the latest
 		}
 
 		c := cliConfig.NewClient()
+
 		err = c.Connect()
 		if err != nil {
 			check.ExitError(err)
@@ -93,6 +94,7 @@ Note: Time range values e.G. 'go_memstats_alloc_bytes_total[0s]' only the latest
 			if strings.Contains(err.Error(), "unmarshalerDecoder: unexpected value type \"string\"") {
 				err = errors.New("string value results are not supported")
 			}
+
 			check.ExitError(err)
 		}
 
@@ -112,10 +114,8 @@ Note: Time range values e.G. 'go_memstats_alloc_bytes_total[0s]' only the latest
 		case model.ValVector:
 			// Instant vector - a set of time series containing a single sample for each time series, all sharing the same timestamp
 			vectorVal := result.(model.Vector)
-
 			// Set initial capacity to reduce memory allocations
 			for _, sample := range vectorVal {
-
 				numberValue := float64(sample.Value)
 				partial := goresult.NewPartialResult()
 
@@ -185,6 +185,7 @@ Note: Time range values e.G. 'go_memstats_alloc_bytes_total[0s]' only the latest
 			appendum := fmt.Sprintf("HTTP Warnings: %v", strings.Join(warnings, ", "))
 			overall.Summary = overall.GetOutput() + appendum
 		}
+
 		check.ExitRaw(overall.GetStatus(), overall.GetOutput())
 	},
 }

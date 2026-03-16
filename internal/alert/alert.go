@@ -16,7 +16,7 @@ const (
 	alertnameLabelKey = "alertname"
 )
 
-// Internal representation of Prometheus Rules.
+// Rule is the internal representation of a Prometheus Rules.
 // Alert attribute will be used when iterating over multiple AlertingRules.
 type Rule struct {
 	AlertingRule v1.AlertingRule
@@ -139,7 +139,6 @@ func (a *Rule) GetOutput() (output string) {
 	// Add current value to output
 	value, _ = strconv.ParseFloat(a.Alert.Value, 32)
 	out.WriteString(fmt.Sprintf(" is %s - value: %.2f", a.AlertingRule.State, value))
-
 	// Add labels to the output
 	l, err := json.Marshal(a.Alert.Labels)
 

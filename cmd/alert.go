@@ -100,6 +100,7 @@ inactive = 0`,
 			if cliAlertConfig.AlertName != nil {
 				check.ExitRaw(check.Unknown, "No such alert defined", "|", pdlist.String())
 			}
+
 			check.ExitRaw(noAlertsState, "No alerts defined", "|", pdlist.String())
 		}
 
