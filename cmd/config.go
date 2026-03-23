@@ -90,6 +90,7 @@ func (c *Config) NewClient() *client.Client {
 	// Using a Bearer Token for authentication
 	if c.Bearer != "" {
 		var t = config.NewInlineSecret(c.Bearer)
+
 		rt = config.NewAuthorizationCredentialsRoundTripper("Bearer", t, rt)
 	}
 

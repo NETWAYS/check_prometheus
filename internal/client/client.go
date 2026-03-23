@@ -3,6 +3,7 @@ package client
 import (
 	"context"
 	"fmt"
+	"maps"
 	"net/http"
 	"net/url"
 	"strings"
@@ -31,7 +32,6 @@ func (c *Client) Connect() error {
 		Address:      c.URL,
 		RoundTripper: c.RoundTripper,
 	})
-
 	if err != nil {
 		return fmt.Errorf("error creating client: %w", err)
 	}
@@ -113,10 +113,7 @@ func cloneRequest(r *http.Request) *http.Request {
 	r2 := new(http.Request)
 	*r2 = *r
 	// Deep copy of the Header.
-	r2.Header = make(http.Header)
-	for k, s := range r.Header {
-		r2.Header[k] = s
-	}
+	maps.Copy(r.Header, r2.Header)
 
 	return r2
 }

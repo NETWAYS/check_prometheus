@@ -29,6 +29,7 @@ Ready: Checks the readiness of an endpoint, which returns OK if the Prometheus s
 
 		// Creating an client and connecting to the API
 		c := cliConfig.NewClient()
+
 		err := c.Connect()
 		if err != nil {
 			check.ExitError(err)
@@ -61,6 +62,7 @@ Ready: Checks the readiness of an endpoint, which returns OK if the Prometheus s
 			if err != nil {
 				check.ExitError(err)
 			}
+
 			partialResult := result.NewPartialResult()
 
 			_ = partialResult.SetState(rc)

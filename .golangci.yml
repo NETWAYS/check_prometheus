@@ -3,7 +3,10 @@ run:
   tests: false
 linters:
   default: all
+  enable:
+    - wsl_v5
   disable:
+    - wsl
     - cyclop
     - depguard
     - err113
@@ -25,6 +28,13 @@ linters:
     - varnamelen
     - wrapcheck
     - funlen
+  settings:
+    wsl_v5:
+      allow-first-in-block: true
+      allow-whole-block: true
+      branch-max-lines: 2
+      disable:
+        - err
   exclusions:
     generated: lax
     presets:
