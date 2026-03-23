@@ -2,6 +2,11 @@
 
 An Icinga check plugin to check Prometheus.
 
+Other Icinga and Prometheus integrations we provide:
+
+* https://github.com/NETWAYS/icinga2-exporter
+* https://github.com/NETWAYS/icingaweb2-module-perfdatagraphs-prometheus
+
 ## Usage
 
 ```bash
@@ -170,6 +175,7 @@ Flags:
                                     If no name is given, all alerts will be evaluated
   -T, --no-alerts-state string      State to assign when no alerts are found (0, 1, 2, 3, OK, WARNING, CRITICAL, UNKNOWN). If not set this defaults to OK (default "OK")
   -P, --problems                    Display only alerts which status is not inactive/OK. Note that in combination with the --name flag this might result in no alerts being displayed
+  -W, --watchdog                    Flip the exit state for firing alerts. When this flag is set firing alerts will be OK and inactive alerts will be CRITICAL. This is intended for handling watchdog alerts
 ```
 
 The `--label-key-state` can be used to override the exit code for firing alerts.
