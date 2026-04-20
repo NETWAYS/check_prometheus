@@ -197,7 +197,7 @@ func TestFlattenRules(t *testing.T) {
 			Name:     "example",
 			File:     "/rules.yaml",
 			Interval: 60,
-			Rules: []interface{}{
+			Rules: []any{
 				v1.AlertingRule{
 					Alerts: []*v1.Alert{
 						{
