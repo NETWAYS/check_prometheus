@@ -120,7 +120,11 @@ inactive = 0`,
 				}
 			}
 
-			labelsMatchedInclude := matchesLabel(rl.AlertingRule.Labels, cliAlertConfig.IncludeLabels)
+			labelsMatchedInclude, regexErr := matchesLabel(rl.AlertingRule.Labels, cliAlertConfig.IncludeLabels)
+
+			if regexErr != nil {
+				check.ExitRaw(check.Unknown, "Invalid regular expression provided:", regexErr.Error())
+			}
 
 			if len(cliAlertConfig.IncludeLabels) > 0 && !labelsMatchedInclude {
 				// If the alert labels don't match here we can skip it.
@@ -143,7 +147,11 @@ inactive = 0`,
 				continue
 			}
 
-			labelsMatchedExclude := matchesLabel(rl.AlertingRule.Labels, cliAlertConfig.ExcludeLabels)
+			labelsMatchedExclude, regexErr := matchesLabel(rl.AlertingRule.Labels, cliAlertConfig.ExcludeLabels)
+
+			if regexErr != nil {
+				check.ExitRaw(check.Unknown, "Invalid regular expression provided:", regexErr.Error())
+			}
 
 			if len(cliAlertConfig.ExcludeLabels) > 0 && labelsMatchedExclude {
 				// If the alert labels matches here we can skip it.
@@ -261,12 +269,12 @@ func init() {
 
 	fs.StringArrayVar(&cliAlertConfig.IncludeLabels, "include-label", []string{},
 		"The label of one or more specific alerts to include. "+
-			"\nThis parameter can be repeated e.g.: '--include-label prio=high --include-label another=example'"+
+			"\nThis parameter can be repeated e.g.: '--include-label prio=high --include-label another=example'. Supports regex for values"+
 			"\nNote that repeated --include-label are combined using a union.")
 
 	fs.StringArrayVar(&cliAlertConfig.ExcludeLabels, "exclude-label", []string{},
 		"The label of one or more specific alerts to exclude."+
-			"\nThis parameter can be repeated e.g.: '--exclude-label prio=high --exclude-label another=example'")
+			"\nThis parameter can be repeated e.g.: '--exclude-label prio=high --exclude-label another=example'. Supports regex for values")
 
 	fs.BoolVarP(&cliAlertConfig.ProblemsOnly, "problems", "P", false,
 		"Display only alerts which status is not inactive/OK. Note that in combination with the --name flag this might result in no alerts being displayed")
@@ -314,22 +322,32 @@ func matches(input string, regexToExclude []string) (bool, error) {
 }
 
 // Matches a list of labels against a list of labels
-func matchesLabel(labels model.LabelSet, labelsToMatch []string) bool {
+func matchesLabel(labels model.LabelSet, labelsToMatch []string) (bool, error) {
 	for _, lb := range labelsToMatch {
-		kv := strings.SplitN(lb, "=", 2)
+		expectedLabelSet := strings.SplitN(lb, "=", 2)
 
-		if len(kv) != 2 {
+		if len(expectedLabelSet) != 2 {
 			continue
 		}
+		// Do we have a value for the expected key?
+		actualValue, ok := labels[model.LabelName(expectedLabelSet[0])]
 
-		key, value := model.LabelName(kv[0]), model.LabelValue(kv[1])
+		if !ok {
+			return false, nil
+		}
 
-		if val, ok := labels[key]; ok && val == value {
-			return true
+		re, err := regexp.Compile(expectedLabelSet[1])
+		if err != nil {
+			return false, err
+		}
+
+		// Does the values match the expected label regex?
+		if re.MatchString(string(actualValue)) {
+			return true, nil
 		}
 	}
 
-	return false
+	return false, nil
 }
 
 // negateStatus turns an OK state into critical and a warning/critical state into OK
