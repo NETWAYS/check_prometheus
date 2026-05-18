@@ -122,23 +122,23 @@ func (a *Rule) GetOutput() (output string) {
 	)
 
 	// Base Output
-	out.WriteString(fmt.Sprintf("[%s]", a.AlertingRule.Name))
+	fmt.Fprintf(&out, "[%s]", a.AlertingRule.Name)
 
 	// Add job if available
 	v, ok = a.Alert.Labels["job"]
 	if ok {
-		out.WriteString(fmt.Sprintf(" - Job: [%s]", string(v)))
+		fmt.Fprintf(&out, " - Job: [%s]", string(v))
 	}
 
 	// Add instance if available
 	v, ok = a.Alert.Labels["instance"]
 	if ok {
-		out.WriteString(fmt.Sprintf(" on Instance: [%s]", string(v)))
+		fmt.Fprintf(&out, " on Instance: [%s]", string(v))
 	}
 
 	// Add current value to output
 	value, _ = strconv.ParseFloat(a.Alert.Value, 32)
-	out.WriteString(fmt.Sprintf(" is %s - value: %.2f", a.AlertingRule.State, value))
+	fmt.Fprintf(&out, " is %s - value: %.2f", a.AlertingRule.State, value)
 	// Add labels to the output
 	l, err := json.Marshal(a.Alert.Labels)
 
