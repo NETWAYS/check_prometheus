@@ -231,6 +231,8 @@ OK - 1 Alerts: 0 Firing - 0 Pending - 1 Inactive
  \_[OK] [ApacheDown] is inactive
 ```
 
+Values support regular expressions (e.g. `severity=warn.+`).
+
 #### Checking watchdog alerts
 
 In Prometheus a "watchdog" or "dead man's switch" is an alert that is always firing to ensure alerting pipeline is working. The `-W, --watchdog` flag can be used to flip/negate the exit state of the plugin for these kind of alerts:

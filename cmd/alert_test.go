@@ -273,12 +273,42 @@ exit status 1
 `,
 		},
 		{
+			name: "alert-exclude-label-regex",
+			server: httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				w.WriteHeader(http.StatusOK)
+				w.Write(loadTestdata(alertTestDataSet1))
+			})),
+			args: []string{"run", "../main.go", "alert", "--exclude-label", "severity=crit.*"},
+			expected: `[WARNING] - 1 Alerts: 0 Firing - 1 Pending - 0 Inactive
+\_ [WARNING] [SqlAccessDeniedRate] - Job: [mysql] on Instance: [localhost] is pending - value: 0.40 - {"alertname":"SqlAccessDeniedRate","instance":"localhost","job":"mysql","severity":"warning"}
+|total=1 firing=0 pending=1 inactive=0
+
+exit status 1
+`,
+		},
+		{
 			name: "alert-include-label-multiple",
 			server: httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 				w.WriteHeader(http.StatusOK)
 				w.Write(loadTestdata(alertTestDataSet1))
 			})),
 			args: []string{"run", "../main.go", "alert", "--include-label", "team=database", "--include-label", "severity=critical"},
+			expected: `[CRITICAL] - 3 Alerts: 1 Firing - 1 Pending - 1 Inactive
+\_ [OK] [HostOutOfMemory] is inactive
+\_ [WARNING] [SqlAccessDeniedRate] - Job: [mysql] on Instance: [localhost] is pending - value: 0.40 - {"alertname":"SqlAccessDeniedRate","instance":"localhost","job":"mysql","severity":"warning"}
+\_ [CRITICAL] [BlackboxTLS] - Job: [blackbox] on Instance: [https://localhost:443] is firing - value: -6065338.00 - {"alertname":"TLS","instance":"https://localhost:443","job":"blackbox","severity":"critical"}
+|total=3 firing=1 pending=1 inactive=1
+
+exit status 2
+`,
+		},
+		{
+			name: "alert-include-label-multiple-regex",
+			server: httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				w.WriteHeader(http.StatusOK)
+				w.Write(loadTestdata(alertTestDataSet1))
+			})),
+			args: []string{"run", "../main.go", "alert", "--include-label", "team=data.+", "--include-label", "severity=critical"},
 			expected: `[CRITICAL] - 3 Alerts: 1 Firing - 1 Pending - 1 Inactive
 \_ [OK] [HostOutOfMemory] is inactive
 \_ [WARNING] [SqlAccessDeniedRate] - Job: [mysql] on Instance: [localhost] is pending - value: 0.40 - {"alertname":"SqlAccessDeniedRate","instance":"localhost","job":"mysql","severity":"warning"}
