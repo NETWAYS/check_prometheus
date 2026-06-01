@@ -96,7 +96,7 @@ func (c *Config) NewClient() *client.Client {
 
 	// Using a BasicAuth for authentication
 	if c.BasicAuth != "" {
-		s := strings.Split(c.BasicAuth, ":")
+		s := strings.SplitN(c.BasicAuth, ":", 2)
 		if len(s) != 2 {
 			check.ExitError(errors.New("specify the user name and password for server authentication <user:password>"))
 		}
