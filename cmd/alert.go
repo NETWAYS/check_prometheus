@@ -120,17 +120,6 @@ inactive = 0`,
 				}
 			}
 
-			labelsMatchedInclude, regexErr := matchesLabel(rl.AlertingRule.Labels, cliAlertConfig.IncludeLabels)
-
-			if regexErr != nil {
-				check.ExitRaw(check.Unknown, "Invalid regular expression provided:", regexErr.Error())
-			}
-
-			if len(cliAlertConfig.IncludeLabels) > 0 && !labelsMatchedInclude {
-				// If the alert labels don't match here we can skip it.
-				continue
-			}
-
 			// Skip inactive alerts if flag is set
 			if len(rl.AlertingRule.Alerts) == 0 && cliAlertConfig.ProblemsOnly {
 				continue
@@ -147,6 +136,7 @@ inactive = 0`,
 				continue
 			}
 
+			// Check if the alert group should be excluded
 			labelsMatchedExclude, regexErr := matchesLabel(rl.AlertingRule.Labels, cliAlertConfig.ExcludeLabels)
 
 			if regexErr != nil {
@@ -197,6 +187,28 @@ inactive = 0`,
 						counterPending++
 					case 2:
 						counterFiring++
+					}
+
+					labelsMatchedInclude, regexErr := matchesLabel(alert.Labels, cliAlertConfig.IncludeLabels)
+
+					if regexErr != nil {
+						check.ExitRaw(check.Unknown, "Invalid regular expression provided:", regexErr.Error())
+					}
+
+					if len(cliAlertConfig.IncludeLabels) > 0 && !labelsMatchedInclude {
+						// If the alert labels don't match here we can skip it.
+						continue
+					}
+
+					labelsMatchedExclude, regexErr := matchesLabel(alert.Labels, cliAlertConfig.ExcludeLabels)
+
+					if regexErr != nil {
+						check.ExitRaw(check.Unknown, "Invalid regular expression provided:", regexErr.Error())
+					}
+
+					if len(cliAlertConfig.ExcludeLabels) > 0 && labelsMatchedExclude {
+						// If the alert labels matches here we can skip it.
+						continue
 					}
 
 					sc := result.NewPartialResult()
@@ -329,6 +341,7 @@ func matchesLabel(labels model.LabelSet, labelsToMatch []string) (bool, error) {
 		if len(expectedLabelSet) != 2 {
 			continue
 		}
+
 		// Do we have a value for the expected key?
 		actualValue, ok := labels[model.LabelName(expectedLabelSet[0])]
 

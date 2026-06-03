@@ -54,6 +54,7 @@
                   "alertname": "SqlAccessDeniedRate",
                   "instance": "localhost",
                   "job": "mysql",
+                  "team": "database",
                   "severity": "warning"
                 },
                 "annotations": {
@@ -100,6 +101,8 @@
                   "alertname": "TLS",
                   "instance": "https://localhost:443",
                   "job": "blackbox",
+                  "icinga": "ok",
+                  "team": "network",
                   "severity": "critical"
                 },
                 "annotations": {
