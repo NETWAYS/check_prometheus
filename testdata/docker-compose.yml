@@ -17,6 +17,10 @@ services:
         image: docker.io/prom/node-exporter
         ports:
             - '9100:9100'
+    blackbox-exporter:
+        image: docker.io/prom/blackbox-exporter
+        ports:
+            - '9115:9115'
 
     alertmanager:
         image: docker.io/prom/alertmanager

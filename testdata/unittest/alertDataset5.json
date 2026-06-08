@@ -1,0 +1,107 @@
+{
+  "status": "success",
+  "data": {
+    "groups": [
+      {
+        "name": "Examples",
+        "file": "alerts.yaml",
+        "rules": [
+          {
+            "state": "firing",
+            "name": "PrometheusTargetMissing",
+            "query": "up == 0",
+            "duration": 0,
+            "keepFiringFor": 0,
+            "labels": {
+              "example": "foobar",
+              "icingaState": "warning",
+              "severity": "critical",
+              "team": "monitoring"
+            },
+            "annotations": {
+              "description": "A Prometheus target has disappeared.",
+              "summary": "Prometheus target missing"
+            },
+            "alerts": [],
+            "health": "ok",
+            "evaluationTime": 0.000096631,
+            "lastEvaluation": "2026-06-02T08:52:53.929002951Z",
+            "type": "alerting"
+          },
+          {
+            "state": "firing",
+            "name": "ContainerKilled",
+            "query": "example",
+            "duration": 17280000,
+            "labels": {
+              "severity": "warning",
+              "team": "k8s"
+            },
+            "annotations": {
+              "description": "A container has disappeared\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}",
+              "summary": "Container killed (instance {{ $labels.instance }})"
+            },
+            "alerts": [
+              {
+                "labels": {
+                  "alertname": "ContainerKilled",
+                  "instance": "example:8888",
+                  "job": "cadvisor",
+                  "name": "nodered",
+                  "severity": "warning"
+                },
+                "annotations": {
+                  "description": "Container killed (instance example:8088)",
+                  "summary": "Job: [cadvisor] on Instance: [example:8088] is firing - value: 1234"
+                },
+                "state": "firing",
+                "activeAt": "2022-11-21T10:38:35.373483748Z",
+                "value": "123.4"
+              },
+              {
+                "labels": {
+                  "alertname": "ContainerKilled",
+                  "instance": "example:8888",
+                  "job": "cadvisor",
+                  "name": "foobar",
+                  "severity": "warning"
+                },
+                "annotations": {
+                  "description": "Container killed (instance foobar:8088)",
+                  "summary": "Job: [cadvisor] on Instance: [foobar:8088] is firing - value: 1234"
+                },
+                "state": "firing",
+                "activeAt": "2022-11-21T10:38:35.373483748Z",
+                "value": "123.4"
+              },
+              {
+                "labels": {
+                  "alertname": "ContainerKilled",
+                  "instance": "example:8888",
+                  "job": "cadvisor",
+                  "name": "mosquitto",
+                  "severity": "warning"
+                },
+                "annotations": {
+                  "description": "Container killed (instance example:8088)",
+                  "summary": "Job: [cadvisor] on Instance: [example:8088] is firing - value: 1234"
+                },
+                "state": "firing",
+                "activeAt": "2022-11-21T10:38:35.373483748Z",
+                "value": "123.4"
+              }
+            ],
+            "health": "ok",
+            "evaluationTime": 0.002909617,
+            "lastEvaluation": "2022-11-24T14:08:25.375220595Z",
+            "type": "alerting"
+          }
+        ],
+        "interval": 10,
+        "limit": 0,
+        "evaluationTime": 0.003046259,
+        "lastEvaluation": "2022-11-24T14:08:25.375096825Z"
+      }
+    ]
+  }
+}
