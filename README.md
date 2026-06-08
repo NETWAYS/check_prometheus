@@ -231,7 +231,7 @@ OK - 1 Alerts: 0 Firing - 0 Pending - 1 Inactive
  \_[OK] [ApacheDown] is inactive
 ```
 
-Values support regular expressions (e.g. `severity=warn.+`).
+The `--include-label` and `--exclude-label` flag support regular expressions in the values (e.g. `severity=warn.+`).
 
 #### Checking watchdog alerts
 
