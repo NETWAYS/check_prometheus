@@ -5,7 +5,7 @@ go 1.25.0
 require (
 	github.com/NETWAYS/go-check v0.6.4
 	github.com/prometheus/client_golang v1.23.2
-	github.com/prometheus/common v0.68.1
+	github.com/prometheus/common v0.69.0
 	github.com/spf13/cobra v1.10.2
 )
 
