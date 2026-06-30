@@ -49,7 +49,7 @@ func TestAlertCmd(t *testing.T) {
 				w.Write([]byte(`{"status":"success","data":{"groups":[]}}`))
 			})),
 			args:     []string{"run", "../main.go", "alert"},
-			expected: "[OK] - No alerts defined | total=0 firing=0 pending=0 inactive=0\n",
+			expected: "[OK] - No alerts defined|total=0 firing=0 pending=0 inactive=0\n",
 		},
 		{
 			name: "alert-none-with-problems",
@@ -58,7 +58,7 @@ func TestAlertCmd(t *testing.T) {
 				w.Write([]byte(`{"status":"success","data":{"groups":[]}}`))
 			})),
 			args:     []string{"run", "../main.go", "alert", "--problems"},
-			expected: "[OK] - No alerts defined | total=0 firing=0 pending=0 inactive=0\n",
+			expected: "[OK] - No alerts defined|total=0 firing=0 pending=0 inactive=0\n",
 		},
 		{
 			name: "alert-none-with-no-state",
@@ -67,7 +67,7 @@ func TestAlertCmd(t *testing.T) {
 				w.Write([]byte(`{"status":"success","data":{"groups":[]}}`))
 			})),
 			args:     []string{"run", "../main.go", "alert", "--no-alerts-state", "3"},
-			expected: "[UNKNOWN] - No alerts defined | total=0 firing=0 pending=0 inactive=0\nexit status 3\n",
+			expected: "[UNKNOWN] - No alerts defined|total=0 firing=0 pending=0 inactive=0\nexit status 3\n",
 		},
 		{
 			name: "alert-none-with-name",
@@ -76,7 +76,7 @@ func TestAlertCmd(t *testing.T) {
 				w.Write([]byte(`{"status":"success","data":{"groups":[]}}`))
 			})),
 			args:     []string{"run", "../main.go", "alert", "--name", "MyPreciousAlert"},
-			expected: "[UNKNOWN] - No such alert defined | total=0 firing=0 pending=0 inactive=0\nexit status 3\n",
+			expected: "[UNKNOWN] - No such alert defined|total=0 firing=0 pending=0 inactive=0\nexit status 3\n",
 		},
 		{
 			name: "alert-default",

@@ -70,7 +70,7 @@ func FlattenRules(groups []v1.RuleGroup, wantedGroups []string, alerts []v1.Aler
 	return rules
 }
 
-func (a *Rule) GetStatus(labelKey string) (status int) {
+func (a *Rule) GetStatus(labelKey string) (status check.Status) {
 	state := a.AlertingRule.State
 
 	switch state {

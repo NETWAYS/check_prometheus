@@ -1,9 +1,9 @@
 module github.com/NETWAYS/check_prometheus
 
-go 1.25.0
+go 1.26
 
 require (
-	github.com/NETWAYS/go-check v0.6.4
+	github.com/NETWAYS/go-check v1.0.0
 	github.com/prometheus/client_golang v1.24.1
 	github.com/prometheus/common v0.70.1
 	github.com/spf13/cobra v1.10.2

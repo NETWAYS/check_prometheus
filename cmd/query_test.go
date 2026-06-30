@@ -149,7 +149,6 @@ func TestQueryCmd(t *testing.T) {
 			actual := string(out)
 
 			if actual != test.expected {
-				//				t.Error("\nActual: ", actual, "\nExpected: ", test.expected)
 				t.Error("\nActual: ", actual, "\nExpected: ", test.expected)
 			}
 
@@ -166,7 +165,7 @@ func TestExtendedQueryCmd(t *testing.T) {
 				w.Write([]byte(`{"status":"success","data":{"resultType":"vector","result":[{"metric":{"__name__":"up","instance":"localhost:9100","job":"node"},"value":[1696589905.608,"1"]},{"metric":{"__name__":"up","instance":"localhost:9104","job":"mysqld"},"value":[1696589905.608,"99"]},{"metric":{"__name__":"up","instance":"localhost:9117","job":"apache"},"value":[1696589905.608,"1"]}]}}`))
 			})),
 			args:     []string{"run", "../main.go", "query", "--query", "up", "-w", "100", "-c", "200"},
-			expected: "OK] - states: ok=3\n\\_ [OK]  up{instance=\"localhost:9100\", job=\"node\"} - value: 1\n\\_ [OK]  up{instance=\"localhost:9104\", job=\"mysqld\"} - value: 99\n\\_ [OK]  up{instance=\"localhost:9117\", job=\"apache\"} - value: 1\n|up_instance_localhost:9100_job_node=1;100;200 up_instance_localhost:9104_job_mysqld=99;100;200 up_instance_localhost:9117_job_apache=1;100;200\n\n",
+			expected: "[OK] - states: ok=3\n\\_ [OK]  up{instance=\"localhost:9100\", job=\"node\"} - value: 1\n\\_ [OK]  up{instance=\"localhost:9104\", job=\"mysqld\"} - value: 99\n\\_ [OK]  up{instance=\"localhost:9117\", job=\"apache\"} - value: 1\n|up_instance_localhost:9100_job_node=1;100;200 up_instance_localhost:9104_job_mysqld=99;100;200 up_instance_localhost:9117_job_apache=1;100;200\n\n",
 		},
 		{
 			name: "vector-multiple-critical",

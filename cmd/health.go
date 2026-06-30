@@ -21,9 +21,7 @@ Ready: Checks the readiness of an endpoint, which returns OK if the Prometheus s
 	$ check_prometheus --bearer secrettoken health --ready
 	OK - Prometheus Server is Ready. | statuscode=200`,
 	Run: func(_ *cobra.Command, _ []string) {
-		var (
-			rc int
-		)
+		var rc check.Status
 
 		overall := result.Overall{}
 
@@ -49,11 +47,11 @@ Ready: Checks the readiness of an endpoint, which returns OK if the Prometheus s
 
 			partialResult := result.NewPartialResult()
 
-			_ = partialResult.SetState(rc)
-			partialResult.Output = output
+			partialResult.SetState(rc)
+			partialResult.SetOutput(output)
 			overall.AddSubcheck(partialResult)
 
-			check.ExitRaw(overall.GetStatus(), overall.GetOutput())
+			check.Exit(overall.GetStatus(), overall.GetOutput())
 		}
 
 		if cliConfig.Info {
@@ -65,18 +63,18 @@ Ready: Checks the readiness of an endpoint, which returns OK if the Prometheus s
 
 			partialResult := result.NewPartialResult()
 
-			_ = partialResult.SetState(rc)
+			partialResult.SetState(rc)
 
-			partialResult.Output = "Prometheus Server information\n\n" +
+			partialResult.SetOutput("Prometheus Server information\n\n" +
 				"Version: " + info.Version + "\n" +
 				"Branch: " + info.Branch + "\n" +
 				"BuildDate: " + info.BuildDate + "\n" +
 				"BuildUser: " + info.BuildUser + "\n" +
-				"Revision: " + info.Revision
+				"Revision: " + info.Revision)
 
 			overall.AddSubcheck(partialResult)
 
-			check.ExitRaw(overall.GetStatus(), overall.GetOutput())
+			check.Exit(overall.GetStatus(), overall.GetOutput())
 		}
 
 		// Getting the health status is the default
@@ -87,11 +85,11 @@ Ready: Checks the readiness of an endpoint, which returns OK if the Prometheus s
 		}
 
 		partialResult := result.NewPartialResult()
-		_ = partialResult.SetState(rc)
-		partialResult.Output = output
+		partialResult.SetState(rc)
+		partialResult.SetOutput(output)
 		overall.AddSubcheck(partialResult)
 
-		check.ExitRaw(overall.GetStatus(), overall.GetOutput())
+		check.Exit(overall.GetStatus(), overall.GetOutput())
 	},
 }
 
