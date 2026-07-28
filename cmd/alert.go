@@ -72,7 +72,7 @@ inactive = 0`,
 		// We use the Rules endpoint since it contains
 		// the state of inactive Alert Rules, unlike the Alert endpoint
 		// Search requested Alert in all Groups and all Rules
-		alertrules, errR := c.API.Rules(ctx)
+		alertrules, errR := c.API.Rules(ctx, []string{})
 		if errR != nil {
 			check.ExitError(errR)
 		}
