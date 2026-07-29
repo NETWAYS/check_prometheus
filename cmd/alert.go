@@ -37,12 +37,12 @@ pending = 1
 inactive = 0`,
 	Example: `
 	$ check_prometheus alert --name "PrometheusAlertmanagerJobMissing"
-	CRITICAL - 1 Alerts: 1 Firing - 0 Pending - 0 Inactive
+	[CRITICAL] - [PrometheusAlertmanagerJobMissing] - Job: [alertmanager] is firing - value: 1.00
 	 \_[CRITICAL] [PrometheusAlertmanagerJobMissing] - Job: [alertmanager] is firing - value: 1.00
 	 | firing=1 pending=0 inactive=0
 
 	$ check_prometheus alert --name "PrometheusAlertmanagerJobMissing" --name "PrometheusTargetMissing"
-	CRITICAL - 2 Alerts: 1 Firing - 0 Pending - 1 Inactive
+	[CRITICAL] [PrometheusAlertmanagerJobMissing] - Job: [alertmanager] is firing - value: 1.00
 	 \_[OK] [PrometheusTargetMissing] is inactive
 	 \_[CRITICAL] [PrometheusAlertmanagerJobMissing] - Job: [alertmanager] is firing - value: 1.00
 	 | total=2 firing=1 pending=0 inactive=1`,
@@ -106,7 +106,7 @@ inactive = 0`,
 		// Set initial capacity to reduce memory allocations
 		var l int
 		for _, rl := range rules {
-			l *= len(rl.AlertingRule.Alerts)
+			l += len(rl.AlertingRule.Alerts)
 		}
 
 		var overall goresult.Overall
@@ -150,7 +150,7 @@ inactive = 0`,
 			// Handle Inactive Alerts
 			if len(rl.AlertingRule.Alerts) == 0 {
 				// Counting states for perfdata. We don't use the state-label override here
-				// to have the acutal count from Prometheus
+				// to have the actual count from Prometheus
 				//nolint: exhaustive
 				switch rl.GetStatus("") {
 				case 0:
@@ -179,7 +179,7 @@ inactive = 0`,
 				// Handle Pending or Firing Alerts
 				for _, alert := range rl.AlertingRule.Alerts {
 					// Counting states for perfdata. We don't use the state-label override here
-					// to have the acutal count from Prometheus
+					// to have the actual count from Prometheus
 					//nolint: exhaustive
 					switch rl.GetStatus("") {
 					case 0:
@@ -239,7 +239,7 @@ inactive = 0`,
 		}
 
 		// When there are no alerts we add an empty PartialResult just to have consistent output
-		if l == 0 {
+		if counterAlert == 0 {
 			sc := goresult.NewPartialResult()
 			sc.SetDefaultState(noAlertsState)
 			sc.SetOutput("No alerts retrieved")
