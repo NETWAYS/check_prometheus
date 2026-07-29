@@ -97,7 +97,7 @@ func TestHealthCmd(t *testing.T) {
 				w.Write([]byte(`Access Denied!`))
 			})),
 			args:     []string{"run", "../main.go", "--bearer", "wrong-token", "health"},
-			expected: "[CRITICAL] - states: critical=1\n\\_ [CRITICAL] Access Denied!\n\nexit status 2\n",
+			expected: "[CRITICAL] - Access Denied!\n\\_ [CRITICAL] Access Denied!\n\nexit status 2\n",
 		},
 		{
 			name: "health-basic-auth-ok",
@@ -133,7 +133,7 @@ func TestHealthCmd(t *testing.T) {
 				w.Write([]byte(`Access Denied!`))
 			})),
 			args:     []string{"run", "../main.go", "health"},
-			expected: "[CRITICAL] - states: critical=1\n\\_ [CRITICAL] Access Denied!\n\nexit status 2\n",
+			expected: "[CRITICAL] - Access Denied!\n\\_ [CRITICAL] Access Denied!\n\nexit status 2\n",
 		},
 		{
 			name: "health-basic-auth-wrong-use",

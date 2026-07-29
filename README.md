@@ -88,13 +88,15 @@ The warning and critical support thresholds in the common Nagios format (e.g. `~
 
 >Note: Time range values e.G. 'go_memstats_alloc_bytes_total[10s]', only the latest value will be evaluated, other values will be ignored!
 
+The check will show the worse state as the first line.
+
 ```bash
 Usage:
   check_prometheus query [flags]
 
 Examples:
   $ check_prometheus query -q 'go_gc_duration_seconds_count' -c 5000 -w 2000
-  CRITICAL - 2 Metrics: 1 Critical - 0 Warning - 1 Ok
+  [CRITICAL] go_gc_duration_seconds_count{instance="node-exporter:9100", job="node-exporter"} - value: 79610
    \_[OK] go_gc_duration_seconds_count{instance="localhost:9090", job="prometheus"} - value: 1599
    \_[CRITICAL] go_gc_duration_seconds_count{instance="node-exporter:9100", job="node-exporter"} - value: 79610
    | value_go_gc_duration_seconds_count_localhost:9090_prometheus=1599 value_go_gc_duration_seconds_count_node-exporter:9100_node-exporter=79610
@@ -110,7 +112,7 @@ Flags:
 
 ```bash
 $ check_prometheus query -q 'go_goroutines{job="prometheus"}' -c 40 -w 27
-WARNING - 1 Metrics: 0 Critical - 1 Warning - 0 Ok
+[WARNING] go_goroutines{instance="localhost:9090", job="prometheus"} - value: 37
  \_[WARNING] go_goroutines{instance="localhost:9090", job="prometheus"} - value: 37
  | value_go_goroutines_localhost:9090_prometheus=37
 ```
@@ -119,7 +121,7 @@ WARNING - 1 Metrics: 0 Critical - 1 Warning - 0 Ok
 
 ```bash
 $ check_prometheus query -q 'go_goroutines' -c 40 -w 27
-WARNING - 2 Metrics: 0 Critical - 1 Warning - 1 Ok
+[WARNING] go_goroutines{instance="localhost:9090", job="prometheus"} - value: 37
  \_[WARNING] go_goroutines{instance="localhost:9090", job="prometheus"} - value: 37
  \_[OK] go_goroutines{instance="node-exporter:9100", job="node-exporter"} - value: 7
  | value_go_goroutines_localhost:9090_prometheus=37 value_go_goroutines_node-exporter:9100_node-exporter=7
@@ -131,7 +133,7 @@ Hint: Currently only the latest value will be evaluated, other values will be ig
 
 ```bash
 $ check_prometheus query -q 'go_goroutines{job="prometheus"}[10s]' -c5 -w 10
-CRITICAL - 1 Metrics: 1 Critical - 0 Warning - 0 Ok
+[CRITICAL] go_goroutines{instance="localhost:9090", job="prometheus"} - value: 37
  \_[CRITICAL] go_goroutines{instance="localhost:9090", job="prometheus"} - value: 37
  | value_go_goroutines_localhost:9090_prometheus=37
 
@@ -143,18 +145,20 @@ OK - 2 Metrics OK | value_go_goroutines_localhost:9090_prometheus=37 value_go_go
 
 Checks the status of a Prometheus alert and evaluates the status of the alert.
 
+The check will show the worse state as the first line.
+
 ```bash
 Usage:
   check_prometheus alert [flags]
 
 Examples:
   $ check_prometheus alert --name "PrometheusAlertmanagerJobMissing"
-  CRITICAL - 1 Alerts: 1 Firing - 0 Pending - 0 Inactive
+  [CRITICAL] [PrometheusAlertmanagerJobMissing] - Job: [alertmanager] is firing - value: 1.00
    \_[CRITICAL] [PrometheusAlertmanagerJobMissing] - Job: [alertmanager] is firing - value: 1.00
    | firing=1 pending=0 inactive=0
 
   $ check_prometheus a alert --name "PrometheusAlertmanagerJobMissing" --name "PrometheusTargetMissing"
-  CRITICAL - 2 Alerts: 1 Firing - 0 Pending - 1 Inactive
+  [CRITICAL] [PrometheusAlertmanagerJobMissing] - Job: [alertmanager] is firing - value: 1.00
    \_[OK] [PrometheusTargetMissing] is inactive
    \_[CRITICAL] [PrometheusAlertmanagerJobMissing] - Job: [alertmanager] is firing - value: 1.00
    | total=2 firing=1 pending=0 inactive=1
@@ -189,7 +193,7 @@ An invalid value will result in an UNKNOWN exit code.
 
 ```bash
 $ check_prometheus alert
-CRITICAL - 6 Alerts: 3 Firing - 0 Pending - 3 Inactive
+[CRITICAL] [PrometheusAlertmanagerJobMissing] - Job: [alertmanager] is firing - value: 1.00
  \_[OK] [PrometheusTargetMissing] is inactive
  \_[CRITICAL] [PrometheusAlertmanagerJobMissing] - Job: [alertmanager] is firing - value: 1.00
  \_[OK] [HostOutOfMemory] - Job: [alertmanager]
@@ -204,7 +208,7 @@ CRITICAL - 6 Alerts: 3 Firing - 0 Pending - 3 Inactive
 
 ```bash
 $ check_prometheus alert --name "HostHighCpuLoad" --name "HighResultLatency"
-CRITICAL - 3 Alerts: 2 Firing - 0 Pending - 1 Inactive
+[CRITICAL] [HighResultLatency] - Job: [prometheus] on Instance: [localhost:9090]  is firing - value: 11.00
  \_[OK] [HostHighCpuLoad] is inactive
  \_[CRITICAL] [HighResultLatency] - Job: [prometheus] on Instance: [localhost:9090]  is firing - value: 11.00
  \_[CRITICAL] [HighResultLatency] - Job: [node-exporter] on Instance: [node-exporter:9100]  is firing - value: 10.00
@@ -248,7 +252,7 @@ $ check_prometheus alert --name Watchdog -W --no-alerts-state 2
 
 ```bash
 $ check_prometheus alert --name Watchdog -W --no-alerts-state 2
-[CRITICAL] - 0 Alerts: 0 Firing - 0 Pending - 0 Inactive
+[CRITICAL] No alerts retrieved
 \_ [CRITICAL] No alerts retrieved
 |total=0 firing=0 pending=0 inactive=0
 ```

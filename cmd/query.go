@@ -9,7 +9,6 @@ import (
 	"time"
 
 	"github.com/NETWAYS/go-check"
-	"github.com/NETWAYS/go-check/perfdata"
 	goresult "github.com/NETWAYS/go-check/result"
 	"github.com/prometheus/common/model"
 	"github.com/spf13/cobra"
@@ -41,9 +40,9 @@ type Number interface {
 	~int | ~int8 | ~int16 | ~int32 | ~int64 | ~uint | ~uint8 | ~uint16 | ~uint32 | ~uint64 | ~uintptr | ~float32 | ~float64
 }
 
-func generatePerfdata[T Number](metric string, value T, warning, critical *check.Threshold) perfdata.Perfdata {
+func generatePerfdata[T Number](metric string, value T, warning, critical *check.Threshold) check.Perfdata {
 	// We trim the trailing "} from the string, so that the Perfdata won't have a trailing _
-	return perfdata.Perfdata{
+	return check.Perfdata{
 		Label: replacer.Replace(metric),
 		Value: value,
 		Warn:  warning,
@@ -120,15 +119,15 @@ Note: Time range values e.G. 'go_memstats_alloc_bytes_total[0s]' only the latest
 				partial := goresult.NewPartialResult()
 
 				if crit.DoesViolate(numberValue) {
-					_ = partial.SetState(check.Critical)
+					partial.SetState(check.Critical)
 				} else if warn.DoesViolate(numberValue) {
-					_ = partial.SetState(check.Warning)
+					partial.SetState(check.Warning)
 				} else {
-					_ = partial.SetState(check.OK)
+					partial.SetState(check.OK)
 				}
 
 				// Format the metric and RC output for console output
-				partial.Output = generateMetricOutput(sample.Metric.String(), sample.Value.String())
+				partial.SetOutput(generateMetricOutput(sample.Metric.String(), sample.Value.String()))
 
 				// Generate Perfdata from API return
 				if math.IsInf(numberValue, 0) || math.IsNaN(numberValue) {
@@ -136,7 +135,7 @@ Note: Time range values e.G. 'go_memstats_alloc_bytes_total[0s]' only the latest
 				}
 
 				perf := generatePerfdata(sample.Metric.String(), numberValue, warn, crit)
-				partial.Perfdata.Add(&perf)
+				partial.AddPerfdata(&perf)
 				overall.AddSubcheck(partial)
 			}
 
@@ -155,15 +154,15 @@ Note: Time range values e.G. 'go_memstats_alloc_bytes_total[0s]' only the latest
 				partial := goresult.NewPartialResult()
 
 				if crit.DoesViolate(numberValue) {
-					_ = partial.SetState(check.Critical)
+					partial.SetState(check.Critical)
 				} else if warn.DoesViolate(numberValue) {
-					_ = partial.SetState(check.Warning)
+					partial.SetState(check.Warning)
 				} else {
-					_ = partial.SetState(check.OK)
+					partial.SetState(check.OK)
 				}
 
 				// Format the metric and RC output for console output
-				partial.Output = generateMetricOutput(samplepair.String(), samplepair.Value.String())
+				partial.SetOutput(generateMetricOutput(samplepair.String(), samplepair.Value.String()))
 
 				valueString := samplepair.Value.String()
 
@@ -173,7 +172,7 @@ Note: Time range values e.G. 'go_memstats_alloc_bytes_total[0s]' only the latest
 
 					// Generate Perfdata from API return
 					if !math.IsInf(numberValue, 0) && !math.IsNaN(numberValue) {
-						partial.Perfdata.Add(&pd)
+						partial.AddPerfdata(&pd)
 					}
 				}
 
@@ -181,12 +180,12 @@ Note: Time range values e.G. 'go_memstats_alloc_bytes_total[0s]' only the latest
 			}
 		}
 
+		var appendum string
 		if len(warnings) != 0 {
-			appendum := fmt.Sprintf("HTTP Warnings: %v", strings.Join(warnings, ", "))
-			overall.Summary = overall.GetOutput() + appendum
+			appendum = fmt.Sprintf("HTTP Warnings: %v", strings.Join(warnings, ", "))
 		}
 
-		check.ExitRaw(overall.GetStatus(), overall.GetOutput())
+		check.Exit(overall.GetStatus(), overall.GetOutput(), appendum)
 	},
 }
 

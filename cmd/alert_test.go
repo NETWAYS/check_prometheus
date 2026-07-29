@@ -49,7 +49,7 @@ func TestAlertCmd(t *testing.T) {
 				w.Write([]byte(`{"status":"success","data":{"groups":[]}}`))
 			})),
 			args:     []string{"run", "../main.go", "alert"},
-			expected: "[OK] - No alerts defined | total=0 firing=0 pending=0 inactive=0\n",
+			expected: "[OK] - No alerts defined|total=0 firing=0 pending=0 inactive=0\n",
 		},
 		{
 			name: "alert-none-with-problems",
@@ -58,7 +58,7 @@ func TestAlertCmd(t *testing.T) {
 				w.Write([]byte(`{"status":"success","data":{"groups":[]}}`))
 			})),
 			args:     []string{"run", "../main.go", "alert", "--problems"},
-			expected: "[OK] - No alerts defined | total=0 firing=0 pending=0 inactive=0\n",
+			expected: "[OK] - No alerts defined|total=0 firing=0 pending=0 inactive=0\n",
 		},
 		{
 			name: "alert-none-with-no-state",
@@ -67,7 +67,7 @@ func TestAlertCmd(t *testing.T) {
 				w.Write([]byte(`{"status":"success","data":{"groups":[]}}`))
 			})),
 			args:     []string{"run", "../main.go", "alert", "--no-alerts-state", "3"},
-			expected: "[UNKNOWN] - No alerts defined | total=0 firing=0 pending=0 inactive=0\nexit status 3\n",
+			expected: "[UNKNOWN] - No alerts defined|total=0 firing=0 pending=0 inactive=0\nexit status 3\n",
 		},
 		{
 			name: "alert-none-with-name",
@@ -76,7 +76,7 @@ func TestAlertCmd(t *testing.T) {
 				w.Write([]byte(`{"status":"success","data":{"groups":[]}}`))
 			})),
 			args:     []string{"run", "../main.go", "alert", "--name", "MyPreciousAlert"},
-			expected: "[UNKNOWN] - No such alert defined | total=0 firing=0 pending=0 inactive=0\nexit status 3\n",
+			expected: "[UNKNOWN] - No such alert defined|total=0 firing=0 pending=0 inactive=0\nexit status 3\n",
 		},
 		{
 			name: "alert-default",
@@ -85,12 +85,11 @@ func TestAlertCmd(t *testing.T) {
 				w.Write(loadTestdata(alertTestDataSet1))
 			})),
 			args: []string{"run", "../main.go", "alert"},
-			expected: `[CRITICAL] - 3 Alerts: 1 Firing - 1 Pending - 1 Inactive
+			expected: `[CRITICAL] - [BlackboxTLS] - Job: [blackbox] on Instance: [https://localhost:443] is firing - value: -6065338.00 - {"alertname":"TLS","icinga":"ok","instance":"https://localhost:443","job":"blackbox","severity":"critical","team":"network"}
 \_ [OK] [HostOutOfMemory] is inactive
 \_ [WARNING] [SqlAccessDeniedRate] - Job: [mysql] on Instance: [localhost] is pending - value: 0.40 - {"alertname":"SqlAccessDeniedRate","instance":"localhost","job":"mysql","severity":"warning","team":"database"}
 \_ [CRITICAL] [BlackboxTLS] - Job: [blackbox] on Instance: [https://localhost:443] is firing - value: -6065338.00 - {"alertname":"TLS","icinga":"ok","instance":"https://localhost:443","job":"blackbox","severity":"critical","team":"network"}
 |total=3 firing=1 pending=1 inactive=1
-
 exit status 2
 `,
 		},
@@ -101,11 +100,10 @@ exit status 2
 				w.Write(loadTestdata(alertTestDataSet1))
 			})),
 			args: []string{"run", "../main.go", "alert", "--problems"},
-			expected: `[CRITICAL] - 2 Alerts: 1 Firing - 1 Pending - 0 Inactive
+			expected: `[CRITICAL] - [BlackboxTLS] - Job: [blackbox] on Instance: [https://localhost:443] is firing - value: -6065338.00 - {"alertname":"TLS","icinga":"ok","instance":"https://localhost:443","job":"blackbox","severity":"critical","team":"network"}
 \_ [WARNING] [SqlAccessDeniedRate] - Job: [mysql] on Instance: [localhost] is pending - value: 0.40 - {"alertname":"SqlAccessDeniedRate","instance":"localhost","job":"mysql","severity":"warning","team":"database"}
 \_ [CRITICAL] [BlackboxTLS] - Job: [blackbox] on Instance: [https://localhost:443] is firing - value: -6065338.00 - {"alertname":"TLS","icinga":"ok","instance":"https://localhost:443","job":"blackbox","severity":"critical","team":"network"}
 |total=2 firing=1 pending=1 inactive=0
-
 exit status 2
 `,
 		},
@@ -116,10 +114,9 @@ exit status 2
 				w.Write(loadTestdata(alertTestDataSet1))
 			})),
 			args: []string{"run", "../main.go", "alert", "--problems", "-g", "TLS"},
-			expected: `[CRITICAL] - 1 Alerts: 1 Firing - 0 Pending - 0 Inactive
+			expected: `[CRITICAL] - [BlackboxTLS] - Job: [blackbox] on Instance: [https://localhost:443] is firing - value: -6065338.00 - {"alertname":"TLS","icinga":"ok","instance":"https://localhost:443","job":"blackbox","severity":"critical","team":"network"}
 \_ [CRITICAL] [BlackboxTLS] - Job: [blackbox] on Instance: [https://localhost:443] is firing - value: -6065338.00 - {"alertname":"TLS","icinga":"ok","instance":"https://localhost:443","job":"blackbox","severity":"critical","team":"network"}
 |total=1 firing=1 pending=0 inactive=0
-
 exit status 2
 `,
 		},
@@ -130,11 +127,10 @@ exit status 2
 				w.Write(loadTestdata(alertTestDataSet1))
 			})),
 			args: []string{"run", "../main.go", "alert", "--problems", "-g", "SQL", "-g", "TLS"},
-			expected: `[CRITICAL] - 2 Alerts: 1 Firing - 1 Pending - 0 Inactive
+			expected: `[CRITICAL] - [BlackboxTLS] - Job: [blackbox] on Instance: [https://localhost:443] is firing - value: -6065338.00 - {"alertname":"TLS","icinga":"ok","instance":"https://localhost:443","job":"blackbox","severity":"critical","team":"network"}
 \_ [WARNING] [SqlAccessDeniedRate] - Job: [mysql] on Instance: [localhost] is pending - value: 0.40 - {"alertname":"SqlAccessDeniedRate","instance":"localhost","job":"mysql","severity":"warning","team":"database"}
 \_ [CRITICAL] [BlackboxTLS] - Job: [blackbox] on Instance: [https://localhost:443] is firing - value: -6065338.00 - {"alertname":"TLS","icinga":"ok","instance":"https://localhost:443","job":"blackbox","severity":"critical","team":"network"}
 |total=2 firing=1 pending=1 inactive=0
-
 exit status 2
 `,
 		},
@@ -145,10 +141,9 @@ exit status 2
 				w.Write(loadTestdata(alertTestDataSet1))
 			})),
 			args: []string{"run", "../main.go", "alert", "--problems", "--exclude-alert", "Sql.*DeniedRate"},
-			expected: `[CRITICAL] - 1 Alerts: 1 Firing - 0 Pending - 0 Inactive
+			expected: `[CRITICAL] - [BlackboxTLS] - Job: [blackbox] on Instance: [https://localhost:443] is firing - value: -6065338.00 - {"alertname":"TLS","icinga":"ok","instance":"https://localhost:443","job":"blackbox","severity":"critical","team":"network"}
 \_ [CRITICAL] [BlackboxTLS] - Job: [blackbox] on Instance: [https://localhost:443] is firing - value: -6065338.00 - {"alertname":"TLS","icinga":"ok","instance":"https://localhost:443","job":"blackbox","severity":"critical","team":"network"}
 |total=1 firing=1 pending=0 inactive=0
-
 exit status 2
 `,
 		},
@@ -168,10 +163,9 @@ exit status 2
 				w.Write(loadTestdata(alertTestDataSet2))
 			})),
 			args: []string{"run", "../main.go", "alert", "--name", "NoSuchAlert", "-T", "3"},
-			expected: `[UNKNOWN] - 0 Alerts: 0 Firing - 0 Pending - 0 Inactive
+			expected: `[UNKNOWN] - No alerts retrieved
 \_ [UNKNOWN] No alerts retrieved
 |total=0 firing=0 pending=0 inactive=0
-
 exit status 3
 `,
 		},
@@ -182,10 +176,9 @@ exit status 3
 				w.Write(loadTestdata(alertTestDataSet2))
 			})),
 			args: []string{"run", "../main.go", "alert", "--name", "InactiveAlert", "--problems", "-T", "3"},
-			expected: `[UNKNOWN] - 0 Alerts: 0 Firing - 0 Pending - 0 Inactive
+			expected: `[UNKNOWN] - No alerts retrieved
 \_ [UNKNOWN] No alerts retrieved
 |total=0 firing=0 pending=0 inactive=0
-
 exit status 3
 `,
 		},
@@ -196,11 +189,10 @@ exit status 3
 				w.Write(loadTestdata(alertTestDataSet1))
 			})),
 			args: []string{"run", "../main.go", "alert", "--name", "HostOutOfMemory", "--name", "BlackboxTLS"},
-			expected: `[CRITICAL] - 2 Alerts: 1 Firing - 0 Pending - 1 Inactive
+			expected: `[CRITICAL] - [BlackboxTLS] - Job: [blackbox] on Instance: [https://localhost:443] is firing - value: -6065338.00 - {"alertname":"TLS","icinga":"ok","instance":"https://localhost:443","job":"blackbox","severity":"critical","team":"network"}
 \_ [OK] [HostOutOfMemory] is inactive
 \_ [CRITICAL] [BlackboxTLS] - Job: [blackbox] on Instance: [https://localhost:443] is firing - value: -6065338.00 - {"alertname":"TLS","icinga":"ok","instance":"https://localhost:443","job":"blackbox","severity":"critical","team":"network"}
 |total=2 firing=1 pending=0 inactive=1
-
 exit status 2
 `,
 		},
@@ -211,10 +203,9 @@ exit status 2
 				w.Write(loadTestdata(alertTestDataSet1))
 			})),
 			args: []string{"run", "../main.go", "alert", "--name", "HostOutOfMemory", "--name", "BlackboxTLS", "--problems"},
-			expected: `[CRITICAL] - 1 Alerts: 1 Firing - 0 Pending - 0 Inactive
+			expected: `[CRITICAL] - [BlackboxTLS] - Job: [blackbox] on Instance: [https://localhost:443] is firing - value: -6065338.00 - {"alertname":"TLS","icinga":"ok","instance":"https://localhost:443","job":"blackbox","severity":"critical","team":"network"}
 \_ [CRITICAL] [BlackboxTLS] - Job: [blackbox] on Instance: [https://localhost:443] is firing - value: -6065338.00 - {"alertname":"TLS","icinga":"ok","instance":"https://localhost:443","job":"blackbox","severity":"critical","team":"network"}
 |total=1 firing=1 pending=0 inactive=0
-
 exit status 2
 `,
 		},
@@ -225,7 +216,7 @@ exit status 2
 				w.Write(loadTestdata(alertTestDataSet2))
 			})),
 			args:     []string{"run", "../main.go", "alert", "--name", "InactiveAlert"},
-			expected: "[OK] - 1 Alerts: 0 Firing - 0 Pending - 1 Inactive\n\\_ [OK] [InactiveAlert] is inactive\n|total=1 firing=0 pending=0 inactive=1\n\n",
+			expected: "[OK] - 1 Alerts: 0 Firing - 0 Pending - 1 Inactive\n\\_ [OK] [InactiveAlert] is inactive\n|total=1 firing=0 pending=0 inactive=1\n",
 		},
 		{
 			name: "alert-watchdog",
@@ -234,7 +225,7 @@ exit status 2
 				w.Write(loadTestdata(alertTestDataSet2))
 			})),
 			args:     []string{"run", "../main.go", "alert", "--name", "InactiveAlert", "-W"},
-			expected: "[CRITICAL] - 1 Alerts: 0 Firing - 0 Pending - 1 Inactive\n\\_ [CRITICAL] [InactiveAlert] is inactive\n|total=1 firing=0 pending=0 inactive=1\n\nexit status 2\n",
+			expected: "[CRITICAL] - [InactiveAlert] is inactive\n\\_ [CRITICAL] [InactiveAlert] is inactive\n|total=1 firing=0 pending=0 inactive=1\nexit status 2\n",
 		},
 		{
 			name: "alert-recording-rule",
@@ -243,7 +234,7 @@ exit status 2
 				w.Write(loadTestdata(alertTestDataSet4))
 			})),
 			args:     []string{"run", "../main.go", "alert", "--name", "InactiveAlert"},
-			expected: "[OK] - 1 Alerts: 0 Firing - 0 Pending - 1 Inactive\n\\_ [OK] [InactiveAlert] is inactive\n|total=1 firing=0 pending=0 inactive=1\n\n",
+			expected: "[OK] - 1 Alerts: 0 Firing - 0 Pending - 1 Inactive\n\\_ [OK] [InactiveAlert] is inactive\n|total=1 firing=0 pending=0 inactive=1\n",
 		},
 		{
 			name: "alert-include-label",
@@ -252,11 +243,10 @@ exit status 2
 				w.Write(loadTestdata(alertTestDataSet1))
 			})),
 			args: []string{"run", "../main.go", "alert", "--include-label", "severity=critical"},
-			expected: `[CRITICAL] - 3 Alerts: 1 Firing - 1 Pending - 1 Inactive
+			expected: `[CRITICAL] - [BlackboxTLS] - Job: [blackbox] on Instance: [https://localhost:443] is firing - value: -6065338.00 - {"alertname":"TLS","icinga":"ok","instance":"https://localhost:443","job":"blackbox","severity":"critical","team":"network"}
 \_ [OK] [HostOutOfMemory] is inactive
 \_ [CRITICAL] [BlackboxTLS] - Job: [blackbox] on Instance: [https://localhost:443] is firing - value: -6065338.00 - {"alertname":"TLS","icinga":"ok","instance":"https://localhost:443","job":"blackbox","severity":"critical","team":"network"}
 |total=3 firing=1 pending=1 inactive=1
-
 exit status 2
 `,
 		},
@@ -267,10 +257,9 @@ exit status 2
 				w.Write(loadTestdata(alertTestDataSet1))
 			})),
 			args: []string{"run", "../main.go", "alert", "--exclude-label", "severity=critical"},
-			expected: `[WARNING] - 1 Alerts: 0 Firing - 1 Pending - 0 Inactive
+			expected: `[WARNING] - [SqlAccessDeniedRate] - Job: [mysql] on Instance: [localhost] is pending - value: 0.40 - {"alertname":"SqlAccessDeniedRate","instance":"localhost","job":"mysql","severity":"warning","team":"database"}
 \_ [WARNING] [SqlAccessDeniedRate] - Job: [mysql] on Instance: [localhost] is pending - value: 0.40 - {"alertname":"SqlAccessDeniedRate","instance":"localhost","job":"mysql","severity":"warning","team":"database"}
 |total=1 firing=0 pending=1 inactive=0
-
 exit status 1
 `,
 		},
@@ -281,10 +270,9 @@ exit status 1
 				w.Write(loadTestdata(alertTestDataSet1))
 			})),
 			args: []string{"run", "../main.go", "alert", "--exclude-label", "severity=crit.*"},
-			expected: `[WARNING] - 1 Alerts: 0 Firing - 1 Pending - 0 Inactive
+			expected: `[WARNING] - [SqlAccessDeniedRate] - Job: [mysql] on Instance: [localhost] is pending - value: 0.40 - {"alertname":"SqlAccessDeniedRate","instance":"localhost","job":"mysql","severity":"warning","team":"database"}
 \_ [WARNING] [SqlAccessDeniedRate] - Job: [mysql] on Instance: [localhost] is pending - value: 0.40 - {"alertname":"SqlAccessDeniedRate","instance":"localhost","job":"mysql","severity":"warning","team":"database"}
 |total=1 firing=0 pending=1 inactive=0
-
 exit status 1
 `,
 		},
@@ -295,12 +283,11 @@ exit status 1
 				w.Write(loadTestdata(alertTestDataSet1))
 			})),
 			args: []string{"run", "../main.go", "alert", "--include-label", "team=database", "--include-label", "severity=critical"},
-			expected: `[CRITICAL] - 3 Alerts: 1 Firing - 1 Pending - 1 Inactive
+			expected: `[CRITICAL] - [BlackboxTLS] - Job: [blackbox] on Instance: [https://localhost:443] is firing - value: -6065338.00 - {"alertname":"TLS","icinga":"ok","instance":"https://localhost:443","job":"blackbox","severity":"critical","team":"network"}
 \_ [OK] [HostOutOfMemory] is inactive
 \_ [WARNING] [SqlAccessDeniedRate] - Job: [mysql] on Instance: [localhost] is pending - value: 0.40 - {"alertname":"SqlAccessDeniedRate","instance":"localhost","job":"mysql","severity":"warning","team":"database"}
 \_ [CRITICAL] [BlackboxTLS] - Job: [blackbox] on Instance: [https://localhost:443] is firing - value: -6065338.00 - {"alertname":"TLS","icinga":"ok","instance":"https://localhost:443","job":"blackbox","severity":"critical","team":"network"}
 |total=3 firing=1 pending=1 inactive=1
-
 exit status 2
 `,
 		},
@@ -311,12 +298,11 @@ exit status 2
 				w.Write(loadTestdata(alertTestDataSet1))
 			})),
 			args: []string{"run", "../main.go", "alert", "--include-label", "team=data.+", "--include-label", "severity=critical"},
-			expected: `[CRITICAL] - 3 Alerts: 1 Firing - 1 Pending - 1 Inactive
+			expected: `[CRITICAL] - [BlackboxTLS] - Job: [blackbox] on Instance: [https://localhost:443] is firing - value: -6065338.00 - {"alertname":"TLS","icinga":"ok","instance":"https://localhost:443","job":"blackbox","severity":"critical","team":"network"}
 \_ [OK] [HostOutOfMemory] is inactive
 \_ [WARNING] [SqlAccessDeniedRate] - Job: [mysql] on Instance: [localhost] is pending - value: 0.40 - {"alertname":"SqlAccessDeniedRate","instance":"localhost","job":"mysql","severity":"warning","team":"database"}
 \_ [CRITICAL] [BlackboxTLS] - Job: [blackbox] on Instance: [https://localhost:443] is firing - value: -6065338.00 - {"alertname":"TLS","icinga":"ok","instance":"https://localhost:443","job":"blackbox","severity":"critical","team":"network"}
 |total=3 firing=1 pending=1 inactive=1
-
 exit status 2
 `,
 		},
@@ -327,12 +313,11 @@ exit status 2
 				w.Write(loadTestdata(alertTestDataSet1))
 			})),
 			args: []string{"run", "../main.go", "alert", "--include-label", "severity=warning", "--include-label", "severity=critical"},
-			expected: `[CRITICAL] - 3 Alerts: 1 Firing - 1 Pending - 1 Inactive
+			expected: `[CRITICAL] - [BlackboxTLS] - Job: [blackbox] on Instance: [https://localhost:443] is firing - value: -6065338.00 - {"alertname":"TLS","icinga":"ok","instance":"https://localhost:443","job":"blackbox","severity":"critical","team":"network"}
 \_ [OK] [HostOutOfMemory] is inactive
 \_ [WARNING] [SqlAccessDeniedRate] - Job: [mysql] on Instance: [localhost] is pending - value: 0.40 - {"alertname":"SqlAccessDeniedRate","instance":"localhost","job":"mysql","severity":"warning","team":"database"}
 \_ [CRITICAL] [BlackboxTLS] - Job: [blackbox] on Instance: [https://localhost:443] is firing - value: -6065338.00 - {"alertname":"TLS","icinga":"ok","instance":"https://localhost:443","job":"blackbox","severity":"critical","team":"network"}
 |total=3 firing=1 pending=1 inactive=1
-
 exit status 2
 `,
 		},
@@ -343,7 +328,7 @@ exit status 2
 				w.Write(loadTestdata(alertTestDataSet1))
 			})),
 			args:     []string{"run", "../main.go", "alert", "--exclude-label", "team=database", "--exclude-label", "severity=critical"},
-			expected: "[OK] - 0 Alerts: 0 Firing - 0 Pending - 0 Inactive\n\\_ [OK] No alerts retrieved\n|total=0 firing=0 pending=0 inactive=0\n\n",
+			expected: "[OK] - 0 Alerts: 0 Firing - 0 Pending - 0 Inactive\n\\_ [OK] No alerts retrieved\n|total=0 firing=0 pending=0 inactive=0\n",
 		},
 		{
 			name: "alert-state-label",
@@ -352,12 +337,11 @@ exit status 2
 				w.Write(loadTestdata(alertTestDataSet1))
 			})),
 			args: []string{"run", "../main.go", "alert", "--label-key-state=icinga"},
-			expected: `[WARNING] - 3 Alerts: 1 Firing - 1 Pending - 1 Inactive
+			expected: `[WARNING] - [SqlAccessDeniedRate] - Job: [mysql] on Instance: [localhost] is pending - value: 0.40 - {"alertname":"SqlAccessDeniedRate","instance":"localhost","job":"mysql","severity":"warning","team":"database"}
 \_ [OK] [HostOutOfMemory] is inactive
 \_ [WARNING] [SqlAccessDeniedRate] - Job: [mysql] on Instance: [localhost] is pending - value: 0.40 - {"alertname":"SqlAccessDeniedRate","instance":"localhost","job":"mysql","severity":"warning","team":"database"}
 \_ [OK] [BlackboxTLS] - Job: [blackbox] on Instance: [https://localhost:443] is firing - value: -6065338.00 - {"alertname":"TLS","icinga":"ok","instance":"https://localhost:443","job":"blackbox","severity":"critical","team":"network"}
 |total=3 firing=1 pending=1 inactive=1
-
 exit status 1
 `,
 		},
@@ -368,11 +352,10 @@ exit status 1
 				w.Write(loadTestdata(alertTestDataSet5))
 			})),
 			args: []string{"run", "../main.go", "alert", "--name", "ContainerKilled", "--include-label", "name=(mosquitto|nodered)"},
-			expected: `[CRITICAL] - 3 Alerts: 3 Firing - 0 Pending - 0 Inactive
+			expected: `[CRITICAL] - [ContainerKilled] - Job: [cadvisor] on Instance: [example:8888] is firing - value: 123.40 - {"alertname":"ContainerKilled","instance":"example:8888","job":"cadvisor","name":"nodered","severity":"warning"}
 \_ [CRITICAL] [ContainerKilled] - Job: [cadvisor] on Instance: [example:8888] is firing - value: 123.40 - {"alertname":"ContainerKilled","instance":"example:8888","job":"cadvisor","name":"nodered","severity":"warning"}
 \_ [CRITICAL] [ContainerKilled] - Job: [cadvisor] on Instance: [example:8888] is firing - value: 123.40 - {"alertname":"ContainerKilled","instance":"example:8888","job":"cadvisor","name":"mosquitto","severity":"warning"}
 |total=3 firing=3 pending=0 inactive=0
-
 exit status 2
 `,
 		},

@@ -9,8 +9,7 @@ import (
 
 	"github.com/NETWAYS/check_prometheus/internal/alert"
 	"github.com/NETWAYS/go-check"
-	"github.com/NETWAYS/go-check/perfdata"
-	"github.com/NETWAYS/go-check/result"
+	goresult "github.com/NETWAYS/go-check/result"
 	"github.com/prometheus/common/model"
 	"github.com/spf13/cobra"
 )
@@ -38,12 +37,12 @@ pending = 1
 inactive = 0`,
 	Example: `
 	$ check_prometheus alert --name "PrometheusAlertmanagerJobMissing"
-	CRITICAL - 1 Alerts: 1 Firing - 0 Pending - 0 Inactive
+	[CRITICAL] - [PrometheusAlertmanagerJobMissing] - Job: [alertmanager] is firing - value: 1.00
 	 \_[CRITICAL] [PrometheusAlertmanagerJobMissing] - Job: [alertmanager] is firing - value: 1.00
 	 | firing=1 pending=0 inactive=0
 
 	$ check_prometheus alert --name "PrometheusAlertmanagerJobMissing" --name "PrometheusTargetMissing"
-	CRITICAL - 2 Alerts: 1 Firing - 0 Pending - 1 Inactive
+	[CRITICAL] [PrometheusAlertmanagerJobMissing] - Job: [alertmanager] is firing - value: 1.00
 	 \_[OK] [PrometheusTargetMissing] is inactive
 	 \_[CRITICAL] [PrometheusAlertmanagerJobMissing] - Job: [alertmanager] is firing - value: 1.00
 	 | total=2 firing=1 pending=0 inactive=1`,
@@ -88,7 +87,7 @@ inactive = 0`,
 		// If there are no rules we can exit early
 		if len(rules) == 0 {
 			// Just an empty PerfdataList to have consistent perfdata output
-			pdlist := perfdata.PerfdataList{
+			pdlist := check.PerfdataList{
 				{Label: "total", Value: 0},
 				{Label: "firing", Value: 0},
 				{Label: "pending", Value: 0},
@@ -98,19 +97,19 @@ inactive = 0`,
 			// Since the user is expecting the state of a certain alert and
 			// it that is not present it might be noteworthy.
 			if cliAlertConfig.AlertName != nil {
-				check.ExitRaw(check.Unknown, "No such alert defined", "|", pdlist.String())
+				check.ExitWithPerfdata(check.Unknown, pdlist, "No such alert defined")
 			}
 
-			check.ExitRaw(noAlertsState, "No alerts defined", "|", pdlist.String())
+			check.ExitWithPerfdata(noAlertsState, pdlist, "No alerts defined")
 		}
 
 		// Set initial capacity to reduce memory allocations
 		var l int
 		for _, rl := range rules {
-			l *= len(rl.AlertingRule.Alerts)
+			l += len(rl.AlertingRule.Alerts)
 		}
 
-		var overall result.Overall
+		var overall goresult.Overall
 
 		for _, rl := range rules {
 			// If it's not the Alert we're looking for, Skip!
@@ -128,7 +127,7 @@ inactive = 0`,
 			alertMatchedExclude, regexErr := matches(rl.AlertingRule.Name, cliAlertConfig.ExcludeAlerts)
 
 			if regexErr != nil {
-				check.ExitRaw(check.Unknown, "Invalid regular expression provided:", regexErr.Error())
+				check.Exit(check.Unknown, "Invalid regular expression provided:", regexErr.Error())
 			}
 
 			if alertMatchedExclude {
@@ -140,7 +139,7 @@ inactive = 0`,
 			labelsMatchedExclude, regexErr := matchesLabel(rl.AlertingRule.Labels, cliAlertConfig.ExcludeLabels)
 
 			if regexErr != nil {
-				check.ExitRaw(check.Unknown, "Invalid regular expression provided:", regexErr.Error())
+				check.Exit(check.Unknown, "Invalid regular expression provided:", regexErr.Error())
 			}
 
 			if len(cliAlertConfig.ExcludeLabels) > 0 && labelsMatchedExclude {
@@ -151,7 +150,8 @@ inactive = 0`,
 			// Handle Inactive Alerts
 			if len(rl.AlertingRule.Alerts) == 0 {
 				// Counting states for perfdata. We don't use the state-label override here
-				// to have the acutal count from Prometheus
+				// to have the actual count from Prometheus
+				//nolint: exhaustive
 				switch rl.GetStatus("") {
 				case 0:
 					counterInactive++
@@ -161,7 +161,7 @@ inactive = 0`,
 					counterFiring++
 				}
 
-				sc := result.NewPartialResult()
+				sc := goresult.NewPartialResult()
 
 				rlStatus := rl.GetStatus(cliAlertConfig.StateLabelKey)
 				// If the negate flag is set we negate this state
@@ -169,8 +169,8 @@ inactive = 0`,
 					rlStatus = negateStatus(rlStatus)
 				}
 
-				_ = sc.SetState(rlStatus)
-				sc.Output = rl.GetOutput()
+				sc.SetState(rlStatus)
+				sc.SetOutput(rl.GetOutput())
 				overall.AddSubcheck(sc)
 			}
 
@@ -179,7 +179,8 @@ inactive = 0`,
 				// Handle Pending or Firing Alerts
 				for _, alert := range rl.AlertingRule.Alerts {
 					// Counting states for perfdata. We don't use the state-label override here
-					// to have the acutal count from Prometheus
+					// to have the actual count from Prometheus
+					//nolint: exhaustive
 					switch rl.GetStatus("") {
 					case 0:
 						counterInactive++
@@ -192,7 +193,7 @@ inactive = 0`,
 					labelsMatchedInclude, regexErr := matchesLabel(alert.Labels, cliAlertConfig.IncludeLabels)
 
 					if regexErr != nil {
-						check.ExitRaw(check.Unknown, "Invalid regular expression provided:", regexErr.Error())
+						check.Exit(check.Unknown, "Invalid regular expression provided:", regexErr.Error())
 					}
 
 					if len(cliAlertConfig.IncludeLabels) > 0 && !labelsMatchedInclude {
@@ -203,7 +204,7 @@ inactive = 0`,
 					labelsMatchedExclude, regexErr := matchesLabel(alert.Labels, cliAlertConfig.ExcludeLabels)
 
 					if regexErr != nil {
-						check.ExitRaw(check.Unknown, "Invalid regular expression provided:", regexErr.Error())
+						check.Exit(check.Unknown, "Invalid regular expression provided:", regexErr.Error())
 					}
 
 					if len(cliAlertConfig.ExcludeLabels) > 0 && labelsMatchedExclude {
@@ -211,7 +212,7 @@ inactive = 0`,
 						continue
 					}
 
-					sc := result.NewPartialResult()
+					sc := goresult.NewPartialResult()
 
 					rlStatus := rl.GetStatus(cliAlertConfig.StateLabelKey)
 					// If the negate flag is set we negate this state
@@ -219,10 +220,10 @@ inactive = 0`,
 						rlStatus = negateStatus(rlStatus)
 					}
 
-					_ = sc.SetState(rlStatus)
+					sc.SetState(rlStatus)
 					// Set the alert in the internal Type to generate the output
 					rl.Alert = alert
-					sc.Output = rl.GetOutput()
+					sc.SetOutput(rl.GetOutput())
 					overall.AddSubcheck(sc)
 				}
 			}
@@ -230,7 +231,7 @@ inactive = 0`,
 
 		counterAlert := counterFiring + counterPending + counterInactive
 
-		perfList := perfdata.PerfdataList{
+		perfList := check.PerfdataList{
 			{Label: "total", Value: counterAlert},
 			{Label: "firing", Value: counterFiring},
 			{Label: "pending", Value: counterPending},
@@ -238,24 +239,20 @@ inactive = 0`,
 		}
 
 		// When there are no alerts we add an empty PartialResult just to have consistent output
-		if len(overall.PartialResults) == 0 {
-			sc := result.NewPartialResult()
-			// We already make sure it's valid
-			//nolint: errcheck
+		if counterAlert == 0 {
+			sc := goresult.NewPartialResult()
 			sc.SetDefaultState(noAlertsState)
-			sc.Output = "No alerts retrieved"
+			sc.SetOutput("No alerts retrieved")
 			overall.AddSubcheck(sc)
 		}
 
-		overall.PartialResults[0].Perfdata = append(overall.PartialResults[0].Perfdata, perfList...)
-
-		overall.Summary = fmt.Sprintf("%d Alerts: %d Firing - %d Pending - %d Inactive",
+		overall.SetOKSummary(fmt.Sprintf("%d Alerts: %d Firing - %d Pending - %d Inactive",
 			counterAlert,
 			counterFiring,
 			counterPending,
-			counterInactive)
+			counterInactive))
 
-		check.ExitRaw(overall.GetStatus(), overall.GetOutput())
+		check.ExitWithPerfdata(overall.GetStatus(), perfList, overall.GetOutput())
 	},
 }
 
@@ -300,7 +297,7 @@ func init() {
 }
 
 // Function to convert state to integer.
-func convertStateToInt(state string) (int, error) {
+func convertStateToInt(state string) (check.Status, error) {
 	state = strings.ToUpper(state)
 	switch state {
 	case "OK", "0":
@@ -364,7 +361,7 @@ func matchesLabel(labels model.LabelSet, labelsToMatch []string) (bool, error) {
 }
 
 // negateStatus turns an OK state into critical and a warning/critical state into OK
-func negateStatus(state int) int {
+func negateStatus(state check.Status) check.Status {
 	switch state {
 	case check.OK:
 		return check.Critical
