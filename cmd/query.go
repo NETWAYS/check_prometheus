@@ -15,11 +15,11 @@ import (
 )
 
 type QueryConfig struct {
-	RawQuery string
-	Warning  string
-	Critical string
-	ShowAll  bool
-	UnixTime bool
+	RawQuery        string
+	Warning         string
+	Critical        string
+	ShowAll         bool
+	DisablePerfdata bool
 }
 
 type User struct {
@@ -135,7 +135,11 @@ Note: Time range values e.G. 'go_memstats_alloc_bytes_total[0s]' only the latest
 				}
 
 				perf := generatePerfdata(sample.Metric.String(), numberValue, warn, crit)
-				partial.AddPerfdata(&perf)
+
+				if !cliQueryConfig.DisablePerfdata {
+					partial.AddPerfdata(&perf)
+				}
+
 				overall.AddSubcheck(partial)
 			}
 
@@ -171,7 +175,7 @@ Note: Time range values e.G. 'go_memstats_alloc_bytes_total[0s]' only the latest
 					pd := generatePerfdata(samplestream.Metric.String(), valueNumber, warn, crit)
 
 					// Generate Perfdata from API return
-					if !math.IsInf(numberValue, 0) && !math.IsNaN(numberValue) {
+					if !math.IsInf(numberValue, 0) && !math.IsNaN(numberValue) && !cliQueryConfig.DisablePerfdata {
 						partial.AddPerfdata(&pd)
 					}
 				}
@@ -203,6 +207,9 @@ func init() {
 		"The warning threshold for a value")
 	fs.StringVarP(&cliQueryConfig.Critical, "critical", "c", "20",
 		"The critical threshold for a value")
+
+	fs.BoolVar(&cliQueryConfig.DisablePerfdata, "disable-perfdata", false,
+		"Disable performance data output")
 
 	fs.SortFlags = false
 	_ = queryCmd.MarkFlagRequired("query")

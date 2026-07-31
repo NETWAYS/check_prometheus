@@ -105,6 +105,7 @@ Flags:
   -q, --query string      An Prometheus query which will be performed and the value result will be evaluated
   -w, --warning string    The warning threshold for a value (default "10")
   -c, --critical string   The critical threshold for a value (default "20")
+      --disable-perfdata  Disable performance data output
   -h, --help              help for query
 ```
 
