@@ -118,6 +118,15 @@ func TestQueryCmd(t *testing.T) {
 			expected: "[OK] - states: ok=1\n\\_ [OK]  up{instance=\"localhost\", job=\"prometheus\"} - value: 1\n|up_instance_localhost_job_prometheus=1;10;20\n \n",
 		},
 		{
+			name: "query-without-perfdata",
+			server: httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				w.WriteHeader(http.StatusOK)
+				w.Write(loadTestdata(queryTestDataSet1))
+			})),
+			args:     []string{"run", "../main.go", "query", "--query", "up{job=\"prometheus\"}[5m]", "--disable-perfdata"},
+			expected: "[OK] - states: ok=1\n\\_ [OK]  1 @[1670340952.99] - value: 1\n \n",
+		},
+		{
 			name: "query-threshold-ok",
 			server: httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 				w.WriteHeader(http.StatusOK)
