@@ -12,6 +12,7 @@ linters:
     - cyclop
     - depguard
     - err113
+    - exhaustruct_v5
     - exhaustruct
     - forbidigo
     - forcetypeassert
