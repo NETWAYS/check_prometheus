@@ -87,10 +87,10 @@ Note: Time range values e.G. 'go_memstats_alloc_bytes_total[0s]' only the latest
 		ctx, cancel := cliConfig.timeoutContext()
 		defer cancel()
 
-		result, warnings, err := c.API.Query(ctx, cliQueryConfig.RawQuery, time.Now())
+		result, warnings, _, err := c.API.Query(ctx, cliQueryConfig.RawQuery, time.Now())
 
 		if err != nil {
-			if strings.Contains(err.Error(), "unmarshalerDecoder: unexpected value type \"string\"") {
+			if strings.Contains(err.Error(), "unexpected value type \"string\"") {
 				err = errors.New("string value results are not supported")
 			}
 
