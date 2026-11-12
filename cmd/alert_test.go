@@ -251,6 +251,19 @@ exit status 2
 `,
 		},
 		{
+			name: "alert-include-label-no-alerts-state",
+			server: httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				w.WriteHeader(http.StatusOK)
+				w.Write(loadTestdata(alertTestDataSet1))
+			})),
+			args: []string{"run", "../main.go", "alert", "--include-label", "foo=bar", "--no-alerts-state", "1", "-P", "true"},
+			expected: `[WARNING] - No alerts retrieved
+\_ [WARNING] No alerts retrieved
+|total=2 firing=1 pending=1 inactive=0
+exit status 1
+`,
+		},
+		{
 			name: "alert-exclude-label",
 			server: httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 				w.WriteHeader(http.StatusOK)
