@@ -110,6 +110,8 @@ inactive = 0`,
 		}
 
 		var overall goresult.Overall
+		// We need to count how many times we added an alert for the no-alerts-state
+		var counterPartialResult int
 
 		for _, rl := range rules {
 			// If it's not the Alert we're looking for, Skip!
@@ -172,6 +174,8 @@ inactive = 0`,
 				sc.SetState(rlStatus)
 				sc.SetOutput(rl.GetOutput())
 				overall.AddSubcheck(sc)
+
+				counterPartialResult++
 			}
 
 			// Handle active alerts
@@ -225,6 +229,8 @@ inactive = 0`,
 					rl.Alert = alert
 					sc.SetOutput(rl.GetOutput())
 					overall.AddSubcheck(sc)
+
+					counterPartialResult++
 				}
 			}
 		}
@@ -239,7 +245,7 @@ inactive = 0`,
 		}
 
 		// When there are no alerts we add an empty PartialResult just to have consistent output
-		if counterAlert == 0 {
+		if counterPartialResult == 0 {
 			sc := goresult.NewPartialResult()
 			sc.SetDefaultState(noAlertsState)
 			sc.SetOutput("No alerts retrieved")
