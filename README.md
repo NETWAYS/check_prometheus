@@ -156,13 +156,13 @@ Examples:
   $ check_prometheus alert --name "PrometheusAlertmanagerJobMissing"
   [CRITICAL] [PrometheusAlertmanagerJobMissing] - Job: [alertmanager] is firing - value: 1.00
    \_[CRITICAL] [PrometheusAlertmanagerJobMissing] - Job: [alertmanager] is firing - value: 1.00
-   | firing=1 pending=0 inactive=0
+   | PrometheusAlertmanagerJobMissing=2
 
   $ check_prometheus a alert --name "PrometheusAlertmanagerJobMissing" --name "PrometheusTargetMissing"
   [CRITICAL] [PrometheusAlertmanagerJobMissing] - Job: [alertmanager] is firing - value: 1.00
    \_[OK] [PrometheusTargetMissing] is inactive
    \_[CRITICAL] [PrometheusAlertmanagerJobMissing] - Job: [alertmanager] is firing - value: 1.00
-   | total=2 firing=1 pending=0 inactive=1
+   | PrometheusAlertmanagerJobMissing=2 PrometheusTargetMissing=0
 
 Flags:
   -S, --label-key-state string      Use the given AlertRule label to override the exit state for firing alerts.
@@ -201,8 +201,6 @@ $ check_prometheus alert
  \_[OK] [HostHighCpuLoad] - Job: [alertmanager]
  \_[CRITICAL] [HighResultLatency] - Job: [prometheus] on Instance: [localhost:9090]  is firing - value: 11.00
  \_[CRITICAL] [HighResultLatency] - Job: [node-exporter] on Instance: [node-exporter:9100]  is firing - value: 10.00
- | total=6 firing=3 pending=0 inactive=3
-
 ```
 
 #### Checking multiple alerts
@@ -213,12 +211,11 @@ $ check_prometheus alert --name "HostHighCpuLoad" --name "HighResultLatency"
  \_[OK] [HostHighCpuLoad] is inactive
  \_[CRITICAL] [HighResultLatency] - Job: [prometheus] on Instance: [localhost:9090]  is firing - value: 11.00
  \_[CRITICAL] [HighResultLatency] - Job: [node-exporter] on Instance: [node-exporter:9100]  is firing - value: 10.00
- | total=3 firing=2 pending=0 inactive=1
 ```
 
 ```bash
 $ check_prometheus alert --name "HostHighCpuLoad" --name "PrometheusTargetMissing"
-OK - Alerts inactive | total=2 firing=0 pending=0 inactive=2
+OK - Alerts inactive
 ```
 
 #### Checking alerts via their labels
@@ -248,14 +245,12 @@ In Prometheus a "watchdog" or "dead man's switch" is an alert that is always fir
 $ check_prometheus alert --name Watchdog -W --no-alerts-state 2
 [OK] - 1 Alerts: 1 Firing - 0 Pending - 0 Inactive
 \_ [OK] [Watchdog] is firing - value: 1.00 - {"alertname":"Watchdog","severity":"none"}
-|total=1 firing=1 pending=0 inactive=0
 ```
 
 ```bash
 $ check_prometheus alert --name Watchdog -W --no-alerts-state 2
 [CRITICAL] No alerts retrieved
 \_ [CRITICAL] No alerts retrieved
-|total=0 firing=0 pending=0 inactive=0
 ```
 
 ## License

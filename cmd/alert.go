@@ -39,13 +39,13 @@ inactive = 0`,
 	$ check_prometheus alert --name "PrometheusAlertmanagerJobMissing"
 	[CRITICAL] - [PrometheusAlertmanagerJobMissing] - Job: [alertmanager] is firing - value: 1.00
 	 \_[CRITICAL] [PrometheusAlertmanagerJobMissing] - Job: [alertmanager] is firing - value: 1.00
-	 | firing=1 pending=0 inactive=0
+	 | PrometheusAlertmanagerJobMissing=2
 
 	$ check_prometheus alert --name "PrometheusAlertmanagerJobMissing" --name "PrometheusTargetMissing"
 	[CRITICAL] [PrometheusAlertmanagerJobMissing] - Job: [alertmanager] is firing - value: 1.00
 	 \_[OK] [PrometheusTargetMissing] is inactive
 	 \_[CRITICAL] [PrometheusAlertmanagerJobMissing] - Job: [alertmanager] is firing - value: 1.00
-	 | total=2 firing=1 pending=0 inactive=1`,
+	 | PrometheusAlertmanagerJobMissing=2 PrometheusTargetMissing=0`,
 	Run: func(_ *cobra.Command, _ []string) {
 		// Convert --no-alerts-state to integer and validate input
 		noAlertsState, err := convertStateToInt(cliAlertConfig.NoAlertsState)
@@ -86,21 +86,13 @@ inactive = 0`,
 
 		// If there are no rules we can exit early
 		if len(rules) == 0 {
-			// Just an empty PerfdataList to have consistent perfdata output
-			pdlist := check.PerfdataList{
-				{Label: "total", Value: 0},
-				{Label: "firing", Value: 0},
-				{Label: "pending", Value: 0},
-				{Label: "inactive", Value: 0},
-			}
-
 			// Since the user is expecting the state of a certain alert and
 			// it that is not present it might be noteworthy.
 			if cliAlertConfig.AlertName != nil {
-				check.ExitWithPerfdata(check.Unknown, pdlist, "No such alert defined")
+				check.Exit(check.Unknown, "No such alert defined")
 			}
 
-			check.ExitWithPerfdata(noAlertsState, pdlist, "No alerts defined")
+			check.Exit(noAlertsState, "No alerts defined")
 		}
 
 		// Set initial capacity to reduce memory allocations
@@ -172,6 +164,7 @@ inactive = 0`,
 				}
 
 				sc.SetState(rlStatus)
+				sc.AddPerfdata(&check.Perfdata{Label: rl.AlertingRule.Name, Value: int(rlStatus)})
 				sc.SetOutput(rl.GetOutput())
 				overall.AddSubcheck(sc)
 
@@ -228,6 +221,7 @@ inactive = 0`,
 					// Set the alert in the internal Type to generate the output
 					rl.Alert = alert
 					sc.SetOutput(rl.GetOutput())
+					sc.AddPerfdata(&check.Perfdata{Label: rl.AlertingRule.Name, Value: int(rlStatus)})
 					overall.AddSubcheck(sc)
 
 					counterPartialResult++
@@ -236,13 +230,6 @@ inactive = 0`,
 		}
 
 		counterAlert := counterFiring + counterPending + counterInactive
-
-		perfList := check.PerfdataList{
-			{Label: "total", Value: counterAlert},
-			{Label: "firing", Value: counterFiring},
-			{Label: "pending", Value: counterPending},
-			{Label: "inactive", Value: counterInactive},
-		}
 
 		// When there are no alerts we add an empty PartialResult just to have consistent output
 		if counterPartialResult == 0 {
@@ -258,7 +245,7 @@ inactive = 0`,
 			counterPending,
 			counterInactive))
 
-		check.ExitWithPerfdata(overall.GetStatus(), perfList, overall.GetOutput())
+		check.Exit(overall.GetStatus(), overall.GetOutput())
 	},
 }
 
